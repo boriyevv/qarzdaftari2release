@@ -4,6 +4,9 @@ import { z } from 'zod'
 import { otpService } from '@/src/lib/services/otp.service'
 import { smsService } from '@/src/lib/services/sms.service'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const sendOTPSchema = z.object({
   phone: z.string().regex(/^\+998\d{9}$/, 'Telefon format: +998XXXXXXXXX'),
   type: z.enum(['registration', 'login', 'password_reset']),

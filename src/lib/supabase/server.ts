@@ -1,6 +1,4 @@
 // src/lib/supabase/server.ts
-// Bu file serverda ishlaydi (API routes, Server Components)
-
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -21,7 +19,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server Component dan ishlatilganda ignore qilish
+            // Server Component
           }
         },
       },

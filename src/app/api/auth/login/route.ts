@@ -2,10 +2,14 @@
 // Updated - supports both email and phone login
 // Phone login works for ANY user with phone (email or phone auth_method)
 
+
+
 import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 // Email login schema
 const emailLoginSchema = z.object({
   auth_method: z.literal('email'),

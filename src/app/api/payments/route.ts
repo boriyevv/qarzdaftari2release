@@ -5,6 +5,9 @@ import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const createPaymentSchema = z.object({
   debt_id: z.string().uuid(),
   amount: z.number().positive('Summa musbat bo\'lishi kerak'),

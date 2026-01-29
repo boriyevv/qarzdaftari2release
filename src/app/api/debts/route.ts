@@ -6,6 +6,9 @@ import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // GET - List debts
 export async function GET(request: Request) {
   try {

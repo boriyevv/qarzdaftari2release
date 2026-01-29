@@ -1,7 +1,12 @@
 // src/app/api/auth/forgot-password/route.ts
+
+
 import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Email noto\'g\'ri'),

@@ -1,6 +1,11 @@
 // src/app/api/auth/me/route.ts
+
+
 import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET() {
   try {

@@ -3,6 +3,9 @@ import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const createFolderSchema = z.object({
   name: z.string().min(1, 'Folder nomi kerak'),
   color: z.string().default('#3B82F6'),

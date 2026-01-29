@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { otpService } from '@/src/lib/services/otp.service'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const verifyOTPSchema = z.object({
   phone: z.string().regex(/^\+998\d{9}$/),
   code: z.string().length(6, 'Kod 6 ta raqam bo\'lishi kerak'),

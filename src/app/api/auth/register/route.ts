@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { smsService } from '@/src/lib/services/sms.service'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // Email registration schema
 const emailRegisterSchema = z.object({
   auth_method: z.literal('email'),
