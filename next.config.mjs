@@ -12,6 +12,9 @@ const pwaConfig = withPWA({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  srcDir: 'src',
+
   eslint: {
     ignoreDuringBuilds: true,  // ← QO'SHING!
   },
