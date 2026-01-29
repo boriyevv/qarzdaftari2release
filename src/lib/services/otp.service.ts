@@ -1,7 +1,7 @@
 // src/lib/services/otp.service.ts
 // OTP Code Management Service
 
-import { createClient } from '@/src/lib/supabase/client'
+import { createClient } from '@/src/lib/supabase/server'
 
 export class OTPService {
   /**

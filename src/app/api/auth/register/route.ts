@@ -1,6 +1,3 @@
-// src/app/api/auth/register/route.ts
-// Updated - supports both email and phone registration
-
 import { createClient } from '@/src/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -32,11 +29,14 @@ export async function POST(request: Request) {
     const body = await request.json()
     const auth_method = body.auth_method || 'email'
 
+    console.log('📝 Registration attempt:', auth_method)
+
     // Validate based on auth method
     const schema = auth_method === 'phone' ? phoneRegisterSchema : emailRegisterSchema
     const result = schema.safeParse(body)
 
     if (!result.success) {
+      console.error('❌ Validation error:', result.error.issues[0].message)
       return NextResponse.json(
         { error: result.error.issues[0].message },
         { status: 400 }
@@ -62,8 +62,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // EMAIL REGISTRATION
+    // ============================================
+    // EMAIL REGISTRATION (with Supabase Auth)
+    // ============================================
     if (auth_method === 'email' && 'password' in data && 'email' in data) {
+      console.log('📧 Email registration for:', data.email)
+
       // Check username
       const { data: existingUser } = await supabase
         .from('users')
@@ -92,6 +96,8 @@ export async function POST(request: Request) {
         )
       }
 
+      console.log('🔐 Creating Supabase auth user...')
+
       // Create Supabase auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -99,58 +105,99 @@ export async function POST(request: Request) {
         options: {
           data: {
             full_name: data.full_name,
-            phone: data.phone,
+            phone: data.phone || null,
           },
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
         },
       })
 
-      if (authError || !authData.user) {
+      if (authError) {
+        console.error('❌ Supabase auth error:', authError)
         return NextResponse.json(
-          { error: authError?.message || 'Ro\'yxatdan o\'tishda xato' },
+          { error: authError.message || 'Ro\'yxatdan o\'tishda xato' },
           { status: 400 }
         )
       }
 
+      if (!authData.user) {
+        console.error('❌ No auth user returned')
+        return NextResponse.json(
+          { error: 'Ro\'yxatdan o\'tishda xato' },
+          { status: 400 }
+        )
+      }
+
+      console.log('✅ Auth user created:', authData.user.id)
+      console.log('📝 Creating profile in database...')
+
       // Create user profile
-      const { error: profileError } = await supabase.from('users').insert({
-        auth_id: authData.user.id,
-        full_name: data.full_name,
-        email: data.email,
-        phone: data.phone,
-        username: data.username,
-        store_name: data.store_name,
-        auth_method: 'email',
-        phone_verified: false,
-      })
+      const { data: profileData, error: profileError } = await supabase
+        .from('users')
+        .insert({
+          auth_id: authData.user.id,
+          full_name: data.full_name,
+          email: data.email,
+          phone: data.phone || null,
+          username: data.username,
+          store_name: data.store_name,
+          auth_method: 'email',
+          phone_verified: false,
+        })
+        .select()
+        .single()
 
       if (profileError) {
-        console.error('Profile error:', profileError)
+        console.error('❌ Profile creation error:', profileError)
+        console.error('Error details:', JSON.stringify(profileError, null, 2))
+        
+        // ROLLBACK: Delete auth user if profile creation fails
+        console.log('🔄 Rolling back: deleting auth user...')
+        try {
+          await supabase.auth.admin.deleteUser(authData.user.id)
+          console.log('✅ Auth user deleted (rollback successful)')
+        } catch (deleteError) {
+          console.error('❌ Rollback failed:', deleteError)
+        }
+        
         return NextResponse.json(
-          { error: 'Profile yaratishda xato' },
+          { error: 'Profile yaratishda xato: ' + profileError.message },
           { status: 500 }
         )
       }
 
-      // Get profile and create defaults
-      const { data: profile } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authData.user.id)
-        .single()
+      console.log('✅ Profile created successfully:', profileData.id)
 
-      if (profile) {
-        await supabase.from('folders').insert({
-          user_id: profile.id,
-          name: 'Qarzlar',
-          is_default: true,
-          order_index: 0,
-        })
+      // Create default folder
+      console.log('📁 Creating default folder...')
+      const { error: folderError } = await supabase.from('folders').insert({
+        user_id: profileData.id,
+        name: 'Qarzlar',
+        is_default: true,
+        order_index: 0,
+      })
 
-        await supabase.from('sms_credits').insert({
-          user_id: profile.id,
-          balance: 0,
-        })
+      if (folderError) {
+        console.error('⚠️ Folder creation error:', folderError)
+      } else {
+        console.log('✅ Default folder created')
       }
+
+      // Create SMS credits
+      console.log('💳 Creating SMS credits...')
+      const { error: creditsError } = await supabase.from('sms_credits').insert({
+        user_id: profileData.id,
+        balance: 0,
+        total_purchased: 0,
+        total_used: 0,
+      })
+
+      if (creditsError) {
+        console.error('⚠️ SMS credits error:', creditsError)
+      } else {
+        console.log('✅ SMS credits created')
+      }
+
+      console.log('🎉 Email registration complete!')
 
       return NextResponse.json({
         success: true,
@@ -159,8 +206,12 @@ export async function POST(request: Request) {
       })
     }
 
-    // PHONE REGISTRATION
+    // ============================================
+    // PHONE REGISTRATION (WITHOUT Supabase Auth)
+    // ============================================
     if (auth_method === 'phone' && 'otp_verified' in data) {
+      console.log('📱 Phone registration for:', data.phone)
+
       if (!data.otp_verified) {
         return NextResponse.json(
           { error: 'Telefon raqamni tasdiqlang' },
@@ -168,80 +219,97 @@ export async function POST(request: Request) {
         )
       }
 
-      // Generate username from phone
-      const username = `user_${data.phone.slice(-8)}`
+      // Check if phone already exists
+      const { data: existingPhone } = await supabase
+        .from('users')
+        .select('id')
+        .eq('phone', data.phone)
+        .single()
 
-      // Create Supabase auth user (phone-based, no password)
-      const randomPassword = Math.random().toString(36).slice(-16)
-      const tempEmail = `${username}@qarzdaftari.temp`
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: tempEmail,
-        password: randomPassword,
-        options: {
-          data: {
-            full_name: data.full_name,
-            phone: data.phone,
-            auth_method: 'phone',
-          },
-        },
-      })
-
-      if (authError || !authData.user) {
+      if (existingPhone) {
         return NextResponse.json(
-          { error: 'Ro\'yxatdan o\'tishda xato' },
+          { error: 'Bu telefon raqam allaqachon ro\'yxatdan o\'tgan' },
           { status: 400 }
         )
       }
 
-      // Create user profile
-      const { error: profileError } = await supabase.from('users').insert({
-        auth_id: authData.user.id,
-        full_name: data.full_name,
-        phone: data.phone,
-        username,
-        store_name: data.store_name,
-        auth_method: 'phone',
-        phone_verified: true,
-        email: data.email || null,
-      })
+      // Generate username from phone
+      const username = `user_${data.phone.slice(-8)}`
+
+      console.log('📝 Creating phone-only profile...')
+
+      // Create user profile (WITHOUT Supabase Auth!)
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .insert({
+          auth_id: null, // No Supabase auth for phone users!
+          full_name: data.full_name,
+          phone: data.phone,
+          username,
+          store_name: data.store_name,
+          auth_method: 'phone',
+          phone_verified: true,
+          email: data.email || null,
+        })
+        .select()
+        .single()
 
       if (profileError) {
-        console.error('Profile error:', profileError)
+        console.error('❌ Phone profile error:', profileError)
         return NextResponse.json(
-          { error: 'Profile yaratishda xato' },
+          { error: 'Profile yaratishda xato: ' + profileError.message },
           { status: 500 }
         )
       }
 
-      // Get profile and create defaults
-      const { data: profile } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_id', authData.user.id)
-        .single()
+      console.log('✅ Phone profile created:', profile.id)
 
-      if (profile) {
-        await supabase.from('folders').insert({
-          user_id: profile.id,
-          name: 'Qarzlar',
-          is_default: true,
-          order_index: 0,
-        })
+      // Create default folder
+      console.log('📁 Creating default folder...')
+      const { error: folderError } = await supabase.from('folders').insert({
+        user_id: profile.id,
+        name: 'Qarzlar',
+        is_default: true,
+        order_index: 0,
+      })
 
-        await supabase.from('sms_credits').insert({
-          user_id: profile.id,
-          balance: 0,
-        })
-
-        // Send welcome SMS
-        await smsService.sendWelcome(data.phone, data.full_name)
+      if (folderError) {
+        console.error('⚠️ Folder error:', folderError)
+      } else {
+        console.log('✅ Folder created')
       }
+
+      // Create SMS credits
+      console.log('💳 Creating SMS credits...')
+      const { error: creditsError } = await supabase.from('sms_credits').insert({
+        user_id: profile.id,
+        balance: 0,
+        total_purchased: 0,
+        total_used: 0,
+      })
+
+      if (creditsError) {
+        console.error('⚠️ Credits error:', creditsError)
+      } else {
+        console.log('✅ Credits created')
+      }
+
+      // Send welcome SMS
+      console.log('📨 Sending welcome SMS...')
+      try {
+        await smsService.sendWelcome(data.phone, data.full_name)
+        console.log('✅ Welcome SMS sent')
+      } catch (error) {
+        console.error('⚠️ Welcome SMS error:', error)
+      }
+
+      console.log('🎉 Phone registration complete!')
 
       return NextResponse.json({
         success: true,
         message: 'Ro\'yxatdan o\'tish muvaffaqiyatli!',
         auth_method: 'phone',
+        user_id: profile.id,
       })
     }
 
@@ -250,7 +318,7 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('Register error:', error)
+    console.error('❌ Register API error:', error)
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })
   }
 }

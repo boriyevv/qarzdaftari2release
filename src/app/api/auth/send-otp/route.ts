@@ -13,9 +13,12 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
 
+    console.log('📱 Send OTP request:', body)
+
     // Validate
     const result = sendOTPSchema.safeParse(body)
     if (!result.success) {
+      console.error('❌ Validation error:', result.error.issues[0].message)
       return NextResponse.json(
         { error: result.error.issues[0].message },
         { status: 400 }
@@ -30,6 +33,8 @@ export async function POST(request: Request) {
                      'unknown'
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
+    console.log('🔑 Creating OTP...')
+
     // Create OTP
     const { code, error } = await otpService.createOTP(
       phone,
@@ -38,12 +43,19 @@ export async function POST(request: Request) {
       userAgent
     )
 
+    console.log('📝 OTP created:', code ? 'SUCCESS' : 'FAILED', error || '')
+
     if (error) {
+      console.error('❌ OTP creation error:', error)
       return NextResponse.json({ error }, { status: 400 })
     }
 
+    console.log('📤 Sending SMS...')
+
     // Send SMS
     const sent = await smsService.sendOTP(phone, code)
+
+    console.log('📬 SMS sent:', sent ? 'SUCCESS' : 'FAILED')
 
     if (!sent) {
       return NextResponse.json(
@@ -61,7 +73,7 @@ export async function POST(request: Request) {
       ...devCode,
     })
   } catch (error) {
-    console.error('Send OTP error:', error)
+    console.error('❌ Send OTP error:', error)
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })
   }
 }

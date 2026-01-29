@@ -93,10 +93,10 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent>
                 <a
-                  href="mailto:support@qarzdaftari.uz"
+                  href="mailto:boriyevdev08@gmail.com"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  support@qarzdaftari.uz
+                  boriyevdev08@gmail.com
                 </a>
                 <p className="text-sm text-slate-600 mt-2">
                   24 soat ichida javob beramiz
@@ -129,10 +129,10 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent>
                 <a
-                  href="tel:+998901234567"
+                  href="tel:+998904435567"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  +998 (90) 123-45-67
+                  +998 (90) 443-55-67
                 </a>
                 <p className="text-sm text-slate-600 mt-2">
                   Ish kunlari 9:00 - 18:00
@@ -159,12 +159,12 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent>
                 <a
-                  href="https://t.me/qarzdaftari_support"
+                  href="https://t.me/qarzdaftari_support_bot"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  @qarzdaftari_support
+                  @qarzdaftari_support_bot
                 </a>
                 <p className="text-sm text-slate-600 mt-2">
                   Tez javob olish uchun

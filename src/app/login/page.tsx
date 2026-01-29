@@ -71,6 +71,19 @@ export default function LoginPage() {
         return
       }
 
+      if (response.ok) {
+        // Success!
+        console.log('✅ Login successful, redirecting...')
+
+        router.push('/dashboard')
+        router.refresh()  // ← QO'SHING!
+
+        // Force redirect after delay
+        setTimeout(() => {
+          window.location.href = '/dashboard'  // ← QO'SHING!
+        }, 500)
+      }
+
       router.push('/dashboard')
       router.refresh()
     } catch (error) {
@@ -171,6 +184,11 @@ export default function LoginPage() {
 
       router.push('/dashboard')
       router.refresh()
+
+      setTimeout(() => {
+        window.location.href = '/dashboard'  // ← QO'SHING!
+      }, 500)
+
     } catch (error) {
       setError('Tarmoq xatosi')
     } finally {

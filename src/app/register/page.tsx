@@ -1,7 +1,7 @@
 // src/app/register/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/src/components/ui/button'
@@ -42,12 +42,13 @@ export default function RegisterPage() {
   const [countdown, setCountdown] = useState(0)
 
   // Countdown timer
-  useState(() => {
+  // Countdown timer
+  useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
     }
-  })
+  }, [countdown])
 
   // Email registration
   const handleEmailRegister = async (e: React.FormEvent) => {
@@ -168,45 +169,60 @@ export default function RegisterPage() {
   }
 
   // Phone registration
-  const handlePhoneRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
+const handlePhoneRegister = async (e: React.FormEvent) => {
+  e.preventDefault()
 
-    if (!otpVerified) {
-      setError('Avval telefon raqamni tasdiqlang')
+  if (!otpVerified) {
+    setError('Avval telefon raqamni tasdiqlang')
+    return
+  }
+
+  setLoading(true)
+  setError('')
+
+  // DEBUG: Ma'lumotlarni ko'rish
+  console.log('📤 Sending data:', {
+    auth_method: 'phone',
+    full_name: phoneForm.full_name,
+    phone: phoneForm.phone,
+    store_name: phoneForm.store_name,
+    email: phoneForm.email || undefined,
+    otp_verified: true,
+  })
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        auth_method: 'phone',
+        full_name: phoneForm.full_name,
+        phone: phoneForm.phone,
+        store_name: phoneForm.store_name,
+        email: phoneForm.email || undefined,
+        otp_verified: true,
+      }),
+    })
+
+    const data = await response.json()
+
+    // DEBUG: Javobni ko'rish
+    console.log('📥 Response:', data)
+    console.log('📊 Status:', response.status)
+
+    if (!response.ok) {
+      setError(data.error || 'Xato')
       return
     }
 
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          auth_method: 'phone',
-          full_name: phoneForm.full_name,
-          phone: phoneForm.phone,
-          store_name: phoneForm.store_name,
-          email: phoneForm.email || undefined,
-          otp_verified: true,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Xato')
-        return
-      }
-
-      router.push('/login?registered=true')
-    } catch (error) {
-      setError('Tarmoq xatosi')
-    } finally {
-      setLoading(false)
-    }
+    router.push('/login?registered=true')
+  } catch (error) {
+    console.error('❌ Catch error:', error)
+    setError('Tarmoq xatosi')
+  } finally {
+    setLoading(false)
   }
+}
 
   const handlePhoneChange = (value: string, formType: 'email' | 'phone') => {
     let cleaned = value.replace(/\D/g, '')
