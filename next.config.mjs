@@ -21,6 +21,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,  // ← QO'SHING!
   },
+  output: 'standalone',
 }
 
 export default pwaConfig(nextConfig)
