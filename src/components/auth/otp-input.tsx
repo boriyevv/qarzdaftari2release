@@ -2,8 +2,8 @@
 'use client'
 
 import { useRef, useState, KeyboardEvent, ClipboardEvent } from 'react'
-import { Input } from '@/src/components/ui/input'
-import { cn } from '@/src/lib/utills'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utills'
 
 interface OTPInputProps {
   length?: number

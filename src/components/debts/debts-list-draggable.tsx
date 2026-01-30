@@ -3,19 +3,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Badge } from '@/src/components/ui/badge'
-import { Button } from '@/src/components/ui/button'
-import { Input } from '@/src/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu'
-import { formatCurrency } from '@/src/lib/utils/currency'
+} from '@/components/ui/dropdown-menu'
+import { formatCurrency } from '@/lib/utils/currency'
 import { AddPaymentModal } from './add-payment-modal'
 import { EditDebtModal } from './edit-debt-modal'
-import { cn } from '@/src/lib/utills'
+import { cn } from '@/lib/utills'
 import {
   DndContext,
   closestCenter,

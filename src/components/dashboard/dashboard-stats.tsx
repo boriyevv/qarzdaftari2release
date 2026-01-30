@@ -1,8 +1,8 @@
 // src/components/dashboard/dashboard-stats.tsx
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card'
-import { formatCurrency, formatCurrencyShort } from '@/src/lib/utils/currency'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatCurrency, formatCurrencyShort } from '@/lib/utils/currency'
 
 interface DashboardStatsProps {
   totalDebts: number

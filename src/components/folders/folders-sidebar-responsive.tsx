@@ -2,10 +2,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/src/components/ui/button'
-import { Badge } from '@/src/components/ui/badge'
-import { Input } from '@/src/components/ui/input'
-import { Label } from '@/src/components/ui/label'
+import { Button } from '@//components/ui/button'
+import { Badge } from '@//components/ui/badge'
+import { Input } from '@//components/ui/input'
+import { Label } from '@//components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -13,14 +13,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog'
+} from '@//components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu'
-import { cn } from '@/src/lib/utills'
+} from '@//components/ui/dropdown-menu'
+import { cn } from '@//lib/utills'
 import {
   DndContext,
   closestCenter,

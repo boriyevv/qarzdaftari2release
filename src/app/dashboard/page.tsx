@@ -3,14 +3,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useUser } from '@/src/lib/contexts/user-context'
-import { Button } from '@/src/components/ui/button'
+import { useUser } from '@/lib/contexts/user-context'
+import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { FoldersSidebarResponsive } from '@/src/components/folders/folders-sidebar-responsive'
-import { AddDebtModal } from '@/src/components/debts/add-debt-modal'
-import { DebtsListDraggable } from '@/src/components/debts/debts-list-draggable'
-import { DashboardStats } from '@/src/components/dashboard/dashboard-stats'
-import { Sheet, SheetContent } from '@/src/components/ui/sheet'
+import { FoldersSidebarResponsive } from '@/components/folders/folders-sidebar-responsive'
+import { AddDebtModal } from '@/components/debts/add-debt-modal'
+import { DebtsListDraggable } from '@/components/debts/debts-list-draggable'
+import { DashboardStats } from '@/components/dashboard/dashboard-stats'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 
 
 interface Debt {
