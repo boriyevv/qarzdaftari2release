@@ -1,7 +1,7 @@
-import { createClient } from '@/src/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { smsService } from '@/src/lib/services/sms.service'
+import { smsService } from '@/lib/services/sms.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'

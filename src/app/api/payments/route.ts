@@ -1,7 +1,7 @@
 // src/app/api/payments/route.ts
 // POST - Add payment to debt
 
-import { createClient } from '@/src/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 

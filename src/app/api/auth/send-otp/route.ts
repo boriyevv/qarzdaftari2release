@@ -1,8 +1,8 @@
 // src/app/api/auth/send-otp/route.ts
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { otpService } from '@/src/lib/services/otp.service'
-import { smsService } from '@/src/lib/services/sms.service'
+import { otpService } from '@/lib/services/otp.service'
+import { smsService } from '@/lib/services/sms.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'

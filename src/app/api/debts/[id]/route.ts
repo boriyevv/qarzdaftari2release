@@ -3,7 +3,7 @@
 // PATCH - Update debt
 // DELETE - Delete debt
 
-import { createClient } from '@/src/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 

@@ -2,7 +2,7 @@
 // GET - List debts with filters
 // POST - Create new debt
 
-import { createClient } from '@/src/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 

@@ -1,7 +1,7 @@
 // src/app/api/auth/verify-otp/route.ts
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { otpService } from '@/src/lib/services/otp.service'
+import { otpService } from '@/lib/services/otp.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
