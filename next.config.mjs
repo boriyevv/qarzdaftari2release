@@ -13,7 +13,7 @@ const pwaConfig = withPWA({
 const nextConfig = {
   reactStrictMode: true,
 
-  srcDir: 'src',
+  // srcDir: 'src',
 
   eslint: {
     ignoreDuringBuilds: true,  // ← QO'SHING!
