@@ -38,6 +38,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { MainNav } from '../layout/main-nav'
+
 
 interface Folder {
   id: string
@@ -166,7 +168,7 @@ export function FoldersSidebarResponsive({
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
-  
+
   const [formData, setFormData] = useState({
     name: '',
     color: COLORS[0].value,
@@ -193,7 +195,7 @@ export function FoldersSidebarResponsive({
       setLoading(true)
       const response = await fetch('/api/folders')
       const data = await response.json()
-      
+
       if (response.ok) {
         const folders = (data.folders || []).map((folder: any) => ({
           ...folder,
@@ -380,6 +382,7 @@ export function FoldersSidebarResponsive({
 
       {/* Add Folder Button */}
       <div className="p-4 border-t">
+        
         <Button
           variant="outline"
           className="w-full"
@@ -390,7 +393,13 @@ export function FoldersSidebarResponsive({
           </svg>
           Yangi Folder
         </Button>
+
+
       </div>
+
+<div className="p-4 border-t">
+
+</div>
 
       {/* Dialogs (same as before) */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>

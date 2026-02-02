@@ -1,5 +1,5 @@
-// src/app/dashboard/page.tsx
-// Fully responsive with mobile FAB, drawer sidebar, drag & drop
+// // src/app/dashboard/page.tsx
+// // Fully responsive with mobile FAB, drawer sidebar, drag & drop
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -11,6 +11,9 @@ import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { DebtsListDraggable } from '@/components/debts/debts-list-draggable'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { SubscriptionBanner } from '@/components/dashboard/subscription-banner'
+import { OnboardingTooltip } from '@/components/onboarding/tooltip-guide'
+import { MainNav } from '@/components/layout/main-nav'
 
 
 interface Debt {
@@ -105,6 +108,8 @@ export default function DashboardPage() {
           MOBILE LAYOUT (< lg breakpoint)
           ======================================== */}
       <div className="lg:hidden min-h-screen bg-slate-50 pb-20">
+        <SubscriptionBanner/>
+        <OnboardingTooltip/>
         {/* Mobile Header */}
         <header className="bg-white border-b sticky top-0 z-20 shadow-sm">
           <div className="px-4 py-3 flex items-center justify-between">
@@ -161,7 +166,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Mobile FAB (Floating Action Button) */}
-        <div className="fixed bottom-6 right-6 z-30">
+        <div className="fixed bottom-16 right-6 z-30">
           <button
             onClick={() => setIsAddDebtOpen(true)}
             className="h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center justify-center"
@@ -171,6 +176,8 @@ export default function DashboardPage() {
             </svg>
           </button>
         </div>
+
+<MainNav />
 
         {/* Mobile Sidebar Drawer */}
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -183,6 +190,7 @@ export default function DashboardPage() {
           </SheetContent>
         </Sheet>
       </div>
+            
 
       {/* ========================================
           DESKTOP LAYOUT (>= lg breakpoint)
@@ -201,7 +209,11 @@ export default function DashboardPage() {
           {/* Desktop Header */}
           <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
             <div className="px-6 py-4">
-              <div className="flex items-center justify-between">
+             <SubscriptionBanner/>
+
+
+
+              <div className="flex items-center justify-between mt-4">
                 <div>
                   <h1 className="text-2xl font-bold">Dashboard</h1>
                   <p className="text-sm text-slate-600">{user.store_name}</p>
@@ -237,8 +249,12 @@ export default function DashboardPage() {
             />
           </div>
 
+            
           {/* Desktop Debts List */}
           <div className="flex-1 px-6 pb-6">
+
+
+
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -262,3 +278,189 @@ export default function DashboardPage() {
     </>
   )
 }
+
+
+
+// src/app/dashboard/page.tsx
+// 'use client'
+
+// import { useEffect, useState } from 'react'
+// import Link from 'next/link'
+// import { Button } from '@/components/ui/button'
+// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+// import { CompactStats } from '@/components/dashboard/compact-stats'
+// import { SubscriptionBanner } from '@/components/dashboard/subscription-banner'
+// import { OnboardingTooltip } from '@/components/onboarding/tooltip-guide'
+// import { DebtsList } from '@/components/debts/debts-list'
+// import { Plus, BarChart3, MessageSquare, Crown, ArrowRight } from 'lucide-react'
+
+// export default function DashboardPage() {
+//   const [debts, setDebts] = useState([])
+//   const [stats, setStats] = useState({
+//     totalDebts: 0,
+//     totalAmount: 0,
+//     paidAmount: 0,
+//     pendingAmount: 0,
+//     overdueCount: 0,
+//   })
+//   const [loading, setLoading] = useState(true)
+
+//   useEffect(() => {
+//     fetchDashboardData()
+//   }, [])
+
+//   const fetchDashboardData = async () => {
+//     try {
+//       // Fetch debts
+//       const response = await fetch('/api/debts')
+//       const data = await response.json()
+      
+//       if (response.ok) {
+//         setDebts(data.debts || [])
+        
+//         // Calculate stats
+//         const totalAmount = data.debts.reduce((sum: number, d: any) => sum + d.amount, 0)
+//         const paidAmount = data.debts.reduce((sum: number, d: any) => sum + d.paid_amount, 0)
+        
+//         setStats({
+//           totalDebts: data.debts.length,
+//           totalAmount,
+//           paidAmount,
+//           pendingAmount: totalAmount - paidAmount,
+//           overdueCount: data.debts.filter((d: any) => 
+//             d.due_date && new Date(d.due_date) < new Date() && d.status === 'pending'
+//           ).length,
+//         })
+//       }
+//     } catch (error) {
+//       console.error('Failed to fetch dashboard data:', error)
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-slate-50 pb-20 lg:pb-6">
+//       {/* Onboarding for first-time users */}
+//       <OnboardingTooltip />
+
+//       {/* Header */}
+//       <div className="bg-white border-b lg:hidden">
+//         <div className="container mx-auto px-4 py-4">
+//           <h1 className="text-2xl font-bold">Dashboard</h1>
+//         </div>
+//       </div>
+
+//       <div className="container mx-auto px-4 py-6 space-y-6 lg:pl-72">
+//         {/* Subscription Status Banner */}
+//         <SubscriptionBanner />
+
+//         {/* Stats */}
+//         <CompactStats stats={stats} />
+
+//         {/* Quick Actions - Only Mobile */}
+//         <div className="grid grid-cols-3 gap-3 lg:hidden">
+//           <Link href="/analytics" data-tour="analytics-link">
+//             <Card className="p-4 text-center hover:bg-slate-50 transition">
+//               <BarChart3 className="w-6 h-6 mx-auto text-blue-600 mb-2" />
+//               <p className="text-xs font-medium">Analytics</p>
+//             </Card>
+//           </Link>
+          
+//           <Link href="/sms-credits" data-tour="sms-link">
+//             <Card className="p-4 text-center hover:bg-slate-50 transition">
+//               <MessageSquare className="w-6 h-6 mx-auto text-green-600 mb-2" />
+//               <p className="text-xs font-medium">SMS</p>
+//             </Card>
+//           </Link>
+          
+//           <Link href="/pricing">
+//             <Card className="p-4 text-center hover:bg-slate-50 transition">
+//               <Crown className="w-6 h-6 mx-auto text-orange-600 mb-2" />
+//               <p className="text-xs font-medium">Tarif</p>
+//             </Card>
+//           </Link>
+//         </div>
+
+//         {/* Feature Cards - Desktop */}
+//         <div className="hidden lg:grid lg:grid-cols-3 gap-6">
+//           <Link href="/analytics">
+//             <Card className="hover:shadow-lg transition cursor-pointer">
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <BarChart3 className="w-5 h-5 text-blue-600" />
+//                   Analytics
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent>
+//                 <p className="text-sm text-slate-600 mb-3">
+//                   Biznesingiz statistikasini ko&apos;ring
+//                 </p>
+//                 <div className="flex items-center text-blue-600 text-sm font-medium">
+//                   Ko&apos;rish <ArrowRight className="w-4 h-4 ml-1" />
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </Link>
+
+//           <Link href="/sms-credits">
+//             <Card className="hover:shadow-lg transition cursor-pointer">
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <MessageSquare className="w-5 h-5 text-green-600" />
+//                   SMS Kredits
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent>
+//                 <p className="text-sm text-slate-600 mb-3">
+//                   Eslatma yuborish uchun kredit sotib oling
+//                 </p>
+//                 <div className="flex items-center text-green-600 text-sm font-medium">
+//                   Sotib olish <ArrowRight className="w-4 h-4 ml-1" />
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </Link>
+
+//           <Link href="/pricing">
+//             <Card className="hover:shadow-lg transition cursor-pointer border-orange-200">
+//               <CardHeader>
+//                 <CardTitle className="flex items-center gap-2">
+//                   <Crown className="w-5 h-5 text-orange-600" />
+//                   Premium
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent>
+//                 <p className="text-sm text-slate-600 mb-3">
+//                   Pro funksiyalardan foydalaning
+//                 </p>
+//                 <div className="flex items-center text-orange-600 text-sm font-medium">
+//                   Tariflar <ArrowRight className="w-4 h-4 ml-1" />
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </Link>
+//         </div>
+
+//         {/* Debts List */}
+//         <div>
+//           <div className="flex items-center justify-between mb-4">
+//             <h2 className="text-lg font-semibold">Qarzlar</h2>
+//             <Button size="sm" data-tour="add-debt-button">
+//               <Plus className="w-4 h-4 mr-1" />
+//               Qarz qo&apos;shish
+//             </Button>
+//           </div>
+          
+//           {loading ? (
+//             <Card className="p-8 text-center">
+//               <p className="text-slate-600">Yuklanmoqda...</p>
+//             </Card>
+//           ) : (
+//             <DebtsList debts={debts} />
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }

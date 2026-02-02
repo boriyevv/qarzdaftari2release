@@ -322,11 +322,12 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email_phone">Telefon (ixtiyoriy)</Label>
+                    <Label htmlFor="email_phone">Telefon</Label>
                     <Input
                       id="email_phone"
                       type="tel"
                       placeholder="+998901234567"
+                      required
                       value={emailForm.phone}
                       onChange={(e) => handlePhoneChange(e.target.value, 'email')}
                       disabled={loading}

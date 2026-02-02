@@ -1,7 +1,7 @@
 // src/components/debts/debts-list-draggable.tsx
 // Touch-enabled drag & drop with @dnd-kit
 'use client'
-
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -58,6 +58,13 @@ interface DebtsListDraggableProps {
 
 // Sortable Debt Row (Desktop)
 function SortableDebtRow({ debt, onAction }: { debt: Debt; onAction: (action: string, debt: Debt) => void }) {
+
+  const router = useRouter()
+  const handleDebtorClick = (phone: string) => {
+    router.push(`/debtor/${encodeURIComponent(phone)}`)
+  }
+
+
   const {
     attributes,
     listeners,
@@ -86,9 +93,18 @@ function SortableDebtRow({ debt, onAction }: { debt: Debt; onAction: (action: st
     return <Badge variant={config.variant as any}>{config.label}</Badge>
   }
 
+
+
+
   return (
-    <tr ref={setNodeRef} style={style} className="hover:bg-slate-50">
-      <td className="px-4 py-3">
+    <tr
+
+
+
+      ref={setNodeRef} style={style} className="hover:bg-slate-50"
+    >
+      <td className="px-4 py-3"
+        onClick={() => handleDebtorClick(debt.debtor_phone)}>
         <div className="flex items-center gap-3">
           {/* Drag Handle */}
           <div
@@ -107,13 +123,16 @@ function SortableDebtRow({ debt, onAction }: { debt: Debt; onAction: (action: st
               style={{ backgroundColor: debt.folder.color }}
             />
           )}
-          <div>
+          <div
+
+          >
             <div className="font-medium">{debt.debtor_name}</div>
             <div className="text-sm text-slate-500">{debt.debtor_phone}</div>
           </div>
         </div>
       </td>
-      <td className="px-4 py-3">
+      <td className="px-4 py-3"
+        onClick={() => handleDebtorClick(debt.debtor_phone)}>
         <div className="font-medium">{formatCurrency(debt.amount)}</div>
         {debt.paid_amount > 0 && (
           <div className="text-sm text-green-600">
@@ -121,15 +140,17 @@ function SortableDebtRow({ debt, onAction }: { debt: Debt; onAction: (action: st
           </div>
         )}
       </td>
-      <td className="px-4 py-3">
+      <td className="px-4 py-3"
+        onClick={() => handleDebtorClick(debt.debtor_phone)}>
         <div className={remaining > 0 ? 'text-orange-600 font-medium' : 'text-green-600'}>
           {formatCurrency(remaining)}
         </div>
       </td>
-      <td className="px-4 py-3 text-sm text-slate-600">
+      <td className="px-4 py-3 text-sm text-slate-600"
+        onClick={() => handleDebtorClick(debt.debtor_phone)}>
         {debt.due_date ? new Date(debt.due_date).toLocaleDateString('uz-UZ') : '—'}
       </td>
-      <td className="px-4 py-3">{getStatusBadge(debt.status)}</td>
+      <td className="px-4 py-3" onClick={() => handleDebtorClick(debt.debtor_phone)}>{getStatusBadge(debt.status)}</td>
       <td className="px-4 py-3 text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -158,6 +179,12 @@ function SortableDebtRow({ debt, onAction }: { debt: Debt; onAction: (action: st
 
 // Sortable Debt Card (Mobile)
 function SortableDebtCard({ debt, onAction }: { debt: Debt; onAction: (action: string, debt: Debt) => void }) {
+
+  const router = useRouter()
+  const handleDebtorClick = (phone: string) => {
+    router.push(`/debtor/${encodeURIComponent(phone)}`)
+  }
+
   const {
     attributes,
     listeners,
@@ -194,7 +221,9 @@ function SortableDebtCard({ debt, onAction }: { debt: Debt; onAction: (action: s
     >
       {/* Header with Drag Handle */}
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3 flex-1">
+        <div
+          onClick={() => handleDebtorClick(debt.debtor_phone)}
+          className="flex items-center gap-3 flex-1">
           {/* Drag Handle */}
           <div
             {...attributes}
@@ -212,7 +241,9 @@ function SortableDebtCard({ debt, onAction }: { debt: Debt; onAction: (action: s
               style={{ backgroundColor: debt.folder.color }}
             />
           )}
-          <div>
+          <div
+
+          >
             <div className="font-medium">{debt.debtor_name}</div>
             <div className="text-sm text-slate-500">{debt.debtor_phone}</div>
           </div>
@@ -241,7 +272,8 @@ function SortableDebtCard({ debt, onAction }: { debt: Debt; onAction: (action: s
       </div>
 
       {/* Amounts */}
-      <div className="grid grid-cols-2 gap-3 py-3 border-y">
+      <div className="grid grid-cols-2 gap-3 py-3 border-y"
+        onClick={() => handleDebtorClick(debt.debtor_phone)}>
         <div>
           <div className="text-xs text-slate-500">Jami</div>
           <div className="font-medium">{formatCurrency(debt.amount)}</div>
@@ -255,7 +287,8 @@ function SortableDebtCard({ debt, onAction }: { debt: Debt; onAction: (action: s
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between"
+        onClick={() => handleDebtorClick(debt.debtor_phone)}>
         <div className="text-sm text-slate-600">
           {debt.due_date ? new Date(debt.due_date).toLocaleDateString('uz-UZ') : 'Muddat yo\'q'}
         </div>
@@ -412,6 +445,7 @@ export function DebtsListDraggable({ debts, onUpdate }: DebtsListDraggableProps)
                 >
                   {filteredDebts.map((debt) => (
                     <SortableDebtRow
+
                       key={debt.id}
                       debt={debt}
                       onAction={handleAction}
