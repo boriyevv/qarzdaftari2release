@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { createClient } from '@/lib/supabase/client'
 
 export function LoginPageContent() {
   const router = useRouter()
@@ -39,40 +40,26 @@ export function LoginPageContent() {
     }
   })
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
+const handleEmailLogin = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
+  setError('')
 
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          auth_method: 'email',
-          ...emailForm,
-        }),
-      })
+  const supabase = createClient()
+  
+  const { error } = await supabase.auth.signInWithPassword({
+    email: emailForm.email,
+    password: emailForm.password,
+  })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Login xatosi')
-        return
-      }
-
-      setSuccess('Muvaffaqiyatli! Yo\'naltirilmoqda...')
-      
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 300)
-    } catch (error) {
-      setError('Tarmoq xatosi')
-    } finally {
-      setLoading(false)
-    }
+  if (error) {
+    setError('Email yoki parol noto\'g\'ri')
+    setLoading(false)
+    return
   }
+
+  window.location.href = '/dashboard'
+}
 
   const handlePhoneChange = (value: string) => {
     let cleaned = value.replace(/\D/g, '')
