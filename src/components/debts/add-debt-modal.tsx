@@ -1,5 +1,5 @@
 // src/components/debts/add-debt-modal.tsx
-// CORRECT SMS VALIDATION LOGIC
+// FULLY RESPONSIVE VERSION
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { MessageSquare, AlertCircle } from 'lucide-react'
+import { MessageSquare, AlertCircle, X } from 'lucide-react'
 
 import {
   Dialog,
@@ -28,7 +28,7 @@ interface AddDebtModalProps {
 
 export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDebtModalProps) {
   const [loading, setLoading] = useState(false)
-  const [sendSMS, setSendSMS] = useState(false) // User controls this
+  const [sendSMS, setSendSMS] = useState(false)
   const [useCustomMessage, setUseCustomMessage] = useState(false)
   const [smsCredits, setSmsCredits] = useState(0)
   
@@ -42,7 +42,6 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     custom_sms_message: '',
   })
 
-  // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setFormData({
@@ -87,20 +86,15 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     return `Hurmatli ${debtor_name}, Siz${shopText}dan ${formattedAmount} so'm qarz oldingiz.${dueDateText} Qarz Daftari.`
   }
 
-  // ✅ CORRECT VALIDATION LOGIC
   const canSubmit = () => {
-    // Required fields
     if (!formData.debtor_name || !formData.debtor_phone || !formData.amount) {
       return false
     }
 
-    // SMS validation ONLY if user enabled it
     if (sendSMS) {
-      // Must have credits
       if (smsCredits === 0) {
         return false
       }
-      // Custom message must not be empty
       if (useCustomMessage && !formData.custom_sms_message.trim()) {
         return false
       }
@@ -119,7 +113,6 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     setLoading(true)
 
     try {
-      // 1. Create debt
       const debtPayload: any = {
         debtor_name: formData.debtor_name.trim(),
         debtor_phone: formData.debtor_phone.trim(),
@@ -132,8 +125,6 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
         debtPayload.folder_id = folderId
       }
 
-      console.log('📝 Creating debt:', debtPayload)
-
       const debtResponse = await fetch('/api/debts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,7 +132,6 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
       })
 
       const debtData = await debtResponse.json()
-      console.log('📝 Debt response:', debtData)
 
       if (!debtResponse.ok) {
         throw new Error(debtData.error || 'Qarz qo\'shishda xato')
@@ -149,15 +139,12 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
       const debtId = debtData.debt?.id || debtData.id
 
-      // 2. Send SMS ONLY if user enabled it AND has credits
       let smsSent = false
       if (sendSMS && smsCredits > 0) {
         try {
           const smsMessage = useCustomMessage 
             ? formData.custom_sms_message 
             : generateDefaultMessage()
-
-          console.log('📱 Sending SMS:', { debtId, phone: formData.debtor_phone })
 
           const smsResponse = await fetch('/api/sms/send', {
             method: 'POST',
@@ -170,34 +157,25 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
             }),
           })
 
-          const smsData = await smsResponse.json()
-
           if (smsResponse.ok) {
             smsSent = true
-            console.log('✅ SMS sent successfully')
-          } else {
-            console.error('❌ SMS failed:', smsData.error)
-            alert(`⚠️ Qarz qo'shildi, lekin SMS yuborilmadi: ${smsData.error}`)
           }
-        } catch (smsError: any) {
-          console.error('❌ SMS error:', smsError)
-          alert(`⚠️ Qarz qo'shildi, lekin SMS yuborilmadi: ${smsError.message}`)
+        } catch (smsError) {
+          console.error('SMS error:', smsError)
         }
       }
 
-      // 3. Show success message
       if (smsSent) {
         alert('✅ Qarz qo\'shildi va SMS yuborildi!')
       } else {
         alert('✅ Qarz muvaffaqiyatli qo\'shildi!')
       }
 
-      // 4. Close modal and refresh
       onSuccess()
       onOpenChange(false)
 
     } catch (error: any) {
-      console.error('❌ Error:', error)
+      console.error('Error:', error)
       alert(error.message || 'Xato yuz berdi')
     } finally {
       setLoading(false)
@@ -206,220 +184,237 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Yangi qarz qo&apos;shish</DialogTitle>
-          <DialogDescription>
-            Qarzdor ma&apos;lumotlarini kiriting
-          </DialogDescription>
+      <DialogContent className="max-w-lg w-[calc(100%-2rem)] max-h-[95vh] p-0 gap-0">
+        {/* Header - Fixed */}
+        <DialogHeader className="p-4 pb-3 border-b sticky top-0 bg-white z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-lg">Yangi qarz</DialogTitle>
+              <DialogDescription className="text-sm">
+                Qarzdor ma&apos;lumotlari
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Debtor Name */}
-          <div>
-            <Label htmlFor="debtor_name">
-              Qarzdor ismi <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="debtor_name"
-              value={formData.debtor_name}
-              onChange={(e) => setFormData({ ...formData, debtor_name: e.target.value })}
-              placeholder="Ismi Familiyasi"
-              required
-              autoFocus
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <Label htmlFor="debtor_phone">
-              Telefon raqami <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="debtor_phone"
-              type="tel"
-              value={formData.debtor_phone}
-              onChange={(e) => setFormData({ ...formData, debtor_phone: e.target.value })}
-              placeholder="+998901234567"
-              required
-            />
-          </div>
-
-          {/* Amount */}
-          <div>
-            <Label htmlFor="amount">
-              Qarz miqdori (so&apos;m) <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="amount"
-              type="number"
-              min="0"
-              step="1"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              placeholder="100000"
-              required
-            />
-          </div>
-
-          {/* Shop Name (for SMS) */}
-          <div>
-            <Label htmlFor="shop_name">
-              Do&apos;kon nomi <span className="text-slate-400">(SMS uchun)</span>
-            </Label>
-            <Input
-              id="shop_name"
-              value={formData.shop_name}
-              onChange={(e) => setFormData({ ...formData, shop_name: e.target.value })}
-              placeholder="Mening do'konim"
-            />
-          </div>
-
-          {/* Due Date */}
-          <div>
-            <Label htmlFor="due_date">To&apos;lov muddati</Label>
-            <Input
-              id="due_date"
-              type="date"
-              value={formData.due_date}
-              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-            />
-          </div>
-
-          {/* Note */}
-          <div>
-            <Label htmlFor="note">Izoh</Label>
-            <Textarea
-              id="note"
-              value={formData.note}
-              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-              placeholder="Qo'shimcha ma'lumot..."
-              rows={3}
-            />
-          </div>
-
-          {/* SMS Option */}
-          <div className="border rounded-lg p-4 space-y-4 bg-slate-50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="font-medium">SMS yuborish</p>
-                  <p className="text-xs text-slate-500">
-                    Qarzdorga eslatma yuborish
-                  </p>
-                </div>
-              </div>
-              {/* ✅ ALWAYS ENABLED - User controls it */}
-              <Switch
-                checked={sendSMS}
-                onCheckedChange={setSendSMS}
+        {/* Form - Scrollable */}
+        <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(95vh-80px)]">
+          <div className="overflow-y-auto px-4 py-4 space-y-3">
+            {/* Debtor Name */}
+            <div className="space-y-1.5">
+              <Label htmlFor="debtor_name" className="text-sm font-medium">
+                Qarzdor ismi <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="debtor_name"
+                value={formData.debtor_name}
+                onChange={(e) => setFormData({ ...formData, debtor_name: e.target.value })}
+                placeholder="Ismi Familiyasi"
+                required
+                autoFocus
+                className="h-11"
               />
             </div>
 
-            {/* Show credits info always */}
-            {smsCredits === 0 ? (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  SMS kredit yo&apos;q. <a href="/sms-credits" className="underline font-medium">Sotib oling</a>
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <div className="flex items-center justify-between text-sm p-2 bg-green-50 rounded">
-                <span className="text-green-900">Mavjud kredit:</span>
-                <span className="font-bold text-green-700">{smsCredits} SMS</span>
+            {/* Phone */}
+            <div className="space-y-1.5">
+              <Label htmlFor="debtor_phone" className="text-sm font-medium">
+                Telefon <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="debtor_phone"
+                type="tel"
+                value={formData.debtor_phone}
+                onChange={(e) => setFormData({ ...formData, debtor_phone: e.target.value })}
+                placeholder="+998901234567"
+                required
+                className="h-11"
+              />
+            </div>
+
+            {/* Amount */}
+            <div className="space-y-1.5">
+              <Label htmlFor="amount" className="text-sm font-medium">
+                Qarz miqdori (so&apos;m) <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                min="0"
+                step="1"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                placeholder="100000"
+                required
+                className="h-11"
+              />
+            </div>
+
+            {/* Shop Name */}
+            <div className="space-y-1.5">
+              <Label htmlFor="shop_name" className="text-sm">
+                Do&apos;kon nomi <span className="text-slate-400 text-xs">(SMS uchun)</span>
+              </Label>
+              <Input
+                id="shop_name"
+                value={formData.shop_name}
+                onChange={(e) => setFormData({ ...formData, shop_name: e.target.value })}
+                placeholder="Mening do'konim"
+                className="h-11"
+              />
+            </div>
+
+            {/* Due Date */}
+            <div className="space-y-1.5">
+              <Label htmlFor="due_date" className="text-sm">To&apos;lov muddati</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={formData.due_date}
+                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                className="h-11"
+              />
+            </div>
+
+            {/* Note */}
+            <div className="space-y-1.5">
+              <Label htmlFor="note" className="text-sm">Izoh</Label>
+              <Textarea
+                id="note"
+                value={formData.note}
+                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                placeholder="Qo'shimcha ma'lumot..."
+                rows={2}
+                className="resize-none"
+              />
+            </div>
+
+            {/* SMS Section */}
+            <div className="border rounded-lg p-3 space-y-3 bg-slate-50">
+              {/* SMS Toggle */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-2 flex-1">
+                  <MessageSquare className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">SMS yuborish</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Qarzdorga eslatma
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={sendSMS}
+                  onCheckedChange={setSendSMS}
+                  className="flex-shrink-0"
+                />
               </div>
-            )}
 
-            {/* Show SMS options only if enabled */}
-            {sendSMS && (
-              <>
-                {/* Warning if no credits */}
-                {smsCredits === 0 && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      SMS yuborish uchun kredit kerak. SMS ni o&apos;chiring yoki kredit sotib oling.
-                    </AlertDescription>
-                  </Alert>
-                )}
+              {/* Credits Info */}
+              {smsCredits === 0 ? (
+                <Alert variant="destructive" className="py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    SMS kredit yo&apos;q. <a href="/sms-credits" className="underline font-medium">Sotib oling</a>
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="flex items-center justify-between text-xs p-2 bg-green-50 rounded">
+                  <span className="text-green-900">Mavjud:</span>
+                  <span className="font-bold text-green-700">{smsCredits} SMS</span>
+                </div>
+              )}
 
-                {/* Show message options only if has credits */}
-                {smsCredits > 0 && (
-                  <>
-                    {/* Custom Message Toggle */}
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <p className="text-sm font-medium">O&apos;zim yozaman</p>
-                      <Switch
-                        checked={useCustomMessage}
-                        onCheckedChange={setUseCustomMessage}
-                      />
-                    </div>
+              {/* SMS Options */}
+              {sendSMS && smsCredits === 0 && (
+                <Alert variant="destructive" className="py-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    SMS yuborish uchun kredit kerak. SMS ni o&apos;chiring yoki kredit sotib oling.
+                  </AlertDescription>
+                </Alert>
+              )}
 
-                    {/* Message Preview/Edit */}
-                    <div>
-                      <Label className="text-xs">SMS matni</Label>
-                      {useCustomMessage ? (
-                        <>
-                          <Textarea
-                            value={formData.custom_sms_message}
-                            onChange={(e) => setFormData({ ...formData, custom_sms_message: e.target.value })}
-                            placeholder="SMS matnini yozing..."
-                            rows={4}
-                            className="mt-1"
-                          />
-                          {formData.custom_sms_message.trim() === '' && (
-                            <p className="text-xs text-red-500 mt-1">
-                              ⚠️ SMS matni bo&apos;sh bo&apos;lmasligi kerak
-                            </p>
-                          )}
-                        </>
-                      ) : (
-                        <div className="mt-1 p-3 bg-white rounded-lg text-sm border">
-                          {generateDefaultMessage()}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </>
+              {sendSMS && smsCredits > 0 && (
+                <>
+                  {/* Custom Toggle */}
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <p className="text-sm font-medium">O&apos;zim yozaman</p>
+                    <Switch
+                      checked={useCustomMessage}
+                      onCheckedChange={setUseCustomMessage}
+                    />
+                  </div>
+
+                  {/* Message */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-slate-600">SMS matni</Label>
+                    {useCustomMessage ? (
+                      <>
+                        <Textarea
+                          value={formData.custom_sms_message}
+                          onChange={(e) => setFormData({ ...formData, custom_sms_message: e.target.value })}
+                          placeholder="SMS matnini yozing..."
+                          rows={3}
+                          className="text-sm resize-none"
+                        />
+                        {formData.custom_sms_message.trim() === '' && (
+                          <p className="text-xs text-red-500">
+                            ⚠️ SMS matni bo&apos;sh bo&apos;lmasligi kerak
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="p-2 bg-white rounded text-xs border leading-relaxed">
+                        {generateDefaultMessage()}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Validation hint */}
+            {!canSubmit() && (
+              <p className="text-xs text-center text-slate-600 py-2">
+                {!formData.debtor_name || !formData.debtor_phone || !formData.amount
+                  ? '⚠️ Barcha majburiy maydonlarni to\'ldiring'
+                  : sendSMS && smsCredits === 0
+                  ? '⚠️ SMS ni o\'chiring yoki kredit sotib oling'
+                  : sendSMS && useCustomMessage && !formData.custom_sms_message.trim()
+                  ? '⚠️ SMS matni bo\'sh'
+                  : ''
+                }
+              </p>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-2">
+          {/* Footer - Fixed */}
+          <div className="flex gap-2 p-4 border-t bg-white sticky bottom-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
-              className="flex-1"
+              className="flex-1 h-11"
             >
               Bekor qilish
             </Button>
             <Button
               type="submit"
               disabled={loading || !canSubmit()}
-              className="flex-1"
+              className="flex-1 h-11"
             >
               {loading ? 'Saqlanmoqda...' : 'Qo\'shish'}
             </Button>
           </div>
-
-          {/* Show why button is disabled */}
-          {!canSubmit() && (
-            <p className="text-xs text-center text-slate-600">
-              {!formData.debtor_name || !formData.debtor_phone || !formData.amount
-                ? '⚠️ Barcha majburiy maydonlarni to\'ldiring'
-                : sendSMS && smsCredits === 0
-                ? '⚠️ SMS yuborish uchun kredit yo\'q - SMS ni o\'chiring yoki kredit sotib oling'
-                : sendSMS && useCustomMessage && !formData.custom_sms_message.trim()
-                ? '⚠️ SMS matni bo\'sh'
-                : ''
-              }
-            </p>
-          )}
         </form>
       </DialogContent>
     </Dialog>

@@ -1,12 +1,13 @@
 {
   "name": "Qarz Daftari",
-  "short_name": "Qarz Daftari",
-  "description": "Professional qarzlar boshqarish platformasi",
-  "start_url": "/",
+  "short_name": "Qarz",
+  "description": "Qarzlarni boshqarish platformasi",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3B82F6",
+  "theme_color": "#2563eb",
   "orientation": "portrait",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -20,5 +21,22 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Yangi qarz",
+      "short_name": "Qarz qo'shish",
+      "description": "Yangi qarz qo'shish",
+      "url": "/dashboard?action=add",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "SMS kredits",
+      "short_name": "SMS",
+      "description": "SMS kredit sotib olish",
+      "url": "/sms-credits",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["business", "finance", "productivity"]
 }
