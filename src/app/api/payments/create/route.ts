@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
       .eq('auth_id', user.id)
       .single()
 
+      console.log('📋 Profile:', profile, '| Plan:', profile?.plan_type)
+
     if (!profile) {
       return NextResponse.json(
         { error: 'Profile not found' },
@@ -37,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('📦 Body:', body)
     const { planType, provider = 'click', billingCycle = 'monthly' } = body
 
     // Validate plan
