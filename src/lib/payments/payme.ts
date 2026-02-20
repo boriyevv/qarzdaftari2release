@@ -54,44 +54,47 @@ export class PaymePayment {
 
   // ─── CheckPerformTransaction ─────────────────────────────────────
 
-  async checkPerformTransaction(params: any, supabase: any) {
-    const { amount, account } = params
-    const { user_id, plan_type } = account ?? {}
+async checkPerformTransaction(params: any, supabase: any) {
+  const { amount, account } = params
+  const { user_id, plan_type } = account ?? {}
 
-    if (!user_id || !plan_type) {
-      return this.error(-31050, 'Noto\'g\'ri account', 'user_id')
-    }
-
-    if (!amount || amount < 49900) {
-      return this.error(-31001, 'Noto\'g\'ri summa', 'amount')
-    }
-
-    const { data: user } = await supabase
-      .from('users')
-      .select('id')
-      .eq('id', user_id)
-      .single()
-
-    if (!user) {
-      return this.error(-31050, 'Foydalanuvchi topilmadi', 'user_id')
-    }
-
-    const detail = {
-      receipt_type: 0,
-      items: [
-        {
-          title: `Qarz Daftari ${plan_type} obuna`,
-          price: amount,
-          count: 1,
-          code: '10399002001000000', //  Ахборот-коммуникация технологиялари соҳасида (шу жумладан, Интернет жаҳон ахборот тармоғи орқали) таълим бериш хизматлари
-          package_code: '1545637',
-          vat_percent: 12,
-        },
-      ],
-    }
-
-    return { result: { allow: true, detail } }
+  if (!user_id || !plan_type) {
+    return this.error(-31050, 'Noto\'g\'ri account', 'user_id')
   }
+
+  if (!amount || amount < 100) {
+    return this.error(-31001, 'Noto\'g\'ri summa', 'amount')
+  }
+
+  const { data: user } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', user_id)
+    .single()
+
+  if (!user) {
+    return this.error(-31050, 'Foydalanuvchi topilmadi', 'user_id')
+  }
+
+  return {
+    result: {
+      allow: true,
+      detail: {
+        receipt_type: 0,
+        items: [
+          {
+            title: `Qarz Daftari ${plan_type} obuna`,
+            price: amount,
+            count: 1,
+            code: '10399002001000000',
+            package_code: '1545637',
+            vat_percent: 12,
+          },
+        ],
+      },
+    },
+  }
+}
 
   // ─── CreateTransaction ───────────────────────────────────────────
 
