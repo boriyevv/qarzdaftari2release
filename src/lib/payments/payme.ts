@@ -31,9 +31,14 @@ export class PaymePayment {
     ].join(';')
 
     const base64 = Buffer.from(paramsString).toString('base64')
-    return `https://checkout.paycom.uz/${base64}`
-  }
 
+    // Test yoki production
+    const baseUrl = process.env.NODE_ENV === 'production'
+      ? 'https://checkout.paycom.uz'
+      : 'https://checkout.test.paycom.uz'
+
+    return `${baseUrl}/${base64}`
+  }
   // ─── Authorization ───────────────────────────────────────────────
 
   verifyAuthorization(authHeader: string): boolean {
@@ -55,6 +60,10 @@ export class PaymePayment {
 
     if (!user_id || !plan_type) {
       return this.error(-31050, 'Noto\'g\'ri account', 'user_id')
+    }
+
+    if (!amount || amount < 49900) {
+      return this.error(-31001, 'Noto\'g\'ri summa', 'amount')
     }
 
     const { data: user } = await supabase
@@ -233,8 +242,8 @@ export class PaymePayment {
 
     const state =
       transaction.status === 'completed' ? 2
-      : transaction.status === 'cancelled' ? -1
-      : 1
+        : transaction.status === 'cancelled' ? -1
+          : 1
 
     return {
       result: {
