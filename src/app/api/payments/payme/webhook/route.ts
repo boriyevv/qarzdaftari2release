@@ -7,129 +7,159 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify authorization
+    // Authorization tekshirish
     const authHeader = request.headers.get('Authorization')
-    
+
     if (!authHeader || !paymePayment.verifyAuthorization(authHeader)) {
       return NextResponse.json({
         error: {
           code: -32504,
-          message: 'Insufficient privilege',
+          message: {
+            ru: 'Недостаточно привилегий',
+            uz: 'Ruxsat yo\'q',
+            en: 'Insufficient privilege',
+          },
+          data: null,
         },
       })
     }
 
     const body = await request.json()
-    
-    console.log('🔔 Payme webhook received:', body)
+    const { method, params, id } = body
 
-    const { method, params } = body
+    console.log('🔔 Payme webhook:', method, params)
+
+    const supabase = await createClient()
+
+    let result: any
 
     switch (method) {
       case 'CheckPerformTransaction':
-        return NextResponse.json(await paymePayment.checkPerformTransaction(params))
+        result = await paymePayment.checkPerformTransaction(params, supabase)
+        break
 
       case 'CreateTransaction':
-        return NextResponse.json(await paymePayment.createTransaction(params))
+        result = await paymePayment.createTransaction(params, supabase)
+        break
 
       case 'PerformTransaction':
-        const performResult = await paymePayment.performTransaction(params)
-        
-        // Update subscription after successful payment
-        if (performResult.result.state === 2) {
-          await updateSubscription(params, 'payme')
+        result = await paymePayment.performTransaction(params, supabase)
+        if (result.result?.state === 2) {
+          await updateSubscription(params, supabase)
         }
-        
-        return NextResponse.json(performResult)
+        break
 
       case 'CancelTransaction':
-        return NextResponse.json(await paymePayment.cancelTransaction(params))
+        result = await paymePayment.cancelTransaction(params, supabase)
+        break
 
       case 'CheckTransaction':
-        return NextResponse.json(await paymePayment.checkTransaction(params))
+        result = await paymePayment.checkTransaction(params, supabase)
+        break
 
       case 'GetStatement':
-        return NextResponse.json(await paymePayment.getStatement(params))
+        result = await paymePayment.getStatement(params, supabase)
+        break
 
       default:
-        return NextResponse.json({
+        result = {
           error: {
             code: -32601,
-            message: 'Method not found',
+            message: {
+              ru: 'Метод не найден',
+              uz: 'Metod topilmadi',
+              en: 'Method not found',
+            },
+            data: method,
           },
-        })
+        }
     }
+
+    // Payme RPC formatida javob — id ni qaytarish shart
+    return NextResponse.json({ ...result, id })
+
   } catch (error) {
     console.error('❌ Payme webhook error:', error)
     return NextResponse.json({
       error: {
         code: -32400,
-        message: 'System error',
+        message: {
+          ru: 'Системная ошибка',
+          uz: 'Tizim xatosi',
+          en: 'System error',
+        },
+        data: null,
       },
     })
   }
 }
 
-async function updateSubscription(params: any, provider: string) {
+async function updateSubscription(params: any, supabase: any) {
   try {
-    const supabase = await createClient()
-    
-    // Parse subscription ID from account
-    const subscriptionId = params.account.subscription_id
-    const [userId, planType] = subscriptionId.split('_')
-    
-    console.log('📝 Updating subscription:', { userId, planType, provider })
+    const { user_id, plan_type } = params.account
 
-    // Calculate expiry date (30 days from now)
+    if (!user_id || !plan_type) {
+      console.error('❌ updateSubscription: user_id yoki plan_type yo\'q', params)
+      return
+    }
+
+    // Billing cycle aniqlash — plan_type formatida saqlangan bo'lishi mumkin
+    // transactionId: userId_PLUS_monthly_timestamp
+    const parts = plan_type.split('_')
+    const actualPlanType = parts[0] // PLUS yoki PRO
+    const billingCycle = parts[1] ?? 'monthly' // monthly, semi_annual, annual
+
+    const months =
+      billingCycle === 'annual' ? 12
+      : billingCycle === 'semi_annual' ? 6
+      : 1
+
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 30)
+    expiresAt.setMonth(expiresAt.getMonth() + months)
 
-    // Amount from tiyin to sum
-    const amountSum = params.amount / 100
+    console.log('📝 Updating subscription:', { user_id, actualPlanType, billingCycle, months })
 
-    // Update user plan
-    await supabase
+    // User planini yangilash
+    const { error: userError } = await supabase
       .from('users')
       .update({
-        plan_type: planType,
+        plan_type: actualPlanType,
         subscription_status: 'active',
         subscription_expires_at: expiresAt.toISOString(),
         last_payment_date: new Date().toISOString(),
       })
-      .eq('id', userId)
+      .eq('id', user_id)
 
-    // Save payment transaction
-    const { data: transactionData } = await supabase
+    if (userError) {
+      console.error('❌ User update error:', userError)
+      return
+    }
+
+    // Tranzaksiyani olish
+    const { data: transaction } = await supabase
       .from('payment_transactions')
-      .insert({
-        user_id: userId,
-        provider,
-        amount: amountSum,
-        status: 'completed',
-        external_id: params.id,
-        external_data: params,
-        completed_at: new Date().toISOString(),
-      })
-      .select()
+      .select('id, amount')
+      .eq('external_id', params.id)
       .single()
 
-    // Create subscription record
+    // Subscription record yaratish
     await supabase
       .from('subscriptions')
       .insert({
-        user_id: userId,
-        plan_type: planType,
+        user_id,
+        plan_type: actualPlanType,
+        billing_cycle: billingCycle,
         status: 'active',
-        amount: amountSum,
+        amount: transaction?.amount ?? params.amount / 100,
         currency: 'UZS',
-        payment_provider: provider,
-        payment_transaction_id: transactionData?.id,
+        payment_provider: 'payme',
+        payment_transaction_id: transaction?.id ?? null,
         started_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(),
       })
 
-    console.log('✅ Subscription updated successfully')
+    console.log('✅ Subscription updated:', user_id, actualPlanType, billingCycle)
   } catch (error) {
-    console.error('❌ Update subscription error:', error)
+    console.error('❌ updateSubscription error:', error)
   }
 }

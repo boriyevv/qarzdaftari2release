@@ -1,244 +1,294 @@
 // src/lib/payments/payme.ts
-import crypto from 'crypto'
 
 export interface PaymePaymentParams {
-  amount: number // in tiyin (1 sum = 100 tiyin)
+  amount: number // in sum (NOT tiyin)
   userId: string
   planType: string
   returnUrl: string
 }
 
-export interface PaymeCheckPerformTransactionRequest {
-  method: 'CheckPerformTransaction'
-  params: {
-    amount: number
-    account: {
-      subscription_id: string
-    }
-  }
-}
-
-export interface PaymeCreateTransactionRequest {
-  method: 'CreateTransaction'
-  params: {
-    id: string
-    time: number
-    amount: number
-    account: {
-      subscription_id: string
-    }
-  }
-}
-
-export interface PaymePerformTransactionRequest {
-  method: 'PerformTransaction'
-  params: {
-    id: string
-  }
-}
-
-export interface PaymeCancelTransactionRequest {
-  method: 'CancelTransaction'
-  params: {
-    id: string
-    reason: number
-  }
-}
-
 export class PaymePayment {
   private merchantId: string
   private secretKey: string
-  private minAmount = 100 // 1 sum in tiyin
 
   constructor() {
     this.merchantId = process.env.PAYME_MERCHANT_ID!
     this.secretKey = process.env.PAYME_SECRET_KEY!
   }
 
-  /**
-   * Generate payment URL for Payme
-   */
+  // ─── Checkout URL ────────────────────────────────────────────────
+
   generatePaymentUrl(params: PaymePaymentParams): string {
     const { amount, userId, planType, returnUrl } = params
-
-    // Transaction ID format: user_plan_timestamp
-    const subscriptionId = `${userId}_${planType}_${Date.now()}`
-
-    // Amount in tiyin (1 sum = 100 tiyin)
     const amountTiyin = Math.round(amount * 100)
 
-    // Encode params
-    const paramsString = `m=${this.merchantId};ac.subscription_id=${subscriptionId};a=${amountTiyin};c=${returnUrl}`
-    const base64Params = Buffer.from(paramsString).toString('base64')
+    const paramsString = [
+      `m=${this.merchantId}`,
+      `ac.user_id=${userId}`,
+      `ac.plan_type=${planType}`,
+      `a=${amountTiyin}`,
+      `c=${returnUrl}`,
+    ].join(';')
 
-    return `https://checkout.paycom.uz/${base64Params}`
+    const base64 = Buffer.from(paramsString).toString('base64')
+    return `https://checkout.paycom.uz/${base64}`
   }
 
-  /**
-   * Verify authorization header
-   */
+  // ─── Authorization ───────────────────────────────────────────────
+
   verifyAuthorization(authHeader: string): boolean {
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-      return false
-    }
-
+    if (!authHeader?.startsWith('Basic ')) return false
     try {
-      const base64Credentials = authHeader.split(' ')[1]
-      const credentials = Buffer.from(base64Credentials, 'base64').toString()
-      const [login, password] = credentials.split(':')
-
+      const decoded = Buffer.from(authHeader.split(' ')[1], 'base64').toString()
+      const [login, password] = decoded.split(':')
       return login === this.merchantId && password === this.secretKey
     } catch {
       return false
     }
   }
 
-  /**
-   * Handle CheckPerformTransaction
-   */
-  async checkPerformTransaction(params: any): Promise<any> {
-    console.log('🔍 Payme CheckPerformTransaction:', params)
+  // ─── CheckPerformTransaction ─────────────────────────────────────
 
+  async checkPerformTransaction(params: any, supabase: any) {
     const { amount, account } = params
+    const { user_id, plan_type } = account ?? {}
 
-    // Validate amount
-    if (amount < this.minAmount) {
-      return this.errorResponse(-31001, 'Incorrect amount')
+    if (!user_id || !plan_type) {
+      return this.error(-31050, 'Noto\'g\'ri account', 'user_id')
     }
 
-    // Parse subscription ID
-    const subscriptionId = account.subscription_id
-    const [userId, planType] = subscriptionId.split('_')
+    const { data: user } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', user_id)
+      .single()
 
-    if (!userId || !planType) {
-      return this.errorResponse(-31050, 'Invalid subscription ID')
+    if (!user) {
+      return this.error(-31050, 'Foydalanuvchi topilmadi', 'user_id')
     }
 
-    // TODO: Validate user exists
-    // TODO: Validate plan type
-    // TODO: Check if already paid
-
-    return {
-      result: {
-        allow: true,
-      },
+    const detail = {
+      receipt_type: 0,
+      items: [
+        {
+          title: `Qarz Daftari ${plan_type} obuna`,
+          price: amount,
+          count: 1,
+          code: '10399002001000000', //  Ахборот-коммуникация технологиялари соҳасида (шу жумладан, Интернет жаҳон ахборот тармоғи орқали) таълим бериш хизматлари
+          package_code: '1545637',
+          vat_percent: 12,
+        },
+      ],
     }
+
+    return { result: { allow: true, detail } }
   }
 
-  /**
-   * Handle CreateTransaction
-   */
-  async createTransaction(params: any): Promise<any> {
-    console.log('📝 Payme CreateTransaction:', params)
+  // ─── CreateTransaction ───────────────────────────────────────────
 
+  async createTransaction(params: any, supabase: any) {
     const { id, time, amount, account } = params
+    const { user_id, plan_type } = account ?? {}
 
-    // Parse subscription ID
-    const subscriptionId = account.subscription_id
-    const [userId, planType] = subscriptionId.split('_')
+    // Mavjud tranzaksiyani tekshirish
+    const { data: existing } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('external_id', id)
+      .single()
 
-    // TODO: Save transaction to database
-    // State: 1 (created, waiting for payment)
+    if (existing) {
+      return {
+        result: {
+          create_time: new Date(existing.created_at).getTime(),
+          transaction: existing.id,
+          state: 1,
+        },
+      }
+    }
+
+    // Yangi tranzaksiya
+    const { data: transaction, error } = await supabase
+      .from('payment_transactions')
+      .insert({
+        user_id,
+        provider: 'payme',
+        amount: amount / 100,
+        status: 'pending',
+        external_id: id,
+        external_data: params,
+      })
+      .select()
+      .single()
+
+    if (error || !transaction) {
+      return this.error(-32400, 'Tranzaksiya yaratishda xato', null)
+    }
 
     return {
       result: {
         create_time: time,
-        transaction: id,
+        transaction: transaction.id,
         state: 1,
       },
     }
   }
 
-  /**
-   * Handle PerformTransaction
-   */
-  async performTransaction(params: any): Promise<any> {
-    console.log('✅ Payme PerformTransaction:', params)
+  // ─── PerformTransaction ──────────────────────────────────────────
 
+  async performTransaction(params: any, supabase: any) {
     const { id } = params
 
-    // TODO: Update transaction state to 2 (completed)
-    // TODO: Update user subscription
-    // TODO: Send notification
+    const { data: transaction } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('external_id', id)
+      .single()
+
+    if (!transaction) {
+      return this.error(-31003, 'Tranzaksiya topilmadi', null)
+    }
+
+    if (transaction.status === 'completed') {
+      return {
+        result: {
+          transaction: transaction.id,
+          perform_time: new Date(transaction.completed_at).getTime(),
+          state: 2,
+        },
+      }
+    }
+
+    const performTime = Date.now()
+
+    await supabase
+      .from('payment_transactions')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      })
+      .eq('external_id', id)
 
     return {
       result: {
-        transaction: id,
-        perform_time: Date.now(),
+        transaction: transaction.id,
+        perform_time: performTime,
         state: 2,
       },
     }
   }
 
-  /**
-   * Handle CancelTransaction
-   */
-  async cancelTransaction(params: any): Promise<any> {
-    console.log('❌ Payme CancelTransaction:', params)
+  // ─── CancelTransaction ───────────────────────────────────────────
 
+  async cancelTransaction(params: any, supabase: any) {
     const { id, reason } = params
 
-    // TODO: Update transaction state to -1 (cancelled)
-    // TODO: Rollback if needed
+    const { data: transaction } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('external_id', id)
+      .single()
+
+    if (!transaction) {
+      return this.error(-31003, 'Tranzaksiya topilmadi', null)
+    }
+
+    if (transaction.status === 'completed') {
+      return this.error(-31008, 'Tugallangan tranzaksiyani bekor qilib bo\'lmaydi', null)
+    }
+
+    const cancelTime = Date.now()
+
+    await supabase
+      .from('payment_transactions')
+      .update({
+        status: 'cancelled',
+        external_data: { ...transaction.external_data, cancel_reason: reason },
+      })
+      .eq('external_id', id)
 
     return {
       result: {
-        transaction: id,
-        cancel_time: Date.now(),
+        transaction: transaction.id,
+        cancel_time: cancelTime,
         state: -1,
       },
     }
   }
 
-  /**
-   * Handle CheckTransaction
-   */
-  async checkTransaction(params: any): Promise<any> {
-    console.log('🔍 Payme CheckTransaction:', params)
+  // ─── CheckTransaction ────────────────────────────────────────────
 
+  async checkTransaction(params: any, supabase: any) {
     const { id } = params
 
-    // TODO: Get transaction from database
+    const { data: transaction } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('external_id', id)
+      .single()
+
+    if (!transaction) {
+      return this.error(-31003, 'Tranzaksiya topilmadi', null)
+    }
+
+    const state =
+      transaction.status === 'completed' ? 2
+      : transaction.status === 'cancelled' ? -1
+      : 1
 
     return {
       result: {
-        create_time: Date.now(),
-        perform_time: 0,
+        create_time: new Date(transaction.created_at).getTime(),
+        perform_time: transaction.completed_at
+          ? new Date(transaction.completed_at).getTime()
+          : 0,
         cancel_time: 0,
-        transaction: id,
-        state: 1,
+        transaction: transaction.id,
+        state,
         reason: null,
       },
     }
   }
 
-  /**
-   * Handle GetStatement (get transactions list)
-   */
-  async getStatement(params: any): Promise<any> {
-    console.log('📊 Payme GetStatement:', params)
+  // ─── GetStatement ────────────────────────────────────────────────
 
+  async getStatement(params: any, supabase: any) {
     const { from, to } = params
 
-    // TODO: Get transactions from database
+    const { data: transactions } = await supabase
+      .from('payment_transactions')
+      .select('*')
+      .eq('provider', 'payme')
+      .gte('created_at', new Date(from).toISOString())
+      .lte('created_at', new Date(to).toISOString())
 
-    return {
-      result: {
-        transactions: [],
-      },
-    }
+    const list = (transactions ?? []).map((t: any) => ({
+      id: t.external_id,
+      time: new Date(t.created_at).getTime(),
+      amount: t.amount * 100,
+      account: t.external_data?.account ?? {},
+      create_time: new Date(t.created_at).getTime(),
+      perform_time: t.completed_at ? new Date(t.completed_at).getTime() : 0,
+      cancel_time: 0,
+      transaction: t.id,
+      state: t.status === 'completed' ? 2 : t.status === 'cancelled' ? -1 : 1,
+      reason: null,
+    }))
+
+    return { result: { transactions: list } }
   }
 
-  private errorResponse(code: number, message: string): any {
+  // ─── Error helper ────────────────────────────────────────────────
+
+  private error(code: number, message: string, data: any) {
     return {
       error: {
         code,
-        message,
-        data: null,
+        message: { ru: message, uz: message, en: message },
+        data,
       },
     }
   }
 }
 
-// Singleton instance
 export const paymePayment = new PaymePayment()
