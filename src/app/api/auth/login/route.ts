@@ -1,4 +1,3 @@
-// src/app/api/auth/login/route.ts
 
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
@@ -27,14 +26,12 @@ export async function POST(request: Request) {
         .eq('auth_id', authData.user.id)
         .single()
 
-      // ✅ Cookie'larni response'ga qo'shish
       const response = NextResponse.json({
         success: true,
         user: authData.user,
         profile,
       })
 
-      // Session cookie'larini olish va response'ga qo'shish
       const cookieStore = await cookies()
       const allCookies = cookieStore.getAll()
       
@@ -51,7 +48,6 @@ export async function POST(request: Request) {
       return response
     }
 
-    // ... phone login ham xuddi shunday
   } catch (error) {
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })
   }

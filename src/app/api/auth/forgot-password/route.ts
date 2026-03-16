@@ -1,5 +1,3 @@
-// src/app/api/auth/forgot-password/route.ts
-
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -35,7 +33,6 @@ export async function POST(request: Request) {
       console.error('Password reset error:', error)
     }
     
-    // Always return success (security)
     return NextResponse.json({
       success: true,
       message: 'Agar email mavjud bo\'lsa, tiklash havolasi yuborildi',

@@ -1,5 +1,3 @@
-// src/app/api/auth/me/route.ts
-
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -22,7 +20,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    // Try to find profile by auth_id
     const { data: profile, error: profileError } = await supabase
       .from('users')
       .select(`
@@ -39,7 +36,6 @@ export async function GET() {
 
     console.log('⚠️ Profile not found by auth_id, trying phone...')
 
-    // Try to find phone-only user
     if (user.phone) {
       const { data: phoneProfile } = await supabase
         .from('users')
@@ -57,7 +53,6 @@ export async function GET() {
       }
     }
 
-    // Profile not found at all
     console.error('❌ Profile not found in database for user:', user.id)
     console.error('User email:', user.email)
     console.error('User phone:', user.phone)

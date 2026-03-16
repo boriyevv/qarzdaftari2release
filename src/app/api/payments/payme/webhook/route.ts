@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
   try {
     // Authorization tekshirish
     const authHeader = request.headers.get('Authorization')
+    console.log('🔑 Auth header:', authHeader)
 
     if (!authHeader || !paymePayment.verifyAuthorization(authHeader)) {
       return NextResponse.json({

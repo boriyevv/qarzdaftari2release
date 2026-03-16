@@ -1,4 +1,3 @@
-// src/app/api/analytics/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
@@ -7,11 +6,9 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // IMPORTANT: Get cookies for mobile
     const cookieStore = await cookies()
     const supabase = await createClient()
     
-    // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     console.log('📊 Analytics - Auth check:', { 
@@ -26,7 +23,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user profile with plan
     const { data: profile, error: profileError } = await supabase
       .from('users')
       .select('id, plan_type, is_trial_active, trial_ends_at')
@@ -45,7 +41,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check trial OR paid plan
     const hasAccess = profile.is_trial_active || profile.plan_type !== 'FREE'
     
     console.log('📊 Analytics - Access check:', {
@@ -64,7 +59,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const period = searchParams.get('period') || 'monthly'
 
-    // PRO-only periods
     if (profile.plan_type !== 'PRO' && ['semi_annual', 'annual'].includes(period)) {
       if (!profile.is_trial_active) {
         return NextResponse.json(
@@ -74,7 +68,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calculate date range
     const now = new Date()
     let startDate = new Date()
     
@@ -89,7 +82,6 @@ export async function GET(request: NextRequest) {
         startDate.setMonth(now.getMonth() - 1)
     }
 
-    // Get debts
     const { data: debts, error: debtsError } = await supabase
       .from('debts')
       .select('*')
@@ -125,7 +117,6 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Group by month
     const monthsMap = new Map<string, any>()
     
     debts.forEach(debt => {
@@ -157,7 +148,6 @@ export async function GET(request: NextRequest) {
 
     const months = Array.from(monthsMap.values())
 
-    // Summary
     const summary = {
       totalIssued: debts.reduce((sum, d) => sum + d.amount, 0),
       totalReturned: debts.reduce((sum, d) => sum + d.paid_amount, 0),
@@ -170,7 +160,6 @@ export async function GET(request: NextRequest) {
         .reduce((sum, d) => sum + (d.amount - d.paid_amount), 0),
     }
 
-    // Top debtors
     const debtorMap = new Map<string, any>()
     
     debts.forEach(debt => {

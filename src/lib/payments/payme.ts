@@ -35,7 +35,7 @@ export class PaymePayment {
     // Test yoki production
     const baseUrl = process.env.NODE_ENV === 'production'
       ? 'https://checkout.paycom.uz'
-      : 'https://checkout.test.paycom.uz'
+      : 'https://test.paycom.uz'
 
     return `${baseUrl}/${base64}`
   }

@@ -11,7 +11,6 @@ export async function POST() {
     
     console.log('🚪 Logout request')
 
-    // Sign out from Supabase
     const { error } = await supabase.auth.signOut()
 
     if (error) {
