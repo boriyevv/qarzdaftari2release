@@ -9,14 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Metadata } from 'next'
 
 
-// app/profile/page.tsx  (yoki [username] bo'lsa)
-export const metadata: Metadata = {
-  title: 'Aloqa',
-  description: 'Biz bilan bog\'laning. Savol va takliflar uchun',
-}
 
 
 export default function ContactPage() {
