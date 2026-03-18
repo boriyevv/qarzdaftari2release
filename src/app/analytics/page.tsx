@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingUp, TrendingDown, AlertCircle, Users, Lock } from 'lucide-react'
 import { MainNav } from '@/components/layout/main-nav'
-import { Metadata } from 'next'
+
 
 type Period = 'monthly' | 'semi_annual' | 'annual'
 
@@ -37,11 +37,7 @@ interface MonthData {
 }
 
 
-// app/analytics/page.tsx
-export const metadata: Metadata = {
-  title: 'Analitika',
-  description: 'Do\'koningiz qarz statistikasi va hisobotlari.',
-}
+
 
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState<Period>('monthly')

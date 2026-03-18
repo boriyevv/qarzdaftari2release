@@ -3,13 +3,6 @@
 import { MainNav } from "@/components/layout/main-nav"
 import { OnboardingTooltip } from "@/components/onboarding/tooltip-guide"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Metadata } from "next"
-
-// app/dashboard/profile/page.tsx  (yoki [username] bo'lsa)
-export const metadata: Metadata = {
-  title: 'Profil',
-  description: 'Foydalanuvchi profili va sozlamalari.',
-}
 
 function Profile() {
   return (

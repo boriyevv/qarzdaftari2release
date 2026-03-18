@@ -20,13 +20,6 @@ import {
   type BillingCycle
 } from '@/lib/constants/plans'
 import { MainNav } from '@/components/layout/main-nav'
-import { Metadata } from 'next'
-
-// app/tariffs/page.tsx
-export const metadata: Metadata = {
-  title: 'Tariflar',
-  description: 'Qarz Daftari tarif rejalari — bepul va premium.',
-}
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')

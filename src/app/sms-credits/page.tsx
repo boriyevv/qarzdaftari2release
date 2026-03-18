@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { MessageSquare, CreditCard, Check, Zap, History } from 'lucide-react'
 import { SMS_PACKAGES } from '@/lib/constants/plans'
 import { MainNav } from '@/components/layout/main-nav'
-import { Metadata } from 'next'
 
 interface SMSCreditsData {
   total_credits: number
@@ -24,12 +23,6 @@ interface SMSCreditsData {
     recipient_phone: string
     created_at: string
   }>
-}
-
-// app/sms-credits/page.tsx
-export const metadata: Metadata = {
-  title: 'SMS Kreditlar',
-  description: 'SMS xabarnoma kreditlarini boshqaring va to\'ldiring.',
 }
 
 export default function SMSCreditsPage() {

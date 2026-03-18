@@ -9,13 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { supabase } from '@/lib/supabase/client'
-import { Metadata } from 'next'
-
-
-export const metadata: Metadata = {
-  title: 'Parolni qayta tiklang',
-  description: 'Parolingizni tez va oson qayta tiklang',
-}
 
 
 export default function ResetPasswordPage() {
