@@ -1,10 +1,17 @@
 // src/app/login/page.tsx
 'use client'
-
+import { Metadata } from 'next'
 import { Suspense } from 'react'
 import { LoginPageContent } from './login-content'
 
+export const metadata: Metadata = {
+  title: 'Kirish',
+  description: 'Qarz Daftari ga kiring — do\'koningiz qarzlarini boshqaring.',
+}
 export default function LoginPage() {
+
+  // app/login/page.tsx
+
   return (
     <Suspense
       fallback={

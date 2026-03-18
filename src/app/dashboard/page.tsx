@@ -14,6 +14,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { SubscriptionBanner } from '@/components/dashboard/subscription-banner'
 import { OnboardingTooltip } from '@/components/onboarding/tooltip-guide'
 import { MainNav } from '@/components/layout/main-nav'
+import { Metadata } from 'next'
 
 
 interface Debt {
@@ -32,6 +33,14 @@ interface Debt {
     color: string
   } | null
 }
+
+
+// app/dashboard/profile/page.tsx  (yoki [username] bo'lsa)
+export const metadata: Metadata = {
+  title: 'Asosiy',
+  description: 'Qarzdorlar ro\'yhati, qarz qo\'shish va o\chirish.',
+}
+
 
 export default function DashboardPage() {
 

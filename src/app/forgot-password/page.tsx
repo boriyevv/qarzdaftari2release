@@ -8,6 +8,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Metadata } from 'next'
+
+
+// app/dashboard/profile/page.tsx  (yoki [username] bo'lsa)
+export const metadata: Metadata = {
+  title: 'Parolni unutdingizmi',
+  description: 'Parolingizni osongina qayta tiklab oling.',
+}
+
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)

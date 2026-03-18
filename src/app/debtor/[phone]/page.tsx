@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Phone, Calendar, TrendingUp, CheckCircle, Clock } from 'lucide-react'
+import { Metadata } from 'next'
 
 interface Debt {
   id: string
@@ -27,6 +28,12 @@ interface DebtorData {
   totalPaid: number
   totalRemaining: number
   debtCount: number
+}
+
+// app/profile/page.tsx  (yoki [username] bo'lsa)
+export const metadata: Metadata = {
+  title: 'Qarzdor Profili',
+  description: 'Qarzdorlar profili va qarzlar tarixi.',
 }
 
 export default function DebtorProfilePage() {

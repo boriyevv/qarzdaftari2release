@@ -11,6 +11,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { OTPInput } from '@/components/auth/otp-input'
+import { Metadata } from 'next'
+
+
+// app/register/page.tsx
+export const metadata: Metadata = {
+  title: 'Ro\'yhatdan o\'tish',
+  description: 'Qarz Daftari ga ro\'yhatdan o\'ting — bepul boshlang.',
+}
+
 
 export default function RegisterPage() {
   const router = useRouter()
