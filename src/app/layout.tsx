@@ -8,12 +8,21 @@ const inter = Inter({ subsets: ['latin'] })
 
 // app/layout.tsx
 export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png', sizes: '16x16' },
+      { url: '/icon32.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: '/appleicon.png',
+  },
+
   title: {
-    default: 'Qarz Daftari',
+    default:  'Qarz Daftari — Do\'kon Qarzlarini Onlayn Boshqaring',
     template: '%s | Qarz Daftari',
   },
-  description: 'Uzbekiston do\'konlari uchun online qarz hisobi. Mijozlar qarzini kuzating, SMS xabarnoma yuboring.',
-  keywords: ['qarz daftari', 'qarz hisobi', 'do\'kon uchun', 'uzbekistan', 'qarz kuzatish'],
+  description: '✅ Qarzdorlar ro\'yxati • 📱 SMS eslatmalar • 📊 Hisobotlar | Uzbekiston do\'kon egalari uchun #1 qarz boshqaruv tizimi. Bepul boshlang!',
+  keywords: ['qarz daftari', 'qarz hisobi', 'qarzlar daftari', 'qarz daftar', 'p daftar', 'debtbook', 'debt book', 'do\'kon uchun', 'uzbekistan', 'qarz kuzatish', 'qarz'],
   openGraph: {
     title: 'Qarz Daftari',
     description: 'Do\'kon qarzlarini onlayn boshqaring',
@@ -21,6 +30,11 @@ export const metadata: Metadata = {
     siteName: 'Qarz Daftari',
     locale: 'uz_UZ',
     type: 'website',
+    images: [{
+      url: 'https://debtbook.uz/og-image.jpg',
+      width: 1200,
+      height: 630
+    }]
   },
   verification: {
     google: 'NLw2DkN8iCOm5F8yfg2f_grjITI7I7KAbU2oMeEZvok',
@@ -35,7 +49,7 @@ export default function RootLayout({
   return (
     <html lang="uz">
       <body className={inter.className}>
-         <UserProvider>
+        <UserProvider>
           {children}
         </UserProvider>
       </body>
