@@ -46,7 +46,7 @@ export class PaymePayment {
     try {
       const decoded = Buffer.from(authHeader.split(' ')[1], 'base64').toString()
       const [login, password] = decoded.split(':')
-      return login === this.merchantId && password === this.secretKey
+      return login === "Paycom" && password === this.secretKey
     } catch {
       return false
     }
