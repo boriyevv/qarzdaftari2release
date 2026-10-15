@@ -147,7 +147,7 @@ export const SMS_PACKAGES = [
   {
     id: '1000-sms',
     name: '1000 SMS',
-    credits: 500,
+    credits: 1000,
     price: 300_000,
     pricePerSMS: 300,
     savings: '40% tejash',

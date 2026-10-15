@@ -1,10 +1,12 @@
 // src/lib/payments/click.ts
 import crypto from 'crypto'
+import { parsePaymentOrder } from './common'
 
 export interface ClickPaymentParams {
 	amount: number
 	userId: string
-	planType: string
+	planType?: string
+	transactionId?: string
 	returnUrl: string
 }
 //  CHANGE 1: Added 'click_paydoc_id' and 'merchant_prepare_id' to PrepareResponse.
@@ -63,8 +65,12 @@ export class ClickPayment {
 	 * Generate payment URL for Click (unchanged — this was already correct)
 	 */
 	generatePaymentUrl(params: ClickPaymentParams): string {
-		const { amount, userId, planType, returnUrl } = params
-		const transactionId = `${userId}_${planType}_${Date.now()}`
+		const { amount, userId, planType, transactionId: customTxId, returnUrl } = params
+		const transactionId = customTxId
+			? customTxId
+			: (planType && planType.startsWith(userId)
+				? planType
+				: `${userId}_${planType || 'PLUS'}_${Date.now()}`)
 
 		const url = new URL('https://my.click.uz/services/pay')
 		url.searchParams.set('service_id', this.serviceId)
@@ -142,9 +148,9 @@ export class ClickPayment {
 			return this.prepareErrorResponse(params, -4, 'Wrong service ID')
 		}
 
-		const [userId, planType] = params.merchant_trans_id.split('_')
+		const parsedOrder = parsePaymentOrder(params.merchant_trans_id)
 
-		if (!userId || !planType) {
+		if (!parsedOrder || !parsedOrder.userId) {
 			return this.prepareErrorResponse(params, -5, 'Invalid transaction ID')
 		}
 
@@ -191,9 +197,9 @@ export class ClickPayment {
 			return this.completeErrorResponse(params, -4, 'Wrong service ID')
 		}
 
-		const [userId, planType] = params.merchant_trans_id.split('_')
+		const parsedOrder = parsePaymentOrder(params.merchant_trans_id)
 
-		if (!userId || !planType) {
+		if (!parsedOrder || !parsedOrder.userId) {
 			return this.completeErrorResponse(params, -5, 'Invalid transaction ID')
 		}
 

@@ -22,8 +22,11 @@ export interface Database {
           email: string | null
           username: string
           store_name: string
-          plan_type: 'free' | 'plus' | 'pro'
+          plan_type: 'free' | 'plus' | 'pro' | 'FREE' | 'PLUS' | 'PRO' | string
           plan_expires_at: string | null
+          subscription_status?: string | null
+          subscription_expires_at?: string | null
+          last_payment_date?: string | null
           is_active: boolean
           is_admin: boolean
           phone_verified: boolean
@@ -44,8 +47,11 @@ export interface Database {
           email?: string | null
           username: string
           store_name: string
-          plan_type?: 'free' | 'plus' | 'pro'
+          plan_type?: 'free' | 'plus' | 'pro' | 'FREE' | 'PLUS' | 'PRO' | string
           plan_expires_at?: string | null
+          subscription_status?: string | null
+          subscription_expires_at?: string | null
+          last_payment_date?: string | null
           is_active?: boolean
           is_admin?: boolean
           phone_verified?: boolean
@@ -66,8 +72,11 @@ export interface Database {
           email?: string | null
           username?: string
           store_name?: string
-          plan_type?: 'free' | 'plus' | 'pro'
+          plan_type?: 'free' | 'plus' | 'pro' | 'FREE' | 'PLUS' | 'PRO' | string
           plan_expires_at?: string | null
+          subscription_status?: string | null
+          subscription_expires_at?: string | null
+          last_payment_date?: string | null
           is_active?: boolean
           is_admin?: boolean
           phone_verified?: boolean
@@ -236,6 +245,172 @@ export interface Database {
           total_used?: number
         }
       }
+      payment_transactions: {
+        Row: {
+          id: string
+          created_at: string
+          completed_at: string | null
+          user_id: string
+          provider: 'click' | 'payme' | 'uzum' | string
+          amount: number
+          status: 'pending' | 'completed' | 'cancelled' | 'failed' | string
+          external_id: string
+          external_data: Json
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          completed_at?: string | null
+          user_id: string
+          provider: 'click' | 'payme' | 'uzum' | string
+          amount: number
+          status?: 'pending' | 'completed' | 'cancelled' | 'failed' | string
+          external_id: string
+          external_data?: Json
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          completed_at?: string | null
+          user_id?: string
+          provider?: 'click' | 'payme' | 'uzum' | string
+          amount?: number
+          status?: 'pending' | 'completed' | 'cancelled' | 'failed' | string
+          external_id?: string
+          external_data?: Json
+        }
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          plan_type: string
+          billing_cycle: string
+          status: 'active' | 'expired' | 'cancelled' | string
+          amount: number
+          currency: string
+          payment_provider: string
+          payment_transaction_id: string | null
+          started_at: string
+          expires_at: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          plan_type: string
+          billing_cycle?: string
+          status?: 'active' | 'expired' | 'cancelled' | string
+          amount: number
+          currency?: string
+          payment_provider: string
+          payment_transaction_id?: string | null
+          started_at?: string
+          expires_at: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          plan_type?: string
+          billing_cycle?: string
+          status?: 'active' | 'expired' | 'cancelled' | string
+          amount?: number
+          currency?: string
+          payment_provider?: string
+          payment_transaction_id?: string | null
+          started_at?: string
+          expires_at?: string
+        }
+      }
+      activity_logs: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          action: string
+          entity_type: string
+          entity_id?: string | null
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          action: string
+          entity_type: string
+          entity_id?: string | null
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          action?: string
+          entity_type?: string
+          entity_id?: string | null
+          metadata?: Json
+        }
+      }
+      sms_credit_purchases: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          credits: number
+          amount: number
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          credits: number
+          amount: number
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          credits?: number
+          amount?: number
+        }
+      }
+      sms_usage_log: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          debt_id: string | null
+          recipient_phone: string
+          message: string
+          credits_used: number
+          status: string
+          external_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          debt_id?: string | null
+          recipient_phone: string
+          message: string
+          credits_used?: number
+          status?: string
+          external_id?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          debt_id?: string | null
+          recipient_phone?: string
+          message?: string
+          credits_used?: number
+          status?: string
+          external_id?: string | null
+        }
+      }
     }
   }
 }
@@ -246,15 +421,22 @@ export type Folder = Database['public']['Tables']['folders']['Row']
 export type Debt = Database['public']['Tables']['debts']['Row']
 export type Payment = Database['public']['Tables']['payments']['Row']
 export type SMSCredit = Database['public']['Tables']['sms_credits']['Row']
+export type PaymentTransaction = Database['public']['Tables']['payment_transactions']['Row']
+export type Subscription = Database['public']['Tables']['subscriptions']['Row']
+export type ActivityLog = Database['public']['Tables']['activity_logs']['Row']
 
 // Insert types
 export type UserInsert = Database['public']['Tables']['users']['Insert']
 export type FolderInsert = Database['public']['Tables']['folders']['Insert']
 export type DebtInsert = Database['public']['Tables']['debts']['Insert']
 export type PaymentInsert = Database['public']['Tables']['payments']['Insert']
+export type PaymentTransactionInsert = Database['public']['Tables']['payment_transactions']['Insert']
+export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert']
 
 // Update types
 export type UserUpdate = Database['public']['Tables']['users']['Update']
 export type FolderUpdate = Database['public']['Tables']['folders']['Update']
 export type DebtUpdate = Database['public']['Tables']['debts']['Update']
 export type PaymentUpdate = Database['public']['Tables']['payments']['Update']
+export type PaymentTransactionUpdate = Database['public']['Tables']['payment_transactions']['Update']
+export type SubscriptionUpdate = Database['public']['Tables']['subscriptions']['Update']

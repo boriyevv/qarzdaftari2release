@@ -151,7 +151,8 @@ export async function POST(request: Request) {
       PRO: 999,
     }
 
-    const limit = limits[profile.plan_type] || 2
+    const userPlan = (profile.plan_type || 'FREE').toUpperCase()
+    const limit = limits[userPlan] || 2
 
     if ((folderCount || 0) >= limit) {
       return NextResponse.json(

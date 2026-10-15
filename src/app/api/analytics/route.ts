@@ -41,10 +41,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const hasAccess = profile.is_trial_active || profile.plan_type !== 'FREE'
+    const userPlan = (profile.plan_type || 'FREE').toUpperCase()
+    const hasAccess = profile.is_trial_active || userPlan !== 'FREE'
     
     console.log('📊 Analytics - Access check:', {
-      plan: profile.plan_type,
+      plan: userPlan,
       isTrial: profile.is_trial_active,
       hasAccess
     })
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const period = searchParams.get('period') || 'monthly'
 
-    if (profile.plan_type !== 'PRO' && ['semi_annual', 'annual'].includes(period)) {
+    if (userPlan !== 'PRO' && ['semi_annual', 'annual'].includes(period)) {
       if (!profile.is_trial_active) {
         return NextResponse.json(
           { error: 'Upgrade to Pro for 6-month and annual analytics' },

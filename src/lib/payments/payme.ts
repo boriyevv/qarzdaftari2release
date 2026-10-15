@@ -1,9 +1,10 @@
-// src/lib/payments/payme.ts
+import { parsePaymentOrder } from './common'
 
 export interface PaymePaymentParams {
   amount: number // in sum (NOT tiyin)
   userId: string
   planType: string
+  transactionId?: string
   returnUrl: string
 }
 
@@ -19,13 +20,14 @@ export class PaymePayment {
   // ─── Checkout URL ────────────────────────────────────────────────
 
   generatePaymentUrl(params: PaymePaymentParams): string {
-    const { amount, userId, planType, returnUrl } = params
+    const { amount, userId, planType, transactionId: customTxId, returnUrl } = params
     const amountTiyin = Math.round(amount * 100)
+    const targetPlan = customTxId || planType
 
     const paramsString = [
       `m=${this.merchantId}`,
       `ac.user_id=${userId}`,
-      `ac.plan_type=${planType}`,
+      `ac.plan_type=${targetPlan}`,
       `a=${amountTiyin}`,
       `c=${returnUrl}`,
     ].join(';')
@@ -76,6 +78,11 @@ async checkPerformTransaction(params: any, supabase: any) {
     return this.error(-31050, 'Foydalanuvchi topilmadi', 'user_id')
   }
 
+  const parsedOrder = parsePaymentOrder(plan_type, user_id)
+  const itemTitle = parsedOrder?.type === 'sms'
+    ? `Qarz Daftari ${parsedOrder.credits} ta SMS paketi`
+    : `Qarz Daftari ${parsedOrder?.planType || 'PLUS'} obuna`
+
   return {
     result: {
       allow: true,
@@ -83,7 +90,7 @@ async checkPerformTransaction(params: any, supabase: any) {
         receipt_type: 0,
         items: [
           {
-            title: `Qarz Daftari ${plan_type} obuna`,
+            title: itemTitle,
             price: amount,
             count: 1,
             code: '10399002001000000',

@@ -130,7 +130,8 @@ export async function POST(request: Request) {
       pro: 999999,
     }
 
-    const maxDebts = limits[profile.plan_type] || 50
+    const userPlan = (profile.plan_type || 'free').toLowerCase()
+    const maxDebts = limits[userPlan] || 50
 
     if (count && count >= maxDebts) {
       return NextResponse.json(

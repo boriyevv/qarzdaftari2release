@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
         paymentUrl = clickPayment.generatePaymentUrl({
           amount,
           userId: profile.id,
-          planType: transactionId,
+          planType: 'sms',
+          transactionId,
           returnUrl,
         })
         break
@@ -68,17 +69,20 @@ export async function POST(request: NextRequest) {
         paymentUrl = paymePayment.generatePaymentUrl({
           amount,
           userId: profile.id,
-          planType: transactionId,
+          planType: 'sms',
+          transactionId,
           returnUrl,
         })
         break
 
       case 'uzum':
-        paymentUrl = uzumPayment.generatePaymentUrl({
+        paymentUrl = await uzumPayment.generatePaymentUrl({
           amount,
           userId: profile.id,
-          planType: transactionId,
+          planType: 'sms',
+          transactionId,
           returnUrl,
+          supabase,
         })
         break
 

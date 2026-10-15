@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
         paymentUrl = clickPayment.generatePaymentUrl({
           amount,
           userId: profile.id,
-          planType: transactionId, // Include billing cycle in transaction ID
+          planType,
+          transactionId,
           returnUrl,
         })
         break
@@ -94,17 +95,20 @@ export async function POST(request: NextRequest) {
         paymentUrl = paymePayment.generatePaymentUrl({
           amount,
           userId: profile.id,
-          planType: transactionId,
+          planType,
+          transactionId,
           returnUrl,
         })
         break
 
       case 'uzum':
-        paymentUrl = uzumPayment.generatePaymentUrl({
+        paymentUrl = await uzumPayment.generatePaymentUrl({
           amount,
           userId: profile.id,
-          planType: transactionId,
+          planType,
+          transactionId,
           returnUrl,
+          supabase,
         })
         break
 
