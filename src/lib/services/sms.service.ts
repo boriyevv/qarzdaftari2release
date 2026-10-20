@@ -125,22 +125,32 @@ class SMSService {
         responseData: data
       })
 
-      // Handle token expiration
-      if (response.status === 401 || data.message?.includes('Unauthenticated')) {
-        console.log('🔄 Token expired, retrying with new token...')
+      // Handle token expiration or time skew
+      if (
+        response.status === 401 ||
+        data.message?.includes('Unauthenticated') ||
+        data.message?.includes('Token used before issued')
+      ) {
+        console.log('🔄 Token expiration or time skew detected, waiting 1s and retrying...')
+        await new Promise((r) => setTimeout(r, 1000))
         this.token = null
         this.tokenExpiry = 0
         return this.sendSMS(phone, message) // Retry once
       }
 
       if (!response.ok || data.status === 'error') {
+        if (data.message?.toLowerCase().includes('balance')) {
+          console.error(
+            "⚠️ [ESKIZ ALERT] Hisob balansi tugagan! Iltimos, https://eskiz.uz orqali hisobni to'ldiring."
+          )
+        }
         throw new Error(`SMS send failed: ${data.message}`)
       }
       
       console.log('✅ SMS sent successfully! ID:', data.id)
       return data.id || null
     } catch (error: any) {
-      console.error('❌ SMS send error:', error)
+      console.error('❌ SMS send error:', error?.message || error)
       throw error
     }
   }
@@ -149,25 +159,23 @@ class SMSService {
    * Send OTP code
    */
   async sendOTP(phone: string, code: string): Promise<boolean> {
-    const message = this.isTestMode 
-      ? `Bu Eskiz dan test`
-      : `Qarz Daftari: Tasdiqlash kodi: ${code}. Kod 5 daqiqa amal qiladi.`
+    // In test mode: simulate successful OTP dispatch without blocking on Eskiz balance
+    if (this.isTestMode) {
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━')
+      console.log('🔑 [TEST MODE] OTP CODE:', code)
+      console.log('📱 Phone:', phone)
+      console.log('💬 SMS text simulated: Qarz Daftari: Tasdiqlash kodi:', code)
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━')
+      return true
+    }
+
+    const message = `Qarz Daftari: Tasdiqlash kodi: ${code}. Kod 5 daqiqa amal qiladi.`
     
     try {
       await this.sendSMS(phone, message)
-      
-      // Test mode: show code in console
-      if (this.isTestMode) {
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━')
-        console.log('🔑 OTP CODE:', code)
-        console.log('📱 Phone:', phone)
-        console.log('💬 SMS text:', message)
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━')
-      }
-      
       return true
-    } catch (error) {
-      console.error('❌ OTP send error:', error)
+    } catch (error: any) {
+      console.error('❌ OTP send error:', error?.message || error)
       return false
     }
   }

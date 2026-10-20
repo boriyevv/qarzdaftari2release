@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -217,6 +218,32 @@ export default function PricingPage() {
               </div>
             </div>
           )}
+
+          {/* Payment & Security Compliance Banner */}
+          <div className="mt-16 bg-white border rounded-2xl p-6 shadow-sm text-center space-y-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-slate-700">
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">Uzum Bank</span>
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">Uzcard</span>
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">Humo</span>
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">Visa</span>
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">MasterCard</span>
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">Click</span>
+              <span className="bg-slate-100 border px-3 py-1.5 rounded-lg">Payme</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4 text-xs font-medium text-slate-500 pt-2 border-t">
+              <Link href="/payment-terms" className="hover:text-blue-600 underline">
+                To'lov usullari va mablag'larni qaytarish qoidalari (Возврат средств)
+              </Link>
+              <span>•</span>
+              <Link href="/security" className="hover:text-blue-600 underline">
+                Xavfsizlik va firibgarlikni nazorat qilish (Antifraud)
+              </Link>
+              <span>•</span>
+              <Link href="/terms" className="hover:text-blue-600 underline">
+                Ommaviy oferta (Публичная оферта)
+              </Link>
+            </div>
+          </div>
 
           {/* FAQ */}
           <div className="mt-16 text-center">

@@ -124,6 +124,7 @@ export default function RegisterPage() {
 
       if (data.code) {
         console.log('🔑 OTP Code:', data.code)
+        setPhoneForm((prev) => ({ ...prev, otp: data.code }))
       }
     } catch (error) {
       setError('Tarmoq xatosi')
@@ -259,7 +260,25 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
           <CardContent>
             {error && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="space-y-2">
+                  <div>{error}</div>
+                  {authMethod === 'phone' && (
+                    <div className="pt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs bg-white text-slate-800 border-red-300 hover:bg-slate-50"
+                        onClick={() => {
+                          setAuthMethod('email')
+                          setError('')
+                        }}
+                      >
+                        Email orqali tezkor ro'yxatdan o'tish (SMS talab etilmaydi) →
+                      </Button>
+                    </div>
+                  )}
+                </AlertDescription>
               </Alert>
             )}
 
@@ -508,6 +527,27 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
               <Link href="/" className="text-sm text-slate-500 hover:text-slate-700 hover:underline">
                 ← Bosh sahifaga
               </Link>
+            </div>
+
+            <div className="pt-3 border-t text-center text-[11px] text-slate-500 space-y-1">
+              <p>Ro'yxatdan o'tish orqali siz shartlarga rozilik bildirasiz:</p>
+              <div className="flex flex-wrap justify-center gap-2 text-slate-600">
+                <Link href="/terms" className="hover:text-blue-600 underline">
+                  Ommaviy oferta (Оферта)
+                </Link>
+                <span>•</span>
+                <Link href="/security" className="hover:text-blue-600 underline">
+                  Xavfsizlik & Antifraud
+                </Link>
+                <span>•</span>
+                <Link href="/payment-terms" className="hover:text-blue-600 underline">
+                  To'lov va qaytarish
+                </Link>
+                <span>•</span>
+                <Link href="/privacy" className="hover:text-blue-600 underline">
+                  Maxfiylik
+                </Link>
+              </div>
             </div>
           </CardFooter>
         </Card>

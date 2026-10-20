@@ -31,9 +31,10 @@ export async function POST(request: Request) {
     const { phone, type } = result.data
 
     // Get IP and User Agent
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown'
+    const ipAddress =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown'
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
     console.log('🔑 Creating OTP...')
@@ -62,13 +63,20 @@ export async function POST(request: Request) {
 
     if (!sent) {
       return NextResponse.json(
-        { error: 'SMS yuborishda xato' },
+        {
+          error:
+            "SMS yuborishda xato: SMS xizmati vaqtincha band yoki hisob balansi yetarli emas. Iltimos, Email orqali tezkor ro'yxatdan o'ting.",
+          suggestEmail: true,
+        },
         { status: 500 }
       )
     }
 
-    // In development, return code for testing
-    const devCode = process.env.NODE_ENV === 'development' ? { code } : {}
+    // In development or test mode, return code for testing
+    const isTestOrDev =
+      process.env.NODE_ENV === 'development' ||
+      process.env.ESKIZ_TEST_MODE === 'true'
+    const devCode = isTestOrDev ? { code, isTestMode: true } : {}
 
     return NextResponse.json({
       success: true,
