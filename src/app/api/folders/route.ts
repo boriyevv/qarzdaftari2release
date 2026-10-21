@@ -1,7 +1,8 @@
 // src/app/api/folders/route.ts
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { getCurrentUser } from '@/lib/auth/middleware'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -13,47 +14,17 @@ const createFolderSchema = z.object({
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    console.log('📁 Fetching folders for user:', user.id)
+    const adminSupabase = createAdminClient()
 
-    // Get user profile
-    let profile = null
-    
-    // Try auth_id first (email users)
-    const { data: authProfile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (authProfile) {
-      profile = authProfile
-    } else if (user.phone) {
-      // Try phone (phone-only users)
-      const { data: phoneProfile } = await supabase
-        .from('users')
-        .select('id')
-        .eq('phone', user.phone)
-        .single()
-      
-      profile = phoneProfile
-    }
-
-    if (!profile) {
-      console.error('❌ Profile not found for user:', user.id)
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
-
-    console.log('✅ Profile found:', profile.id)
+    console.log('📁 Fetching folders for user:', profile.id)
 
     // Get folders
-    const { data: folders, error: foldersError } = await supabase
+    const { data: folders, error: foldersError } = await adminSupabase
       .from('folders')
       .select('*')
       .eq('user_id', profile.id)
@@ -69,7 +40,7 @@ export async function GET() {
     // Get debt counts for each folder
     const foldersWithCounts = await Promise.all(
       (folders || []).map(async (folder) => {
-        const { count, error: countError } = await supabase
+        const { count, error: countError } = await adminSupabase
           .from('debts')
           .select('id', { count: 'exact', head: true })
           .eq('folder_id', folder.id)
@@ -78,8 +49,6 @@ export async function GET() {
         if (countError) {
           console.error('Count error for folder', folder.id, ':', countError)
         }
-
-        console.log(`📊 Folder "${folder.name}" has ${count || 0} debts`)
 
         return {
           ...folder,
@@ -97,10 +66,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
@@ -114,33 +81,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get user profile
-    let profile = null
-    
-    const { data: authProfile } = await supabase
-      .from('users')
-      .select('id, plan_type')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (authProfile) {
-      profile = authProfile
-    } else if (user.phone) {
-      const { data: phoneProfile } = await supabase
-        .from('users')
-        .select('id, plan_type')
-        .eq('phone', user.phone)
-        .single()
-      
-      profile = phoneProfile
-    }
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
+    const adminSupabase = createAdminClient()
 
     // Check folder limit based on plan
-    const { count: folderCount } = await supabase
+    const { count: folderCount } = await adminSupabase
       .from('folders')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', profile.id)
@@ -162,7 +106,7 @@ export async function POST(request: Request) {
     }
 
     // Get max order_index
-    const { data: maxFolder } = await supabase
+    const { data: maxFolder } = await adminSupabase
       .from('folders')
       .select('order_index')
       .eq('user_id', profile.id)
@@ -173,7 +117,7 @@ export async function POST(request: Request) {
     const nextOrder = (maxFolder?.order_index || 0) + 1
 
     // Create folder
-    const { data: folder, error: createError } = await supabase
+    const { data: folder, error: createError } = await adminSupabase
       .from('folders')
       .insert({
         user_id: profile.id,

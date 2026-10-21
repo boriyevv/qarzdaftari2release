@@ -63,7 +63,29 @@
   * {
     @apply border-border;
   }
+  html {
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes otpDigitSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-otp-digit {
+  animation: otpDigitSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

@@ -11,16 +11,20 @@ export async function POST() {
     
     console.log('🚪 Logout request')
 
-    const { error } = await supabase.auth.signOut()
-
-    if (error) {
-      console.error('❌ Logout error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    try {
+      await supabase.auth.signOut()
+    } catch (signOutErr) {
+      console.warn('⚠️ Supabase signOut error:', signOutErr)
     }
+
+    const response = NextResponse.json({ success: true })
+    
+    // Clear phone session cookie
+    response.cookies.delete('phone_user_session')
 
     console.log('✅ Logout successful')
 
-    return NextResponse.json({ success: true })
+    return response
   } catch (error) {
     console.error('❌ Logout API error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

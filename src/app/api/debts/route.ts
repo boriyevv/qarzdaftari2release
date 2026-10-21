@@ -2,9 +2,10 @@
 // GET - List debts with filters
 // POST - Create new debt
 
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { getCurrentUser } from '@/lib/auth/middleware'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -12,23 +13,12 @@ export const runtime = 'nodejs'
 // GET - List debts
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
+    const adminSupabase = createAdminClient()
 
     // Parse query params
     const { searchParams } = new URL(request.url)
@@ -37,7 +27,7 @@ export async function GET(request: Request) {
     const search = searchParams.get('search')
 
     // Build query
-    let query = supabase
+    let query = adminSupabase
       .from('debts')
       .select(`
         *,
@@ -68,14 +58,27 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Qarzlar olishda xato' }, { status: 500 })
     }
 
-    return NextResponse.json({ debts })
+    // Calculate totals
+    const total_amount = debts?.reduce((sum, d) => sum + (d.amount || 0), 0) || 0
+    const total_paid = debts?.reduce((sum, d) => sum + (d.paid_amount || 0), 0) || 0
+    const total_remaining = total_amount - total_paid
+
+    return NextResponse.json({
+      debts,
+      totals: {
+        total_amount,
+        total_paid,
+        total_remaining,
+        count: debts?.length || 0,
+      },
+    })
   } catch (error) {
-    console.error('Debts GET error:', error)
+    console.error('Debts API error:', error)
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })
   }
 }
 
-// POST - Create debt
+// Validation schema for creating debt
 const createDebtSchema = z.object({
   folder_id: z.string().uuid().optional(),
   debtor_name: z.string().min(2, 'Ism kamida 2 ta belgi'),
@@ -88,10 +91,8 @@ const createDebtSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -105,19 +106,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id, plan_type')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
+    const adminSupabase = createAdminClient()
 
     // Check plan limits (only active debts count)
-    const { count } = await supabase
+    const { count } = await adminSupabase
       .from('debts')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', profile.id)
@@ -144,7 +136,7 @@ export async function POST(request: Request) {
     let folderId = result.data.folder_id
 
     if (!folderId) {
-      const { data: defaultFolder } = await supabase
+      const { data: defaultFolder } = await adminSupabase
         .from('folders')
         .select('id')
         .eq('user_id', profile.id)
@@ -155,7 +147,7 @@ export async function POST(request: Request) {
     }
 
     // Create debt
-    const { data: debt, error } = await supabase
+    const { data: debt, error } = await adminSupabase
       .from('debts')
       .insert({
         user_id: profile.id,

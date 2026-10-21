@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { otpService } from '@/lib/services/otp.service'
 import { smsService } from '@/lib/services/sms.service'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -29,6 +30,47 @@ export async function POST(request: Request) {
     }
 
     const { phone, type } = result.data
+    const adminSupabase = createAdminClient()
+
+    // 1. If LOGIN: Check if phone number is registered
+    if (type === 'login') {
+      const { data: existingUser } = await adminSupabase
+        .from('users')
+        .select('id, full_name')
+        .eq('phone', phone)
+        .maybeSingle()
+
+      if (!existingUser) {
+        console.log(`⚠️ Login OTP blocked: Phone ${phone} is not registered`)
+        return NextResponse.json(
+          {
+            error: "Ushbu telefon raqam bilan hisob topilmadi. Iltimos, avval ro'yxatdan o'ting.",
+            notRegistered: true,
+          },
+          { status: 404 }
+        )
+      }
+    }
+
+    // 2. If REGISTRATION: Check if phone number is already registered
+    if (type === 'registration') {
+      const { data: existingUser } = await adminSupabase
+        .from('users')
+        .select('id')
+        .eq('phone', phone)
+        .maybeSingle()
+
+      if (existingUser) {
+        console.log(`⚠️ Registration OTP blocked: Phone ${phone} is already registered`)
+        return NextResponse.json(
+          {
+            error: "Bu telefon raqam allaqachon ro'yxatdan o'tgan. Iltimos, tizimga kiring.",
+            alreadyRegistered: true,
+          },
+          { status: 400 }
+        )
+      }
+    }
 
     // Get IP and User Agent
     const ipAddress =
@@ -47,41 +89,37 @@ export async function POST(request: Request) {
       userAgent
     )
 
-    console.log('📝 OTP created:', code ? 'SUCCESS' : 'FAILED', error || '')
-
     if (error) {
       console.error('❌ OTP creation error:', error)
       return NextResponse.json({ error }, { status: 400 })
     }
 
+    // Always log OTP code prominently in server terminal console
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log(`🔑 [SMS OTP CODE FOR CONSOLE]: ${code}`)
+    console.log(`📱 Telefon raqam: ${phone}`)
+    console.log(`🎯 Amaliyot turi: ${type}`)
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+
     console.log('📤 Sending SMS...')
 
-    // Send SMS
-    const sent = await smsService.sendOTP(phone, code)
-
-    console.log('📬 SMS sent:', sent ? 'SUCCESS' : 'FAILED')
-
-    if (!sent) {
-      return NextResponse.json(
-        {
-          error:
-            "SMS yuborishda xato: SMS xizmati vaqtincha band yoki hisob balansi yetarli emas. Iltimos, Email orqali tezkor ro'yxatdan o'ting.",
-          suggestEmail: true,
-        },
-        { status: 500 }
-      )
+    // Send SMS via Eskiz (if configured and active)
+    let sent = false
+    try {
+      sent = await smsService.sendOTP(phone, code)
+    } catch (smsErr) {
+      console.warn('⚠️ Eskiz dispatch error:', smsErr)
     }
 
-    // In development or test mode, return code for testing
-    const isTestOrDev =
-      process.env.NODE_ENV === 'development' ||
-      process.env.ESKIZ_TEST_MODE === 'true'
-    const devCode = isTestOrDev ? { code, isTestMode: true } : {}
+    console.log('📬 SMS sent status:', sent ? 'SUCCESS' : 'FAILED')
 
     return NextResponse.json({
       success: true,
-      message: 'SMS kod yuborildi',
-      ...devCode,
+      code,
+      smsSent: sent,
+      message: sent
+        ? 'SMS kod telefoningizga yuborildi'
+        : "Eskiz to'lovisiz sinov rejimi: Kod tayyorlandi va ekranga chiqarildi",
     })
   } catch (error) {
     console.error('❌ Send OTP error:', error)

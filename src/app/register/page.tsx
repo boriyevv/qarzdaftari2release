@@ -39,9 +39,23 @@ export default function RegisterPage() {
   })
   const [otpSent, setOtpSent] = useState(false)
   const [otpVerified, setOtpVerified] = useState(false)
+  const [displayCode, setDisplayCode] = useState<string | null>(null)
   const [countdown, setCountdown] = useState(0)
 
-  // Countdown timer
+  // Staggered bottom-up animation to fill OTP digit by digit like mobile apps
+  const animateFillOTP = (code: string) => {
+    setPhoneForm((prev) => ({ ...prev, otp: '' }))
+    const chars = code.split('')
+    chars.forEach((_, i) => {
+      setTimeout(() => {
+        setPhoneForm((prev) => ({
+          ...prev,
+          otp: code.slice(0, i + 1),
+        }))
+      }, (i + 1) * 85)
+    })
+  }
+
   // Countdown timer
   useEffect(() => {
     if (countdown > 0) {
@@ -101,6 +115,7 @@ export default function RegisterPage() {
 
     setLoading(true)
     setError('')
+    setDisplayCode(null)
 
     try {
       const response = await fetch('/api/auth/send-otp', {
@@ -123,8 +138,9 @@ export default function RegisterPage() {
       setCountdown(60)
 
       if (data.code) {
+        setDisplayCode(data.code)
         console.log('🔑 OTP Code:', data.code)
-        setPhoneForm((prev) => ({ ...prev, otp: data.code }))
+        animateFillOTP(data.code)
       }
     } catch (error) {
       setError('Tarmoq xatosi')
@@ -169,61 +185,81 @@ export default function RegisterPage() {
     }
   }
 
-  // Phone registration
-const handlePhoneRegister = async (e: React.FormEvent) => {
-  e.preventDefault()
+  // Phone registration submit handler (handles multi-step Enter presses smoothly)
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-  if (!otpVerified) {
-    setError('Avval telefon raqamni tasdiqlang')
-    return
-  }
-
-  setLoading(true)
-  setError('')
-
-  // DEBUG: Ma'lumotlarni ko'rish
-  console.log('📤 Sending data:', {
-    auth_method: 'phone',
-    full_name: phoneForm.full_name,
-    phone: phoneForm.phone,
-    store_name: phoneForm.store_name,
-    email: phoneForm.email || undefined,
-    otp_verified: true,
-  })
-
-  try {
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        auth_method: 'phone',
-        full_name: phoneForm.full_name,
-        phone: phoneForm.phone,
-        store_name: phoneForm.store_name,
-        email: phoneForm.email || undefined,
-        otp_verified: true,
-      }),
-    })
-
-    const data = await response.json()
-
-    // DEBUG: Javobni ko'rish
-    console.log('📥 Response:', data)
-    console.log('📊 Status:', response.status)
-
-    if (!response.ok) {
-      setError(data.error || 'Xato')
+    if (!otpSent) {
+      await handleSendOTP()
       return
     }
 
-    router.push('/login?registered=true')
-  } catch (error) {
-    console.error('❌ Catch error:', error)
-    setError('Tarmoq xatosi')
-  } finally {
-    setLoading(false)
+    if (!otpVerified) {
+      if (phoneForm.otp.length === 6) {
+        await handleVerifyOTP()
+      } else {
+        setError('6 ta raqamli tasdiqlash kodini kiriting')
+      }
+      return
+    }
+
+    await handlePhoneRegister(e)
   }
-}
+
+  // Phone registration (final step after OTP is verified)
+  const handlePhoneRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!otpVerified) {
+      setError('Avval telefon raqamni tasdiqlang')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    console.log('📤 Sending data:', {
+      auth_method: 'phone',
+      full_name: phoneForm.full_name,
+      phone: phoneForm.phone,
+      store_name: phoneForm.store_name,
+      email: phoneForm.email || undefined,
+      otp_verified: true,
+    })
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auth_method: 'phone',
+          full_name: phoneForm.full_name,
+          phone: phoneForm.phone,
+          store_name: phoneForm.store_name,
+          email: phoneForm.email || undefined,
+          otp_verified: true,
+        }),
+      })
+
+      const data = await response.json()
+
+      console.log('📥 Response:', data)
+      console.log('📊 Status:', response.status)
+
+      if (!response.ok) {
+        setError(data.error || 'Xato')
+        return
+      }
+
+      // Automatically navigate to dashboard after successful phone registration
+      window.location.href = '/dashboard'
+    } catch (error) {
+      console.error('❌ Catch error:', error)
+      setError('Tarmoq xatosi')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handlePhoneChange = (value: string, formType: 'email' | 'phone') => {
     let cleaned = value.replace(/\D/g, '')
@@ -240,20 +276,20 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-50 p-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+    <div className="min-h-screen flex justify-center items-start pt-6 sm:pt-10 pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="w-full max-w-lg transition-all duration-300 ease-in-out">
+        <div className="text-center mb-6">
           <Link href="/" className="inline-block">
             <h1 className="text-3xl font-bold text-blue-600">Qarz Daftari</h1>
           </Link>
-          <p className="text-slate-600 mt-2">Bepul account yarating</p>
+          <p className="text-slate-600 mt-1 text-sm">Bepul account yarating</p>
         </div>
 
-        <Card className="shadow-xl border-slate-200">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Ro'yxatdan o'tish</CardTitle>
+        <Card className="shadow-xl border-slate-200 transition-all duration-300 ease-in-out">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-2xl font-bold text-center">Ro&apos;yxatdan o&apos;tish</CardTitle>
             <CardDescription className="text-center">
-              Email yoki telefon bilan ro'yxatdan o'ting
+              Email yoki telefon bilan ro&apos;yxatdan o&apos;ting
             </CardDescription>
           </CardHeader>
 
@@ -262,20 +298,18 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
               <Alert variant="destructive" className="mb-4">
                 <AlertDescription className="space-y-2">
                   <div>{error}</div>
-                  {authMethod === 'phone' && (
+                  {error.includes("allaqachon") && (
                     <div className="pt-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs bg-white text-slate-800 border-red-300 hover:bg-slate-50"
-                        onClick={() => {
-                          setAuthMethod('email')
-                          setError('')
-                        }}
-                      >
-                        Email orqali tezkor ro'yxatdan o'tish (SMS talab etilmaydi) →
-                      </Button>
+                      <Link href="/login">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs bg-white text-slate-800 border-blue-300 hover:bg-slate-50"
+                        >
+                          Mavjud hisobga kirish (Login) →
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </AlertDescription>
@@ -283,51 +317,68 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
             )}
 
             <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as 'email' | 'phone')}>
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="email">Email</TabsTrigger>
                 <TabsTrigger value="phone">Telefon ⚡</TabsTrigger>
               </TabsList>
 
               {/* Email Tab */}
-              <TabsContent value="email">
-                <form onSubmit={handleEmailRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email_full_name">To'liq ism</Label>
-                    <Input
-                      id="email_full_name"
-                      placeholder="Ali Valiyev"
-                      required
-                      value={emailForm.full_name}
-                      onChange={(e) => setEmailForm({ ...emailForm, full_name: e.target.value })}
-                      disabled={loading}
-                    />
+              <TabsContent value="email" className="mt-4">
+                <form onSubmit={handleEmailRegister} className="space-y-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email_full_name">To&apos;liq ism</Label>
+                      <Input
+                        id="email_full_name"
+                        placeholder="Ali Valiyev"
+                        required
+                        value={emailForm.full_name}
+                        onChange={(e) => setEmailForm({ ...emailForm, full_name: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="store_name">Do&apos;kon nomi</Label>
+                      <Input
+                        id="store_name"
+                        placeholder="Ali Do&apos;koni"
+                        required
+                        value={emailForm.store_name}
+                        onChange={(e) => setEmailForm({ ...emailForm, store_name: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="store_name">Do'kon nomi</Label>
-                    <Input
-                      id="store_name"
-                      placeholder="Ali Do'koni"
-                      required
-                      value={emailForm.store_name}
-                      onChange={(e) => setEmailForm({ ...emailForm, store_name: e.target.value })}
-                      disabled={loading}
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        placeholder="alijon"
+                        required
+                        value={emailForm.username}
+                        onChange={(e) => setEmailForm({ ...emailForm, username: e.target.value.toLowerCase() })}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email_phone">Telefon</Label>
+                      <Input
+                        id="email_phone"
+                        type="tel"
+                        placeholder="+998901234567"
+                        required
+                        value={emailForm.phone}
+                        onChange={(e) => handlePhoneChange(e.target.value, 'email')}
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      placeholder="alijon"
-                      required
-                      value={emailForm.username}
-                      onChange={(e) => setEmailForm({ ...emailForm, username: e.target.value.toLowerCase() })}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
@@ -340,56 +391,93 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email_phone">Telefon</Label>
-                    <Input
-                      id="email_phone"
-                      type="tel"
-                      placeholder="+998901234567"
-                      required
-                      value={emailForm.phone}
-                      onChange={(e) => handlePhoneChange(e.target.value, 'email')}
-                      disabled={loading}
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="password">Parol</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                        minLength={6}
+                        value={emailForm.password}
+                        onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="confirmPassword">Parolni tasdiqlang</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                        minLength={6}
+                        value={emailForm.confirmPassword}
+                        onChange={(e) => setEmailForm({ ...emailForm, confirmPassword: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Parol</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      required
-                      minLength={6}
-                      value={emailForm.password}
-                      onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Parolni tasdiqlang</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      required
-                      minLength={6}
-                      value={emailForm.confirmPassword}
-                      onChange={(e) => setEmailForm({ ...emailForm, confirmPassword: e.target.value })}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full mt-2" disabled={loading}>
                     {loading ? 'Yuklanmoqda...' : 'Ro\'yxatdan o\'tish'}
                   </Button>
                 </form>
               </TabsContent>
 
               {/* Phone Tab */}
-              <TabsContent value="phone">
-                <form onSubmit={handlePhoneRegister} className="space-y-4">
+              <TabsContent value="phone" className="mt-4">
+                {/* Step Indicator */}
+                <div className="flex items-center justify-between text-xs font-medium text-slate-500 pb-3.5 px-2">
+                  <span
+                    className={`flex items-center gap-1.5 ${
+                      !otpSent ? 'text-blue-600 font-semibold' : 'text-slate-400'
+                    }`}
+                  >
+                    <span
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
+                        !otpSent ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      1
+                    </span>
+                    Telefon
+                  </span>
+                  <span className="w-8 h-px bg-slate-200" />
+                  <span
+                    className={`flex items-center gap-1.5 ${
+                      otpSent && !otpVerified ? 'text-blue-600 font-semibold' : 'text-slate-400'
+                    }`}
+                  >
+                    <span
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
+                        otpSent && !otpVerified ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      2
+                    </span>
+                    SMS Kod
+                  </span>
+                  <span className="w-8 h-px bg-slate-200" />
+                  <span
+                    className={`flex items-center gap-1.5 ${
+                      otpVerified ? 'text-blue-600 font-semibold' : 'text-slate-400'
+                    }`}
+                  >
+                    <span
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
+                        otpVerified ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      3
+                    </span>
+                    Profil
+                  </span>
+                </div>
+
+                <form onSubmit={handlePhoneSubmit} className="space-y-4">
                   {!otpVerified ? (
                     <>
                       <div className="space-y-2">
@@ -406,16 +494,44 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                       </div>
 
                       {!otpSent ? (
-                        <Button
-                          type="button"
-                          onClick={handleSendOTP}
-                          className="w-full"
-                          disabled={loading || countdown > 0}
-                        >
-                          {countdown > 0 ? `${countdown}s` : 'SMS Kod Olish'}
-                        </Button>
+                        <>
+                          <div className="p-3.5 bg-blue-50/70 border border-blue-100 rounded-xl text-xs text-blue-900 space-y-1.5">
+                            <div className="font-semibold flex items-center gap-1.5 text-blue-800">
+                              ⚡ Tezkor ro&apos;yxatdan o&apos;tish afzalliklari:
+                            </div>
+                            <ul className="space-y-1 text-blue-700/90 list-disc list-inside text-[11px] leading-relaxed">
+                              <li>Parol o&apos;ylab topish yoki eslab qolish shart emas</li>
+                              <li>SMS kod bilan 30 soniyada hisobingiz faollashadi</li>
+                              <li>Do&apos;koningiz uchun barcha asosiy imkoniyatlar ochiladi</li>
+                            </ul>
+                          </div>
+
+                          <Button
+                            type="submit"
+                            className="w-full mt-2"
+                            disabled={loading || countdown > 0}
+                          >
+                            {countdown > 0 ? `${countdown}s` : 'SMS Kod Olish'}
+                          </Button>
+                        </>
                       ) : (
                         <>
+                          {displayCode && (
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-sm space-y-1.5 shadow-sm">
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-blue-800 flex items-center gap-1.5 text-xs sm:text-sm">
+                                  ℹ️ Sinov kodi (Eskiz to&apos;lovisiz):
+                                </span>
+                                <span className="font-mono text-base font-semibold bg-white text-blue-900 px-2.5 py-0.5 rounded border border-blue-200 tracking-wider shadow-2xs">
+                                  {displayCode}
+                                </span>
+                              </div>
+                              <p className="text-xs text-blue-700">
+                                Eskiz.uz SMS to&apos;lovisiz sinash uchun kod ekranga chiqarildi va avtomatik kiritildi.
+                              </p>
+                            </div>
+                          )}
+
                           <div className="space-y-2">
                             <Label>Tasdiqlash kodi</Label>
                             <OTPInput
@@ -426,8 +542,7 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                           </div>
 
                           <Button
-                            type="button"
-                            onClick={handleVerifyOTP}
+                            type="submit"
                             className="w-full"
                             disabled={loading || phoneForm.otp.length !== 6}
                           >
@@ -440,6 +555,7 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                               variant="outline"
                               onClick={() => {
                                 setOtpSent(false)
+                                setDisplayCode(null)
                                 setPhoneForm({ ...phoneForm, otp: '' })
                               }}
                               className="w-full"
@@ -458,31 +574,33 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                         </AlertDescription>
                       </Alert>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="phone_full_name">To'liq ism</Label>
-                        <Input
-                          id="phone_full_name"
-                          placeholder="Ali Valiyev"
-                          required
-                          value={phoneForm.full_name}
-                          onChange={(e) => setPhoneForm({ ...phoneForm, full_name: e.target.value })}
-                          disabled={loading}
-                        />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="phone_full_name">To&apos;liq ism</Label>
+                          <Input
+                            id="phone_full_name"
+                            placeholder="Ali Valiyev"
+                            required
+                            value={phoneForm.full_name}
+                            onChange={(e) => setPhoneForm({ ...phoneForm, full_name: e.target.value })}
+                            disabled={loading}
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor="phone_store_name">Do&apos;kon nomi</Label>
+                          <Input
+                            id="phone_store_name"
+                            placeholder="Ali Do&apos;koni"
+                            required
+                            value={phoneForm.store_name}
+                            onChange={(e) => setPhoneForm({ ...phoneForm, store_name: e.target.value })}
+                            disabled={loading}
+                          />
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="phone_store_name">Do'kon nomi</Label>
-                        <Input
-                          id="phone_store_name"
-                          placeholder="Ali Do'koni"
-                          required
-                          value={phoneForm.store_name}
-                          onChange={(e) => setPhoneForm({ ...phoneForm, store_name: e.target.value })}
-                          disabled={loading}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         <Label htmlFor="phone_email">Email (ixtiyoriy)</Label>
                         <Input
                           id="phone_email"
@@ -494,7 +612,7 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                         />
                       </div>
 
-                      <Button type="submit" className="w-full" disabled={loading}>
+                      <Button type="submit" className="w-full mt-2" disabled={loading}>
                         {loading ? 'Yuklanmoqda...' : 'Ro\'yxatdan o\'tish'}
                       </Button>
                     </>
@@ -530,7 +648,7 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
             </div>
 
             <div className="pt-3 border-t text-center text-[11px] text-slate-500 space-y-1">
-              <p>Ro'yxatdan o'tish orqali siz shartlarga rozilik bildirasiz:</p>
+              <p>Ro&apos;yxatdan o&apos;tish orqali siz shartlarga rozilik bildirasiz:</p>
               <div className="flex flex-wrap justify-center gap-2 text-slate-600">
                 <Link href="/terms" className="hover:text-blue-600 underline">
                   Ommaviy oferta (Оферта)
@@ -541,7 +659,7 @@ const handlePhoneRegister = async (e: React.FormEvent) => {
                 </Link>
                 <span>•</span>
                 <Link href="/payment-terms" className="hover:text-blue-600 underline">
-                  To'lov va qaytarish
+                  To&apos;lov va qaytarish
                 </Link>
                 <span>•</span>
                 <Link href="/privacy" className="hover:text-blue-600 underline">

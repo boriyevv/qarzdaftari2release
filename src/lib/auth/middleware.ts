@@ -1,25 +1,55 @@
 // src/lib/auth/middleware.ts
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { hasPermission } from './permissions'
 
 export async function getCurrentUser() {
   try {
+    const adminSupabase = createAdminClient()
+
+    // 1. Check Supabase Auth user (email users)
     const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
-    
-    if (error || !user) {
-      return null
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (!authError && user) {
+      // Find profile by auth_id
+      const { data: profile } = await adminSupabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', user.id)
+        .maybeSingle()
+
+      if (profile) return profile
+
+      // Or by phone if auth user has phone
+      if (user.phone) {
+        const { data: phoneProfile } = await adminSupabase
+          .from('users')
+          .select('*')
+          .eq('phone', user.phone)
+          .maybeSingle()
+
+        if (phoneProfile) return phoneProfile
+      }
     }
 
-    // Get profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('auth_id', user.id)
-      .single()
+    // 2. Check phone_user_session cookie (phone users)
+    const cookieStore = await cookies()
+    const phoneUserId = cookieStore.get('phone_user_session')?.value
 
-    return profile
+    if (phoneUserId) {
+      const { data: profile } = await adminSupabase
+        .from('users')
+        .select('*')
+        .eq('id', phoneUserId)
+        .maybeSingle()
+
+      if (profile) return profile
+    }
+
+    return null
   } catch (error) {
     console.error('getCurrentUser error:', error)
     return null
@@ -62,21 +92,3 @@ export async function requirePermission(permission: string) {
 
   return null // Continue
 }
-
-// Example usage in API route:
-/*
-import { requireAuth, requirePermission } from '@/lib/auth/middleware'
-
-export async function GET(request: NextRequest) {
-  // Check authentication
-  const authError = await requireAuth()
-  if (authError) return authError
-
-  // Check permission
-  const permError = await requirePermission('manage_users')
-  if (permError) return permError
-
-  // Your route logic here
-  return NextResponse.json({ success: true })
-}
-*/

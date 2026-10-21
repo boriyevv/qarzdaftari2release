@@ -47,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="uz">
+    <html lang="uz" className="scroll-smooth">
       <body className={inter.className}>
         <UserProvider>
           {children}

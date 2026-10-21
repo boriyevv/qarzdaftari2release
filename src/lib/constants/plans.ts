@@ -237,11 +237,8 @@ export function hasReachedLimit(
 }
 
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('uz-UZ', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price) + ' so\'m'
+  const formatted = Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return formatted + ' so\'m'
 }
 
 export function formatPricePerMonth(price: number, months: number): string {

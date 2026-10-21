@@ -21,15 +21,26 @@ import {
   type BillingCycle
 } from '@/lib/constants/plans'
 import { MainNav } from '@/components/layout/main-nav'
+import { useUser } from '@/lib/contexts/user-context'
 
 export default function PricingPage() {
+  const { user } = useUser()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
   const [loading, setLoading] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [showProviderModal, setShowProviderModal] = useState(false)
 
   const handleSelectPlan = (planType: string) => {
-    if (planType === 'FREE') return
+    if (planType === 'FREE') {
+      if (!user) {
+        window.location.href = '/register'
+      }
+      return
+    }
+    if (!user) {
+      window.location.href = `/register?plan=${planType.toLowerCase()}`
+      return
+    }
     setSelectedPlan(planType)
     setShowProviderModal(true)
   }
@@ -131,7 +142,7 @@ export default function PricingPage() {
                     <div className="mt-4 space-y-2">
                       {/* Main Price */}
                       <div>
-                        <span className="text-4xl font-bold">
+                        <span className="text-4xl font-bold" suppressHydrationWarning>
                           {price === 0 ? '0' : formatPrice(price)}
                         </span>
                         {price > 0 && months > 1 && (
@@ -144,7 +155,7 @@ export default function PricingPage() {
 
                       {/* Monthly Equivalent */}
                       {price > 0 && months > 1 && (
-                        <div className="text-sm text-slate-500">
+                        <div className="text-sm text-slate-500" suppressHydrationWarning>
                           {formatPricePerMonth(price, months)} ga teng
                         </div>
                       )}
@@ -152,7 +163,7 @@ export default function PricingPage() {
                       {/* Discount Badge */}
                       {discount.amount > 0 && (
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-green-100 text-green-700">
+                          <Badge variant="secondary" className="bg-green-100 text-green-700" suppressHydrationWarning>
                             <Zap className="w-3 h-3 mr-1" />
                             {formatPrice(discount.amount)} tejash
                           </Badge>
@@ -197,9 +208,11 @@ export default function PricingPage() {
                       className="w-full"
                       variant={plan.popular ? 'default' : 'outline'}
                       onClick={() => handleSelectPlan(plan.name)}
-                      disabled={price === 0}
+                      disabled={price === 0 && !!user}
                     >
-                      {price === 0 ? 'Hozirgi plan' : 'Sotib olish'}
+                      {price === 0
+                        ? (user ? 'Hozirgi tarif' : 'Bepul boshlash')
+                        : (!user ? 'Tanlash va Ro\'yxatdan o\'tish' : 'Sotib olish')}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -232,15 +245,15 @@ export default function PricingPage() {
             </div>
             <div className="flex flex-wrap justify-center gap-4 text-xs font-medium text-slate-500 pt-2 border-t">
               <Link href="/payment-terms" className="hover:text-blue-600 underline">
-                To'lov usullari va mablag'larni qaytarish qoidalari (Возврат средств)
+                To'lov usullari va mablag'larni qaytarish qoidalari (Ð’Ð¾Ð·Ð²Ñ€Ð°Ñ‚ ÑÑ€ÐµÐ´ÑÑ‚Ð²)
               </Link>
-              <span>•</span>
+              <span>â€¢</span>
               <Link href="/security" className="hover:text-blue-600 underline">
                 Xavfsizlik va firibgarlikni nazorat qilish (Antifraud)
               </Link>
-              <span>•</span>
+              <span>â€¢</span>
               <Link href="/terms" className="hover:text-blue-600 underline">
-                Ommaviy oferta (Публичная оферта)
+                Ommaviy oferta (ÐŸÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð°Ñ Ð¾Ñ„ÐµÑ€Ñ‚Ð°)
               </Link>
             </div>
           </div>

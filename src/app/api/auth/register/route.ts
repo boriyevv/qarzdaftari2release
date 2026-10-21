@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { smsService } from '@/lib/services/sms.service'
@@ -48,18 +49,78 @@ export async function POST(request: Request) {
 
     const data = result.data
     const supabase = await createClient()
+    const adminSupabase = createAdminClient()
+
+    // Resilient profile inserter that complies with database users_plan_type_check constraint
+    async function insertUserProfile(profilePayload: Record<string, any>) {
+      // 1. Try with 'free' (lowercase)
+      let res = await adminSupabase
+        .from('users')
+        .insert({ ...profilePayload, plan_type: 'free' })
+        .select()
+        .single()
+
+      // 2. If check constraint fails, try with 'FREE' (uppercase)
+      if (res.error && res.error.message?.includes('users_plan_type_check')) {
+        console.warn('⚠️ users_plan_type_check constraint triggered for "free", trying "FREE"...')
+        res = await adminSupabase
+          .from('users')
+          .insert({ ...profilePayload, plan_type: 'FREE' })
+          .select()
+          .single()
+      }
+
+      // 3. Fallback: if check constraint still complains, try without plan_type
+      if (res.error && res.error.message?.includes('users_plan_type_check')) {
+        console.warn('⚠️ Retrying insert without explicit plan_type...')
+        res = await adminSupabase
+          .from('users')
+          .insert(profilePayload)
+          .select()
+          .single()
+      }
+
+      return res
+    }
 
     // Check if phone exists (for both methods)
     if (data.phone) {
-      const { data: existingPhone } = await supabase
+      const { data: existingPhone } = await adminSupabase
         .from('users')
         .select('id')
         .eq('phone', data.phone)
-        .single()
+        .maybeSingle()
 
       if (existingPhone) {
         return NextResponse.json(
           { error: 'Bu telefon raqam allaqachon ro\'yxatdan o\'tgan' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Normalize email if provided
+    const candidateEmail =
+      data.email && typeof data.email === 'string' && data.email.trim()
+        ? data.email.trim().toLowerCase()
+        : null
+
+    // Check if email exists (for both methods)
+    if (candidateEmail) {
+      const { data: existingEmail } = await adminSupabase
+        .from('users')
+        .select('id')
+        .eq('email', candidateEmail)
+        .maybeSingle()
+
+      if (existingEmail) {
+        return NextResponse.json(
+          {
+            error:
+              auth_method === 'phone'
+                ? 'Bu email allaqachon boshqa foydalanuvchi tomonidan ro\'yxatdan o\'tkazilgan. Boshqa email kiriting yoki bo\'sh qoldiring.'
+                : 'Bu email allaqachon ro\'yxatdan o\'tgan',
+          },
           { status: 400 }
         )
       }
@@ -72,11 +133,11 @@ export async function POST(request: Request) {
       console.log('📧 Email registration for:', data.email)
 
       // Check username
-      const { data: existingUser } = await supabase
+      const { data: existingUser } = await adminSupabase
         .from('users')
         .select('id')
         .eq('username', data.username)
-        .single()
+        .maybeSingle()
 
       if (existingUser) {
         return NextResponse.json(
@@ -86,11 +147,11 @@ export async function POST(request: Request) {
       }
 
       // Check email
-      const { data: existingEmail } = await supabase
+      const { data: existingEmail } = await adminSupabase
         .from('users')
         .select('id')
         .eq('email', data.email)
-        .single()
+        .maybeSingle()
 
       if (existingEmail) {
         return NextResponse.json(
@@ -133,21 +194,17 @@ export async function POST(request: Request) {
       console.log('✅ Auth user created:', authData.user.id)
       console.log('📝 Creating profile in database...')
 
-      // Create user profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('users')
-        .insert({
-          auth_id: authData.user.id,
-          full_name: data.full_name,
-          email: data.email,
-          phone: data.phone || null,
-          username: data.username,
-          store_name: data.store_name,
-          auth_method: 'email',
-          phone_verified: false,
-        })
-        .select()
-        .single()
+      // Create user profile using resilient helper
+      const { data: profileData, error: profileError } = await insertUserProfile({
+        auth_id: authData.user.id,
+        full_name: data.full_name,
+        email: data.email,
+        phone: data.phone || null,
+        username: data.username,
+        store_name: data.store_name,
+        auth_method: 'email',
+        phone_verified: false,
+      })
 
       if (profileError) {
         console.error('❌ Profile creation error:', profileError)
@@ -156,15 +213,23 @@ export async function POST(request: Request) {
         // ROLLBACK: Delete auth user if profile creation fails
         console.log('🔄 Rolling back: deleting auth user...')
         try {
-          await supabase.auth.admin.deleteUser(authData.user.id)
+          await adminSupabase.auth.admin.deleteUser(authData.user.id)
           console.log('✅ Auth user deleted (rollback successful)')
         } catch (deleteError) {
           console.error('❌ Rollback failed:', deleteError)
         }
         
+        let friendlyMessage = 'Profile yaratishda xato: ' + profileError.message
+        if (
+          profileError.code === '23505' &&
+          (profileError.message?.includes('email') || profileError.details?.includes('email'))
+        ) {
+          friendlyMessage = 'Bu email allaqachon boshqa foydalanuvchi tomonidan ro\'yxatdan o\'tkazilgan.'
+        }
+        
         return NextResponse.json(
-          { error: 'Profile yaratishda xato: ' + profileError.message },
-          { status: 500 }
+          { error: friendlyMessage },
+          { status: profileError.code === '23505' ? 400 : 500 }
         )
       }
 
@@ -172,7 +237,7 @@ export async function POST(request: Request) {
 
       // Create default folder
       console.log('📁 Creating default folder...')
-      const { error: folderError } = await supabase.from('folders').insert({
+      const { error: folderError } = await adminSupabase.from('folders').insert({
         user_id: profileData.id,
         name: 'Qarzlar',
         is_default: true,
@@ -187,7 +252,7 @@ export async function POST(request: Request) {
 
       // Create SMS credits
       console.log('💳 Creating SMS credits...')
-      const { error: creditsError } = await supabase.from('sms_credits').insert({
+      const { error: creditsError } = await adminSupabase.from('sms_credits').insert({
         user_id: profileData.id,
         balance: 0,
         total_purchased: 0,
@@ -223,11 +288,11 @@ export async function POST(request: Request) {
       }
 
       // Check if phone already exists
-      const { data: existingPhone } = await supabase
+      const { data: existingPhone } = await adminSupabase
         .from('users')
         .select('id')
         .eq('phone', data.phone)
-        .single()
+        .maybeSingle()
 
       if (existingPhone) {
         return NextResponse.json(
@@ -241,26 +306,43 @@ export async function POST(request: Request) {
 
       console.log('📝 Creating phone-only profile...')
 
-      // Create user profile (WITHOUT Supabase Auth!)
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .insert({
-          auth_id: null, // No Supabase auth for phone users!
-          full_name: data.full_name,
-          phone: data.phone,
-          username,
-          store_name: data.store_name,
-          auth_method: 'phone',
-          phone_verified: true,
-          email: data.email || null,
-        })
-        .select()
-        .single()
+      // Create user profile using resilient helper
+      const { data: profile, error: profileError } = await insertUserProfile({
+        auth_id: null,
+        full_name: data.full_name,
+        phone: data.phone,
+        username,
+        store_name: data.store_name,
+        auth_method: 'phone',
+        phone_verified: true,
+        email: candidateEmail,
+      })
 
       if (profileError) {
         console.error('❌ Phone profile error:', profileError)
+        if (
+          profileError.code === '23505' &&
+          (profileError.message?.includes('email') || profileError.details?.includes('email'))
+        ) {
+          return NextResponse.json(
+            {
+              error:
+                'Bu email allaqachon boshqa hisobda ro\'yxatdan o\'tgan. Iltimos, boshqa email kiriting yoki uni bo\'sh qoldiring.',
+            },
+            { status: 400 }
+          )
+        }
+        if (
+          profileError.code === '23505' &&
+          (profileError.message?.includes('phone') || profileError.details?.includes('phone'))
+        ) {
+          return NextResponse.json(
+            { error: 'Bu telefon raqam allaqachon ro\'yxatdan o\'tgan.' },
+            { status: 400 }
+          )
+        }
         return NextResponse.json(
-          { error: 'Profile yaratishda xato: ' + profileError.message },
+          { error: 'Profil yaratishda xato yuz berdi: ' + profileError.message },
           { status: 500 }
         )
       }
@@ -269,7 +351,7 @@ export async function POST(request: Request) {
 
       // Create default folder
       console.log('📁 Creating default folder...')
-      const { error: folderError } = await supabase.from('folders').insert({
+      const { error: folderError } = await adminSupabase.from('folders').insert({
         user_id: profile.id,
         name: 'Qarzlar',
         is_default: true,
@@ -284,7 +366,7 @@ export async function POST(request: Request) {
 
       // Create SMS credits
       console.log('💳 Creating SMS credits...')
-      const { error: creditsError } = await supabase.from('sms_credits').insert({
+      const { error: creditsError } = await adminSupabase.from('sms_credits').insert({
         user_id: profile.id,
         balance: 0,
         total_purchased: 0,
@@ -308,12 +390,24 @@ export async function POST(request: Request) {
 
       console.log('🎉 Phone registration complete!')
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         message: 'Ro\'yxatdan o\'tish muvaffaqiyatli!',
         auth_method: 'phone',
         user_id: profile.id,
+        profile,
       })
+
+      // Set session cookie immediately so user doesn't have to log in again
+      response.cookies.set('phone_user_session', profile.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 kun
+      })
+
+      return response
     }
 
     return NextResponse.json(

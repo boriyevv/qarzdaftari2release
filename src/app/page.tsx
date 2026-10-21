@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShieldCheck, Lock, CreditCard, RotateCcw, FileText, Phone, Mail, Building } from 'lucide-react'
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/pricing" className="hover:text-blue-600 transition">
+            <Link href="#pricing" className="hover:text-blue-600 transition">
               Tariflar
             </Link>
             <Link href="/payment-terms" className="hover:text-blue-600 transition">
@@ -76,7 +76,7 @@ export default function Home() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="h-12 px-8 text-base">
-                <Link href="/pricing">
+                <Link href="#pricing">
                   Tariflar bilan tanishish
                 </Link>
               </Button>
@@ -145,101 +145,141 @@ export default function Home() {
           </div>
 
           {/* Pricing Section */}
-          <div className="mt-20">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-slate-900 mb-2">Qulay Tariflar</h2>
-              <p className="text-slate-600">Har qanday hajmdagi savdo nuqtalari uchun mos yechim</p>
+          <div id="pricing" className="mt-20 scroll-mt-24">
+            <div className="text-center mb-10 space-y-2">
+              <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                Shaffof va hamyonbop
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Qulay Tariflar</h2>
+              <p className="text-slate-600 max-w-xl mx-auto text-sm md:text-base">
+                Har qanday hajmdagi savdo nuqtalari uchun mos yechim. Bepul ro&apos;yxatdan o&apos;ting, keyinchalik xohlagan vaqtda tarifingizni yangilashingiz mumkin.
+              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {/* Free */}
-              <Card className="border shadow-sm">
-                <CardHeader>
-                  <CardTitle>Free</CardTitle>
-                  <CardDescription>Boshlang'ich tadbirkorlar uchun</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">0</span>
-                    <span className="text-slate-600"> so'm/oy</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>50 ta qarzdor yozuvi</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>2 ta papka (folder)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>Brauzer bildirishnomalari</span>
-                  </div>
-                </CardContent>
+              <Card className="border shadow-sm flex flex-col justify-between">
+                <div>
+                  <CardHeader>
+                    <CardTitle>Free</CardTitle>
+                    <CardDescription>Boshlang&apos;ich tadbirkorlar uchun</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">0</span>
+                      <span className="text-slate-600"> so&apos;m/oy</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>50 ta qarzdor yozuvi</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>2 ta papka (folder)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>Brauzer bildirishnomalari</span>
+                    </div>
+                  </CardContent>
+                </div>
+                <CardFooter className="pt-4">
+                  <Button className="w-full bg-slate-900 hover:bg-slate-800" asChild>
+                    <Link href="/register">
+                      Bepul boshlash
+                    </Link>
+                  </Button>
+                </CardFooter>
               </Card>
 
               {/* Plus */}
-              <Card className="border-blue-500 border-2 relative shadow-md">
+              <Card className="border-blue-500 border-2 relative shadow-md flex flex-col justify-between">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-3.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide">
                   Eng ommabop
                 </div>
-                <CardHeader>
-                  <CardTitle>Plus</CardTitle>
-                  <CardDescription>Kichik va o'rta do'konlar</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">49,900</span>
-                    <span className="text-slate-600"> so'm/oy</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>500 ta qarzdor yozuvi</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>10 ta papka (folder)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>SMS va Push eslatmalar</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>Excel va PDF export</span>
-                  </div>
-                </CardContent>
+                <div>
+                  <CardHeader>
+                    <CardTitle>Plus</CardTitle>
+                    <CardDescription>Kichik va o&apos;rta do&apos;konlar</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">49,900</span>
+                      <span className="text-slate-600"> so&apos;m/oy</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>500 ta qarzdor yozuvi</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>10 ta papka (folder)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>SMS va Push eslatmalar</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>Excel va PDF export</span>
+                    </div>
+                  </CardContent>
+                </div>
+                <CardFooter className="pt-4">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20" asChild>
+                    <Link href="/register">
+                      Plus bilan boshlash
+                    </Link>
+                  </Button>
+                </CardFooter>
               </Card>
 
               {/* Pro */}
-              <Card className="border shadow-sm">
-                <CardHeader>
-                  <CardTitle>Pro</CardTitle>
-                  <CardDescription>Yirik savdo tarmoqlari</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">99,900</span>
-                    <span className="text-slate-600"> so'm/oy</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>Cheksiz qarzdor yozuvlari</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>Cheksiz papkalar</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>Ustuvor qo'llab-quvvatlash</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500 font-bold">✓</span>
-                    <span>Kengaytirilgan analitika</span>
-                  </div>
-                </CardContent>
+              <Card className="border shadow-sm flex flex-col justify-between">
+                <div>
+                  <CardHeader>
+                    <CardTitle>Pro</CardTitle>
+                    <CardDescription>Yirik savdo tarmoqlari</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">99,900</span>
+                      <span className="text-slate-600"> so&apos;m/oy</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>Cheksiz qarzdor yozuvlari</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>Cheksiz papkalar</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>Ustuvor qo&apos;llab-quvvatlash</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span>Kengaytirilgan analitika</span>
+                    </div>
+                  </CardContent>
+                </div>
+                <CardFooter className="pt-4">
+                  <Button variant="outline" className="w-full border-slate-300 hover:bg-slate-50" asChild>
+                    <Link href="/register">
+                      Pro bilan boshlash
+                    </Link>
+                  </Button>
+                </CardFooter>
               </Card>
+            </div>
+
+            {/* Pricing note for new users */}
+            <div className="mt-8 text-center text-xs text-slate-500 bg-blue-50/60 border border-blue-200/60 rounded-lg p-3.5 max-w-2xl mx-auto space-y-1">
+              <p className="font-semibold text-blue-900">💡 Yangi a&apos;zolar uchun eslatma</p>
+              <p className="text-slate-600">
+                Barcha yangi foydalanuvchilar platformaga <strong>100% bepul</strong> ro&apos;yxatdan o&apos;tishadi. Ro&apos;yxatdan o&apos;tib hisobingizga kirgach, xohlagan paytingizda shaxsiy kabinet orqali Uzum Bank, Payme yoki Click bilan tarifingizni yangilashingiz mumkin.
+              </p>
             </div>
           </div>
         </div>
@@ -297,7 +337,7 @@ export default function Home() {
               <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wider">Xizmatlar / Сервис</h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <Link href="/pricing" className="hover:text-blue-600 transition">
+                  <Link href="#pricing" className="hover:text-blue-600 transition">
                     Tariflar va rejalar
                   </Link>
                 </li>

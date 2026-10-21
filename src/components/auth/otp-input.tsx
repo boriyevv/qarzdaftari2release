@@ -1,93 +1,145 @@
 // src/components/auth/otp-input.tsx
 'use client'
 
-import { Input } from '@/components/ui/input'
+import { ClipboardEvent, KeyboardEvent, useRef, useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { ClipboardEvent, KeyboardEvent, useRef, useState } from 'react'
 
 interface OTPInputProps {
-	length?: number
-	value: string
-	onChange: (value: string) => void
-	disabled?: boolean
+  length?: number
+  value: string
+  onChange: (value: string) => void
+  disabled?: boolean
 }
 
 export function OTPInput({
-	length = 6,
-	value,
-	onChange,
-	disabled,
+  length = 6,
+  value = '',
+  onChange,
+  disabled,
 }: OTPInputProps) {
-	const [focusedIndex, setFocusedIndex] = useState(0)
-	const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-	const handleChange = (index: number, inputValue: string) => {
-		// Only allow digits
-		const digit = inputValue.replace(/\D/g, '').slice(-1)
+  // Automatically focus next empty box when typing
+  useEffect(() => {
+    if (value.length < length && focusedIndex !== null) {
+      inputRefs.current[value.length]?.focus()
+    }
+  }, [value, length])
 
-		const newValue = value.split('')
-		newValue[index] = digit
-		onChange(newValue.join(''))
+  const handleChange = (index: number, inputValue: string) => {
+    if (disabled) return
+    const digit = inputValue.replace(/\D/g, '').slice(-1)
 
-		// Auto focus next input
-		if (digit && index < length - 1) {
-			inputRefs.current[index + 1]?.focus()
-		}
-	}
+    const chars = value.split('')
+    chars[index] = digit
+    const nextVal = chars.join('').slice(0, length)
+    onChange(nextVal)
 
-	const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Backspace') {
-			if (!value[index] && index > 0) {
-				// Focus previous input on backspace
-				inputRefs.current[index - 1]?.focus()
-			}
-			const newValue = value.split('')
-			newValue[index] = ''
-			onChange(newValue.join(''))
-		} else if (e.key === 'ArrowLeft' && index > 0) {
-			inputRefs.current[index - 1]?.focus()
-		} else if (e.key === 'ArrowRight' && index < length - 1) {
-			inputRefs.current[index + 1]?.focus()
-		}
-	}
+    if (digit && index < length - 1) {
+      inputRefs.current[index + 1]?.focus()
+      setFocusedIndex(index + 1)
+    }
+  }
 
-	const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
-		e.preventDefault()
-		const pastedData = e.clipboardData
-			.getData('text/plain')
-			.replace(/\D/g, '')
-			.slice(0, length)
-		onChange(pastedData)
+  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (disabled) return
+    if (e.key === 'Backspace') {
+      e.preventDefault()
+      const chars = value.split('')
+      if (chars[index]) {
+        chars[index] = ''
+        onChange(chars.join(''))
+      } else if (index > 0) {
+        chars[index - 1] = ''
+        onChange(chars.join(''))
+        inputRefs.current[index - 1]?.focus()
+        setFocusedIndex(index - 1)
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      inputRefs.current[index - 1]?.focus()
+      setFocusedIndex(index - 1)
+    } else if (e.key === 'ArrowRight' && index < length - 1) {
+      inputRefs.current[index + 1]?.focus()
+      setFocusedIndex(index + 1)
+    }
+  }
 
-		// Focus last filled input
-		const focusIndex = Math.min(pastedData.length, length - 1)
-		inputRefs.current[focusIndex]?.focus()
-	}
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    if (disabled) return
+    const pasted = e.clipboardData
+      .getData('text/plain')
+      .replace(/\D/g, '')
+      .slice(0, length)
+    onChange(pasted)
+    const nextIdx = Math.min(pasted.length, length - 1)
+    inputRefs.current[nextIdx]?.focus()
+    setFocusedIndex(nextIdx)
+  }
 
-	return (
-		<div className='flex gap-2 justify-center'>
-			{Array.from({ length }).map((_, index) => (
-				<Input
-					key={index}
-					ref={el => {
-						inputRefs.current[index] = el
-					}}
-					type='text'
-					inputMode='numeric'
-					maxLength={1}
-					value={value[index] || ''}
-					onChange={e => handleChange(index, e.target.value)}
-					onKeyDown={e => handleKeyDown(index, e)}
-					onFocus={() => setFocusedIndex(index)}
-					onPaste={handlePaste}
-					disabled={disabled}
-					className={cn(
-						'w-12 h-14 text-center text-2xl font-bold',
-						focusedIndex === index && 'ring-2 ring-blue-500',
-						value[index] && 'bg-blue-50',
-					)}
-				/>
-			))}
-		</div>
-	)
+  return (
+    <div className="flex gap-2 sm:gap-2.5 justify-center items-center py-1">
+      {Array.from({ length }).map((_, index) => {
+        const char = value[index] || ''
+        const isFocused = focusedIndex === index
+        const hasChar = Boolean(char)
+
+        return (
+          <div
+            key={index}
+            onClick={() => {
+              if (!disabled) {
+                inputRefs.current[index]?.focus()
+                setFocusedIndex(index)
+              }
+            }}
+            className={cn(
+              'relative w-11 h-13 sm:w-13 sm:h-15 flex items-center justify-center rounded-xl border-2 transition-all duration-200 overflow-hidden bg-white select-none',
+              isFocused
+                ? 'border-blue-600 ring-4 ring-blue-100 shadow-md scale-105 z-20'
+                : hasChar
+                ? 'border-blue-500 bg-blue-50/40 shadow-xs'
+                : 'border-slate-200 hover:border-slate-300 shadow-2xs',
+              disabled && 'opacity-60 cursor-not-allowed bg-slate-100'
+            )}
+          >
+            {/* Hidden native input for 100% accessible keyboard/mobile touch entry */}
+            <input
+              ref={(el) => {
+                inputRefs.current[index] = el
+              }}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
+              maxLength={1}
+              value={char}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              onFocus={() => setFocusedIndex(index)}
+              onBlur={() => setFocusedIndex(null)}
+              onPaste={handlePaste}
+              disabled={disabled}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 caret-transparent"
+            />
+
+            {/* Bottom-up animated digit */}
+            {hasChar ? (
+              <span
+                key={`${index}-${char}`}
+                className="text-xl sm:text-2xl font-semibold text-slate-800 animate-otp-digit pointer-events-none select-none"
+              >
+                {char}
+              </span>
+            ) : isFocused ? (
+              <span className="w-0.5 h-5 sm:h-6 bg-blue-600 animate-pulse rounded-full pointer-events-none" />
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-200 pointer-events-none" />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
