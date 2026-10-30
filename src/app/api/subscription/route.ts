@@ -1,6 +1,8 @@
 // src/app/api/subscription/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { uzumPayment } from '@/lib/payments/uzum'
+import { parsePaymentOrder, processSuccessfulPayment } from '@/lib/payments/common'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +32,52 @@ export async function GET(request: NextRequest) {
         { error: 'Profile not found' },
         { status: 404 }
       )
+    }
+
+    // Auto-sync any pending Uzum transactions
+    try {
+      const { data: pendingUzumTx } = await supabase
+        .from('payment_transactions')
+        .select('*')
+        .eq('user_id', profile.id)
+        .eq('provider', 'uzum')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (pendingUzumTx && uzumPayment.isConfigured()) {
+        const orderId = pendingUzumTx.external_id || pendingUzumTx.external_data?.orderId
+        if (orderId) {
+          const uzumStatus = await uzumPayment.getOrderStatus(orderId)
+          if (uzumStatus && (uzumStatus.status === 'COMPLETED' || uzumStatus.status === 'TOP_UP_COMPLETED')) {
+            const parsedOrder = pendingUzumTx.external_data?.order || parsePaymentOrder(pendingUzumTx.external_data?.rawTransactionId)
+            if (parsedOrder) {
+              await processSuccessfulPayment(supabase, {
+                provider: 'uzum',
+                order: parsedOrder,
+                amount: pendingUzumTx.amount,
+                externalId: orderId,
+                externalData: uzumStatus,
+                transactionRecordId: pendingUzumTx.id,
+              })
+              const { data: updatedProfile } = await supabase
+                .from('users')
+                .select('id, plan_type, subscription_status, subscription_expires_at, last_payment_date')
+                .eq('id', profile.id)
+                .single()
+              if (updatedProfile) {
+                profile.plan_type = updatedProfile.plan_type
+                profile.subscription_status = updatedProfile.subscription_status
+                profile.subscription_expires_at = updatedProfile.subscription_expires_at
+                profile.last_payment_date = updatedProfile.last_payment_date
+              }
+            }
+          }
+        }
+      }
+    } catch (syncErr) {
+      console.warn('⚠️ Pending payment auto-sync warning:', syncErr)
     }
 
     // Get latest subscriptions

@@ -117,7 +117,7 @@ export default function TermsPage() {
                   </p>
                   <p>
                     4.2. To'lovlar O'zbekiston Respublikasi hududida litsenziyalangan to'lov tizimlari (Uzum Bank, Click,
-                    Payme, Uzcard, Humo, Visa, MasterCard) orqali onlayn amalga oshiriladi.
+                    Payme hamda Uzcard, Humo kartalari) orqali onlayn amalga oshiriladi.
                   </p>
                   <p>
                     4.3. To'lov to'liq avans (100% oldindan to'lov) shaklida qabul qilinadi. To'lov muvaffaqiyatli
@@ -208,7 +208,7 @@ export default function TermsPage() {
                   </p>
                   <p>
                     3.2. Оплата производится безналичным способом через авторизованные платежные шлюзы (АО «UZUM BANK»,
-                    Click, Payme, банковские карты Uzcard, Humo, Visa, MasterCard).
+                    Click, Payme, банковские карты Uzcard, Humo).
                   </p>
                   <p>
                     3.3. Услуги предоставляются на условиях 100% предоплаты. Активация выбранного тарифного плана

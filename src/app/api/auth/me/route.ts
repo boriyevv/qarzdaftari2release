@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { uzumPayment } from '@/lib/payments/uzum'
+import { parsePaymentOrder, processSuccessfulPayment } from '@/lib/payments/common'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -16,6 +18,51 @@ export async function GET() {
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
+    // Helper to auto-sync pending Uzum transactions in real time
+    const syncPendingUzum = async (prof: any) => {
+      if (!prof?.id || !uzumPayment.isConfigured()) return prof
+      try {
+        const { data: pendingUzumTx } = await adminSupabase
+          .from('payment_transactions')
+          .select('*')
+          .eq('user_id', prof.id)
+          .eq('provider', 'uzum')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (pendingUzumTx) {
+          const orderId = pendingUzumTx.external_id || pendingUzumTx.external_data?.orderId
+          if (orderId) {
+            const uzumStatus = await uzumPayment.getOrderStatus(orderId)
+            if (uzumStatus && (uzumStatus.status === 'COMPLETED' || uzumStatus.status === 'TOP_UP_COMPLETED')) {
+              const parsedOrder = pendingUzumTx.external_data?.order || parsePaymentOrder(pendingUzumTx.external_data?.rawTransactionId)
+              if (parsedOrder) {
+                await processSuccessfulPayment(adminSupabase, {
+                  provider: 'uzum',
+                  order: parsedOrder,
+                  amount: pendingUzumTx.amount,
+                  externalId: orderId,
+                  externalData: uzumStatus,
+                  transactionRecordId: pendingUzumTx.id,
+                })
+                const { data: updatedProf } = await adminSupabase
+                  .from('users')
+                  .select('*, sms_credits:sms_credits(*)')
+                  .eq('id', prof.id)
+                  .maybeSingle()
+                if (updatedProf) return updatedProf
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Uzum auto-sync in /api/auth/me error:', err)
+      }
+      return prof
+    }
+
     // 1. If not authenticated via Supabase Auth, check phone_user_session cookie
     if (authError || !user) {
       const cookieStore = await cookies()
@@ -33,7 +80,8 @@ export async function GET() {
 
         if (phoneProfile) {
           console.log('✅ Phone profile found via session cookie:', phoneProfile.full_name)
-          return NextResponse.json({ profile: phoneProfile })
+          const syncedProfile = await syncPendingUzum(phoneProfile)
+          return NextResponse.json({ profile: syncedProfile })
         }
       }
 
@@ -53,7 +101,8 @@ export async function GET() {
 
     if (profile) {
       console.log('✅ Profile found by auth_id:', profile.full_name)
-      return NextResponse.json({ profile })
+      const syncedProfile = await syncPendingUzum(profile)
+      return NextResponse.json({ profile: syncedProfile })
     }
 
     console.log('⚠️ Profile not found by auth_id, trying phone...')
@@ -71,7 +120,8 @@ export async function GET() {
 
       if (phoneProfile) {
         console.log('✅ Phone profile found:', phoneProfile.full_name)
-        return NextResponse.json({ profile: phoneProfile })
+        const syncedProfile = await syncPendingUzum(phoneProfile)
+        return NextResponse.json({ profile: syncedProfile })
       }
     }
 

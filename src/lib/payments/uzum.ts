@@ -7,18 +7,33 @@ import { parsePaymentOrder, ParsedPaymentOrder } from './common'
  * Official documentation: https://developer.uzumbank.uz/en/checkout/
  */
 
+export interface UzumCartReceiptParams {
+  spic: string
+  packageCode: string
+  vatPercent: number
+  tin?: string
+  PINFL?: string
+}
+
 export interface UzumCartItem {
-  name: string
-  count: number
-  sum: number // Amount in tiyins (1 UZS = 100 tiyins)
-  spic?: string // IKPU / MXIK product classification code from tasnif.soliq.uz
-  packageCode?: string // Package code from tasnif.soliq.uz
-  vatPercent?: number // VAT percentage (e.g. 0 or 12)
+  title: string
+  productId?: string
+  quantity: number
+  unitPrice: number // Amount in tiyins
+  total: number // Amount in tiyins
+  receiptParams?: UzumCartReceiptParams
+  // Backward compatibility fields
+  name?: string
+  count?: number
+  sum?: number
+  spic?: string
+  packageCode?: string
+  vatPercent?: number
 }
 
 export interface UzumCart {
   cartId: string
-  receiptType?: number // 1: Sales receipt, 2: Prepaid, etc.
+  receiptType?: string | number // 'PURCHASE' or 1
   items: UzumCartItem[]
   total: number // Total cost in tiyins
 }
@@ -40,6 +55,7 @@ export interface UzumPaymentParams {
   planType?: string
   transactionId?: string
   returnUrl: string
+  cart?: UzumCart
   supabase?: any
 }
 
@@ -131,10 +147,30 @@ export class UzumPayment {
       payload.paymentDetails = params.paymentDetails
     }
 
-    if (params.cart) {
-      payload.merchantParams = {
-        cart: params.cart,
-      }
+    // Autofiscalization requires a cart in merchantParams
+    const cart: UzumCart = params.cart || {
+      cartId: crypto.randomUUID(),
+      receiptType: 'PURCHASE',
+      total: amountInTiyin,
+      items: [
+        {
+          title: params.paymentDetails || 'Qarz Daftari xizmati',
+          productId: crypto.randomUUID(),
+          quantity: 1,
+          unitPrice: amountInTiyin,
+          total: amountInTiyin,
+          receiptParams: {
+            spic: process.env.UZUM_SPIC || '10305001001000000',
+            packageCode: process.env.UZUM_PACKAGE_CODE || '1500630',
+            vatPercent: Number(process.env.UZUM_VAT_PERCENT || 0),
+            tin: process.env.UZUM_MERCHANT_TIN || '123456789',
+          },
+        },
+      ],
+    }
+
+    payload.merchantParams = {
+      cart,
     }
 
     const endpoint = `${this.baseUrl.replace(/\/+$/, '')}/api/v1/payment/register`
@@ -241,6 +277,7 @@ export class UzumPayment {
       returnUrl,
       failureUrl,
       paymentDetails: `Qarz Daftari: ${planType || 'Subscription'}`,
+      cart: params.cart,
     })
 
     // Update pending transaction with Uzum's orderId

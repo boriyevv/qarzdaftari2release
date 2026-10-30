@@ -18,6 +18,12 @@ import {
   Clock,
   ShieldCheck,
 } from 'lucide-react'
+import {
+  UzumBankLogo,
+  ClickLogo,
+  PaymeLogo,
+  PaymentMethodsRow,
+} from '@/components/payments/payment-logos'
 
 export default function PaymentTermsPage() {
   const [lang, setLang] = useState<'uz' | 'ru'>('ru') // Default to Russian for Uzum Bank audit
@@ -89,8 +95,8 @@ export default function PaymentTermsPage() {
                     {/* Uzum Bank */}
                     <div className="border border-purple-200 bg-purple-50/50 rounded-xl p-4 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-purple-900 text-lg">Uzum Bank</span>
+                        <div className="flex items-center justify-between mb-3">
+                          <UzumBankLogo className="h-10 w-auto rounded-lg shadow-xs" />
                           <span className="text-[10px] font-semibold bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">
                             Рекомендуем
                           </span>
@@ -100,15 +106,15 @@ export default function PaymentTermsPage() {
                         </p>
                       </div>
                       <div className="text-[11px] font-medium text-slate-500 pt-2 border-t border-purple-100">
-                        Uzcard, Humo, Visa, MasterCard
+                        Uzcard, Humo
                       </div>
                     </div>
 
                     {/* Click */}
                     <div className="border border-blue-200 bg-blue-50/50 rounded-xl p-4 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-blue-900 text-lg">Click</span>
+                        <div className="flex items-center justify-between mb-3">
+                          <ClickLogo className="h-8 w-auto rounded-lg shadow-xs" />
                           <span className="text-[10px] font-semibold bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">
                             Online
                           </span>
@@ -125,8 +131,8 @@ export default function PaymentTermsPage() {
                     {/* Payme */}
                     <div className="border border-emerald-200 bg-emerald-50/50 rounded-xl p-4 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-emerald-900 text-lg">Payme</span>
+                        <div className="flex items-center justify-between mb-3">
+                          <PaymeLogo className="h-8 w-auto rounded-lg shadow-xs" />
                           <span className="text-[10px] font-semibold bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
                             Online
                           </span>
@@ -136,9 +142,16 @@ export default function PaymentTermsPage() {
                         </p>
                       </div>
                       <div className="text-[11px] font-medium text-slate-500 pt-2 border-t border-emerald-100">
-                        Uzcard, Humo, Visa, MasterCard
+                        Uzcard, Humo
                       </div>
                     </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider text-center">
+                      Принимаемые банковские карты и сервисы:
+                    </p>
+                    <PaymentMethodsRow />
                   </div>
                 </section>
 
@@ -295,21 +308,34 @@ export default function PaymentTermsPage() {
                   </p>
 
                   <div className="grid sm:grid-cols-3 gap-4 pt-2">
-                    <div className="border border-purple-200 bg-purple-50/50 rounded-xl p-4">
-                      <span className="font-bold text-purple-900 text-lg block mb-1">Uzum Bank</span>
-                      <p className="text-xs text-slate-600 mb-2">AO «UZUM BANK» ekvayring va Uzum Pay.</p>
-                      <span className="text-[11px] text-slate-500 font-medium">Uzcard, Humo, Visa, MasterCard</span>
+                    <div className="border border-purple-200 bg-purple-50/50 rounded-xl p-4 flex flex-col justify-between">
+                      <div>
+                        <UzumBankLogo className="h-10 w-auto rounded-lg shadow-xs mb-2" />
+                        <p className="text-xs text-slate-600 mb-2">AO «UZUM BANK» ekvayring va Uzum Pay.</p>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-medium pt-2 border-t border-purple-100">Uzcard, Humo</span>
                     </div>
-                    <div className="border border-blue-200 bg-blue-50/50 rounded-xl p-4">
-                      <span className="font-bold text-blue-900 text-lg block mb-1">Click</span>
-                      <p className="text-xs text-slate-600 mb-2">Click Up va veb-shlyuz.</p>
-                      <span className="text-[11px] text-slate-500 font-medium">Uzcard, Humo</span>
+                    <div className="border border-blue-200 bg-blue-50/50 rounded-xl p-4 flex flex-col justify-between">
+                      <div>
+                        <ClickLogo className="h-8 w-auto rounded-lg shadow-xs mb-2" />
+                        <p className="text-xs text-slate-600 mb-2">Click Up va veb-shlyuz.</p>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-medium pt-2 border-t border-blue-100">Uzcard, Humo</span>
                     </div>
-                    <div className="border border-emerald-200 bg-emerald-50/50 rounded-xl p-4">
-                      <span className="font-bold text-emerald-900 text-lg block mb-1">Payme</span>
-                      <p className="text-xs text-slate-600 mb-2">Payme to'lov tizimi.</p>
-                      <span className="text-[11px] text-slate-500 font-medium">Uzcard, Humo, Visa, MasterCard</span>
+                    <div className="border border-emerald-200 bg-emerald-50/50 rounded-xl p-4 flex flex-col justify-between">
+                      <div>
+                        <PaymeLogo className="h-8 w-auto rounded-lg shadow-xs mb-2" />
+                        <p className="text-xs text-slate-600 mb-2">Payme to'lov tizimi.</p>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-medium pt-2 border-t border-emerald-100">Uzcard, Humo</span>
                     </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider text-center">
+                      Qabul qilinadigan bank kartalari va to'lov tizimlari:
+                    </p>
+                    <PaymentMethodsRow />
                   </div>
                 </section>
 

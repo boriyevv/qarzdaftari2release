@@ -71,8 +71,14 @@ export async function POST(request: NextRequest) {
     const discount = getDiscount(planType as any, billingCycle as any)
     const months = BILLING_CYCLE_MONTHS[billingCycle as keyof typeof BILLING_CYCLE_MONTHS]
 
-    // Return URL
-    const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`
+    // Return URL for Click/Payme (http ok for localhost)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const returnUrl = `${appUrl}/dashboard?payment=success`
+
+    // Uzum strictly requires https:// return URLs.
+    // Use UZUM_RETURN_BASE_URL (your production domain) when testing locally.
+    const uzumBaseUrl = process.env.UZUM_RETURN_BASE_URL || 'https://debtbook.uz'
+    const uzumReturnUrl = `${uzumBaseUrl}/dashboard?payment=success`
 
     // Generate payment URL based on provider
     let paymentUrl: string
@@ -107,7 +113,7 @@ export async function POST(request: NextRequest) {
           userId: profile.id,
           planType,
           transactionId,
-          returnUrl,
+          returnUrl: uzumReturnUrl,
           supabase,
         })
         break

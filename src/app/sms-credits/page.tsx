@@ -9,6 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { MessageSquare, CreditCard, Check, Zap, History } from 'lucide-react'
 import { SMS_PACKAGES } from '@/lib/constants/plans'
 import { MainNav } from '@/components/layout/main-nav'
+import {
+  UzumBankLogo,
+  PaymeLogo,
+  ClickLogo,
+} from '@/components/payments/payment-logos'
 
 interface SMSCreditsData {
   total_credits: number
@@ -234,32 +239,61 @@ export default function SMSCreditsPage() {
           </DialogHeader>
 
           <div className="space-y-3">
-            {['click', 'payme', 'uzum'].map((provider) => (
-              <Button
-                key={provider}
-                className="w-full justify-start h-16"
-                variant="outline"
-                onClick={() => handlePurchase(provider)}
-                disabled={purchaseLoading}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    provider === 'click' ? 'bg-blue-500' :
-                    provider === 'payme' ? 'bg-green-500' : 'bg-purple-500'
-                  }`}>
-                    <CreditCard className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold capitalize">{provider}</div>
-                    <div className="text-xs text-slate-500">
-                      {provider === 'click' && 'Tezkor va xavfsiz'}
-                      {provider === 'payme' && 'Ishonchli to\'lov'}
-                      {provider === 'uzum' && 'Yangi va qulay'}
-                    </div>
-                  </div>
+            <Button
+              className="w-full justify-start h-18 py-2.5 px-4 hover:border-purple-400 hover:bg-purple-50/40 transition-all"
+              variant="outline"
+              onClick={() => handlePurchase('uzum')}
+              disabled={purchaseLoading}
+            >
+              <div className="flex items-center gap-3.5 w-full">
+                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white border border-purple-200/80 p-1.5 flex items-center justify-center shadow-xs">
+                  <UzumBankLogo className="h-10 w-auto" />
                 </div>
-              </Button>
-            ))}
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-slate-900 flex items-center gap-2">
+                    Uzum Bank
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-[10px] font-semibold py-0 px-1.5">
+                      Tavsiya etiladi
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-slate-500">Uzcard va Humo kartalari orqali</div>
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              className="w-full justify-start h-18 py-2.5 px-4 hover:border-blue-400 hover:bg-blue-50/40 transition-all"
+              variant="outline"
+              onClick={() => handlePurchase('click')}
+              disabled={purchaseLoading}
+            >
+              <div className="flex items-center gap-3.5 w-full">
+                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white border border-blue-200/80 p-2 flex items-center justify-center shadow-xs">
+                  <ClickLogo className="h-7 w-auto" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-slate-900">Click</div>
+                  <div className="text-xs text-slate-500">Click Up yoki karta orqali to'lov</div>
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              className="w-full justify-start h-18 py-2.5 px-4 hover:border-emerald-400 hover:bg-emerald-50/40 transition-all"
+              variant="outline"
+              onClick={() => handlePurchase('payme')}
+              disabled={purchaseLoading}
+            >
+              <div className="flex items-center gap-3.5 w-full">
+                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white border border-emerald-200/80 p-2 flex items-center justify-center shadow-xs">
+                  <PaymeLogo className="h-7 w-auto" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="font-semibold text-slate-900">Payme</div>
+                  <div className="text-xs text-slate-500">Ilova yoki karta orqali tezkor to'lov</div>
+                </div>
+              </div>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

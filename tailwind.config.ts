@@ -57,6 +57,31 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        pulseGlow: {
+          "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
+          "50%": { opacity: "0.85", transform: "scale(1.04)" },
+        },
+        gradientX: {
+          "0%, 100%": { "background-position": "0% 50%" },
+          "50%": { "background-position": "100% 50%" },
+        },
+      },
+      animation: {
+        float: "float 5s ease-in-out infinite",
+        "float-delayed": "float 6s ease-in-out 2s infinite",
+        shimmer: "shimmer 2.5s infinite",
+        "pulse-glow": "pulseGlow 4s ease-in-out infinite",
+        "gradient-x": "gradientX 8s ease infinite",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

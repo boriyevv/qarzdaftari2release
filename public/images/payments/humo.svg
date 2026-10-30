@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" fill="none">
+  <rect width="120" height="48" rx="10" fill="#00A859"/>
+  <!-- Humo Bird Emblem -->
+  <g transform="translate(14, 11)">
+    <path d="M12 2C8 6 4 13 4 20C7 18 10 17 12 18C14 17 17 18 20 20C20 13 16 6 12 2Z" fill="#FFFFFF"/>
+    <circle cx="12" cy="7" r="2" fill="#00A859"/>
+    <path d="M7 14C9.5 12 14.5 12 17 14" stroke="#00A859" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+  <text x="44" y="29" fill="#FFFFFF" font-family="system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif" font-weight="900" font-size="16" letter-spacing="0.8">HUMO</text>
+</svg>

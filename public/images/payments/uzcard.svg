@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" fill="none">
+  <rect width="120" height="48" rx="10" fill="#003B73"/>
+  <!-- Uzcard Dual Shield / Card Motif -->
+  <g transform="translate(14, 13)">
+    <rect width="20" height="22" rx="4" fill="#00A3E0"/>
+    <path d="M4 6H16M4 11H12M4 16H9" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="15" cy="15" r="2.5" fill="#FFFFFF"/>
+  </g>
+  <text x="42" y="29" fill="#FFFFFF" font-family="system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif" font-weight="800" font-size="14.5" letter-spacing="0.5">UZCARD</text>
+</svg>

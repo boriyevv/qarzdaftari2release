@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" fill="none">
+  <rect width="120" height="48" rx="10" fill="#0073FF"/>
+  <!-- Click Target Symbol -->
+  <g transform="translate(14, 12)">
+    <circle cx="12" cy="12" r="10.5" stroke="#FFFFFF" stroke-width="2.5" fill="none"/>
+    <circle cx="12" cy="12" r="5" fill="#FFFFFF"/>
+  </g>
+  <text x="45" y="29" fill="#FFFFFF" font-family="system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif" font-weight="900" font-size="17" letter-spacing="0.5">CLICK</text>
+</svg>

@@ -96,7 +96,7 @@ export default function SecurityAntifraudPage() {
                     </h2>
                   </div>
                   <p>
-                    Все платежи по банковским картам (Uzcard, Humo, Visa, MasterCard) на сайте защищены технологией
+                    Все платежи по банковским картам (Uzcard, Humo) на сайте защищены технологией
                     строгой аутентификации держателя карты:
                   </p>
                   <ul className="list-disc pl-5 space-y-1">
@@ -105,7 +105,7 @@ export default function SecurityAntifraudPage() {
                       банковском приложении эмитента карты.
                     </li>
                     <li>
-                      Поддержка протоколов Verified by Visa, MasterCard Identity Check, Uzcard 3DS и Humo 3DS.
+                      Поддержка протоколов безопасности Uzcard 3DS и Humo 3DS.
                     </li>
                     <li>
                       Списание денежных средств без подтверждения держателя карты технологически исключено.
@@ -279,7 +279,7 @@ export default function SecurityAntifraudPage() {
                     </h2>
                   </div>
                   <p>
-                    Saytdagi har qanday to'lov operatsiyasi (Uzcard, Humo, Visa, MasterCard) 3D-Secure xalqaro
+                    Saytdagi har qanday to'lov operatsiyasi (Uzcard, Humo) 3D-Secure xalqaro
                     xavfsizlik protokoli orqali karta egasining shaxsiy telefoni (SMS-kod) orqali tasdiqlanadi. Karta
                     egasining ruxsatisiz mablag' yechilishi mutlaqo mumkin emas.
                   </p>

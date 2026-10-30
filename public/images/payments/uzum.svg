@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" fill="none">
+  <rect width="120" height="48" rx="10" fill="#7000FF"/>
+  <g transform="translate(12, 10)">
+    <circle cx="6" cy="4" r="3.2" fill="#FFFFFF"/>
+    <circle cx="14" cy="4" r="3.2" fill="#FFFFFF"/>
+    <circle cx="22" cy="4" r="3.2" fill="#FFFFFF"/>
+    <circle cx="10" cy="12" r="3.2" fill="#FFFFFF"/>
+    <circle cx="18" cy="12" r="3.2" fill="#FFFFFF"/>
+    <circle cx="14" cy="20" r="3.2" fill="#FFFFFF"/>
+    <circle cx="14" cy="-2.5" r="1.8" fill="#A970FF"/>
+  </g>
+  <text x="46" y="29" fill="#FFFFFF" font-family="system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif" font-weight="700" font-size="18" letter-spacing="-0.3">uzum</text>
+</svg>
