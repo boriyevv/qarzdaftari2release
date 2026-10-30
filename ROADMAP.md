@@ -42,30 +42,41 @@ Ushbu vazifalar platformaning `https://debtbook.uz` manzilida to'liq va uzluksiz
 Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 
 ### 📱 Telegram Bot & Integratsiya
+
 - [ ] Do'kon egasi uchun rasmiy `@QarzDaftariBot`:
   - Yangi qarz qo'shish (tezkor komanda orqali).
   - Kunlik/haftalik qarzlar hisobotini Telegramga yuborish.
 - [ ] Mijozlar uchun Telegram orqali qarz eslatmasi (SMS krediti tejaladi).
 
 ### 👥 Ko'p foydalanuvchilik rejim (Multi-user / Cashiers)
+
 - [ ] Katta do'konlar uchun: Sotuvchi/Kassir akkauntlarini qo'shish imkoniyati.
 - [ ] Kassir faqat yangi qarz kiritishi va qabul qilishi mumkin, lekin tahlillarni o'chira olmaydi.
 
 ### 📊 Eksport va Buxgalteriya integratsiyasi
+
 - [ ] Qarzlar ro'yxatini Excel (.xlsx) va chiroyli PDF chek formatida yuklab olish.
 - [ ] 1C yoki boshqa savdo tizimlari bilan API orqali sinxronizatsiya.
 
 ### 🔔 Aqlli Bildirishnomalar (Smart Reminders)
+
 - [ ] Qarz to'lov muddati tugashiga 3 kun qolganda avtomatik SMS yuborish (avtopilot rejim).
 - [ ] Qarz to'langanda mijozga "Rahmat, to'lovingiz qabul qilindi" deb xushmuomala tasdiqnoma SMS yuborish.
 
 ---
 
 ## 🎨 3. UI/UX Takomillashtirishlari
+
 - [ ] Dark / Light mode to'liq almashinuvchi tugmasi.
 - [ ] Mobil PWA (Progressive Web App): Telefon ekraniga ilova kabi o'rnatib olish imkoni.
 - [ ] Mikro-tovushlar: To'lov qabul qilinganda yoqimli muvaffaqiyat ovozi.
 
 ---
 
-*Eslatma: Har qanday yangi g'oyani ushbu faylga qo'shib borishingiz mumkin. Antigravity bilan ishlashda unga "ROADMAP.md faylidagi keyingi vazifani qilaylik" deb buyruq berishingiz mumkin!*
+_Eslatma: Har qanday yangi g'oyani ushbu faylga qo'shib borishingiz mumkin. Antigravity bilan ishlashda unga "ROADMAP.md faylidagi keyingi vazifani qilaylik" deb buyruq berishingiz mumkin!_
+
+## MY NOTES
+
+(1) Chech the navigation from dashboard to others because the current version is kinda daunting to navigate easily
+(2) Work on other payment provider, such as Payme and Click
+(3) AGAIN the UI design still kinda lacks
