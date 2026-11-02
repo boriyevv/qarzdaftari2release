@@ -142,6 +142,7 @@ export default function AnalyticsPage() {
   const [subPlan, setSubPlan] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [activePieIndex, setActivePieIndex] = useState<number | null>(null)
+  const [isHoveringPie, setIsHoveringPie] = useState(false)
 
   const effectivePlan = (subPlan || user?.plan_type || 'FREE').toUpperCase()
   const hasAccess = Boolean(user?.is_trial_active || (effectivePlan && effectivePlan !== 'FREE'))
@@ -789,7 +790,14 @@ export default function AnalyticsPage() {
                   {mounted && statusChartData.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-4 py-2">
                       {/* Donut chart */}
-                      <div className="h-[180px] sm:h-[200px] w-full relative flex items-center justify-center">
+                      <div
+                        className="h-[180px] sm:h-[200px] w-full relative flex items-center justify-center select-none"
+                        onMouseEnter={() => setIsHoveringPie(true)}
+                        onMouseLeave={() => {
+                          setIsHoveringPie(false)
+                          setActivePieIndex(null)
+                        }}
+                      >
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Tooltip content={<CustomPieTooltip />} wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }} />
@@ -801,8 +809,14 @@ export default function AnalyticsPage() {
                               outerRadius={78}
                               paddingAngle={4}
                               dataKey="value"
-                              onMouseEnter={(_, index) => setActivePieIndex(index)}
-                              onMouseLeave={() => setActivePieIndex(null)}
+                              onMouseEnter={(_, index) => {
+                                setIsHoveringPie(true)
+                                setActivePieIndex(index)
+                              }}
+                              onMouseLeave={() => {
+                                setIsHoveringPie(false)
+                                setActivePieIndex(null)
+                              }}
                             >
                               {statusChartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -810,16 +824,18 @@ export default function AnalyticsPage() {
                             </Pie>
                           </PieChart>
                         </ResponsiveContainer>
-                        {/* Donut Markaziy Ko'rsatkich - Hover qilinganda Tooltip bilan to'qnashmasligi uchun avtomatik yashiriladi */}
+                        {/* Donut Markaziy Ko'rsatkich - Hover qilinganda Tooltip bilan to'qnashmasligi uchun to'liq yashiriladi */}
                         <div
-                          className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-150 z-0 ${
-                            activePieIndex !== null ? 'opacity-0' : 'opacity-100'
+                          className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-all duration-200 z-0 ${
+                            isHoveringPie || activePieIndex !== null
+                              ? 'opacity-0 scale-90 pointer-events-none'
+                              : 'opacity-100 scale-100'
                           }`}
                         >
-                          <span className="text-lg sm:text-xl font-black text-slate-900">
+                          <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                             {data.summary.repaymentRate}%
                           </span>
-                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                             Undirildi
                           </span>
                         </div>

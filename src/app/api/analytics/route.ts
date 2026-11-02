@@ -95,20 +95,19 @@ export async function GET(request: NextRequest) {
     const allDebtsList = allActiveDebts || []
     const safeDebts = debts || []
 
-    // 1. Asosiy KPI hisob-kitoblari
-    // Davr bo'yicha pul oqimi:
+    // 1. Asosiy KPI hisob-kitoblari (Tanlangan davr bo'yicha)
     const totalIssued = safeDebts.reduce((sum, d) => sum + (Number(d.amount) || 0), 0)
     const totalReturned = safeDebts.reduce((sum, d) => sum + (Number(d.paid_amount) || 0), 0)
 
-    // Joriy do'kon balansi va muddati o'tganlar (Dashboard bilan 100% mutanosib):
-    const targetDebtsForBalance = allDebtsList.length > 0 ? allDebtsList : safeDebts
+    // Tanlangan davrga tegishli qoldiq va muddati o'tganlar:
+    const debtsForMetrics = safeDebts
 
-    const totalRemaining = targetDebtsForBalance.reduce((sum, d) => {
+    const totalRemaining = debtsForMetrics.reduce((sum, d) => {
       const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
       return sum + Math.max(0, remaining)
     }, 0)
 
-    const overdueDebts = targetDebtsForBalance.filter(d => {
+    const overdueDebts = debtsForMetrics.filter(d => {
       const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
       return remaining > 0 && d.due_date && new Date(d.due_date) < now
     })
@@ -121,13 +120,11 @@ export async function GET(request: NextRequest) {
 
     const repaymentRate = totalIssued > 0
       ? Math.min(100, Math.round((totalReturned / totalIssued) * 100))
-      : (allDebtsList.length > 0
-          ? Math.min(100, Math.round((allDebtsList.reduce((s, d) => s + (Number(d.paid_amount) || 0), 0) / Math.max(1, allDebtsList.reduce((s, d) => s + (Number(d.amount) || 0), 0))) * 100))
-          : 0)
+      : 0
 
     const averageDebtAmount = safeDebts.length > 0
       ? Math.round(totalIssued / safeDebts.length)
-      : (allDebtsList.length > 0 ? Math.round(allDebtsList.reduce((s, d) => s + (Number(d.amount) || 0), 0) / allDebtsList.length) : 0)
+      : 0
 
     // 2. Qarzlar holati bo'yicha taqsimot (Status Distribution)
     let paidCount = 0
@@ -184,6 +181,25 @@ export async function GET(request: NextRequest) {
       remaining: number
       overdueCount: number
     }>()
+
+    // 6 oylik yoki yillik uchun barcha oylarni xronologik tartibda oldindan shakllantiramiz
+    const totalMonthsCount = period === 'semi_annual' ? 6 : (period === 'annual' ? 12 : 0)
+    if (totalMonthsCount > 0) {
+      for (let i = totalMonthsCount - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const mIdx = d.getMonth()
+        const year = d.getFullYear()
+        const mKey = `${UZ_MONTHS[mIdx]} ${year}`
+        monthsMap.set(mKey, {
+          month: mKey,
+          monthShort: `${UZ_MONTHS_SHORT[mIdx]}`,
+          issued: 0,
+          returned: 0,
+          remaining: 0,
+          overdueCount: 0,
+        })
+      }
+    }
 
     safeDebts.forEach(debt => {
       const date = new Date(debt.created_at)
@@ -278,8 +294,8 @@ export async function GET(request: NextRequest) {
       isOverdue: boolean
     }>()
 
-    // Top qarzdorlar uchun do'kondagi barcha mavjud faol qarzlardan foydalanamiz
-    targetDebtsForBalance.forEach(debt => {
+    // Top qarzdorlar uchun tanlangan davr qarzlaridan foydalanamiz
+    debtsForMetrics.forEach(debt => {
       const key = debt.debtor_phone || debt.debtor_name || 'Noma\'lum'
       const amt = Number(debt.amount) || 0
       const paid = Number(debt.paid_amount) || 0
@@ -314,7 +330,7 @@ export async function GET(request: NextRequest) {
     const activeDebtorsCount = Array.from(debtorMap.values()).filter(d => d.amount > 0).length
 
     // Batafsil qarzlar ro'yxati (Eksport va hisobotlar uchun)
-    const exportDebts = targetDebtsForBalance.map(d => {
+    const exportDebts = debtsForMetrics.map(d => {
       const amt = Number(d.amount) || 0
       const paid = Number(d.paid_amount) || 0
       const remaining = Math.max(0, amt - paid)
