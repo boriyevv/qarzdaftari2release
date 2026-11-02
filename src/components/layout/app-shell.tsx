@@ -27,7 +27,6 @@ import {
 import { useUser } from '@/lib/contexts/user-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 
 interface NavItem {
@@ -424,91 +423,6 @@ export function AppShell({
         </aside>
 
         {/* =========================================================
-            MOBILE DRAWER (Sheet)
-            ========================================================= */}
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="left" className="w-72 p-0 flex flex-col justify-between bg-white">
-            <div className="pt-5 pb-4">
-              <div className="px-5 mb-6 flex items-center justify-between">
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-lg text-slate-900 tracking-tight leading-none block">
-                      Qarz Daftari
-                    </span>
-                    <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Boshqaruv menyusi
-                    </span>
-                  </div>
-                </Link>
-              </div>
-
-              {renderNavLinks(false, () => setMobileOpen(false))}
-            </div>
-
-            {/* Mobile Drawer Bottom User Card */}
-            <div className="p-4 border-t border-slate-100">
-              {user ? (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
-                        {user.store_name?.[0] || 'U'}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-slate-900 truncate">
-                          {user.store_name || user.full_name}
-                        </p>
-                        <p className="text-[11px] text-slate-500 truncate">
-                          {user.phone}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-[10px] font-bold">
-                      {currentPlan}
-                    </Badge>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileOpen(false)
-                      handleStartTour()
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-blue-600 bg-blue-50/70 rounded-xl hover:bg-blue-100/70 transition-colors border border-blue-200/50"
-                  >
-                    <Compass className="w-3.5 h-3.5" />
-                    <span>Tizim qo&apos;llanmasi</span>
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Chiqish</span>
-                  </button>
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className="block text-center py-2 text-xs font-bold text-blue-600 bg-blue-50 rounded-xl"
-                >
-                  Kirish
-                </Link>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
-
-        {/* =========================================================
             MAIN APP AREA WITH UNIFIED TOPBAR
             ========================================================= */}
         <div
@@ -519,28 +433,28 @@ export function AppShell({
         >
           {/* Unified Sticky Header */}
           <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
-            <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-              {/* Left Side: Mobile Hamburger + Breadcrumbs / Title */}
-              <div className="flex items-center gap-3 min-w-0">
-                {/* Mobile Menu Trigger */}
-                <button
-                  onClick={() => setMobileOpen(true)}
-                  className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                  aria-label="Asosiy menyuni ochish"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
+              {/* Left Side: Mobile Avatar / Back button + Title */}
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 {/* Back button (if on subpage like debtor/[phone]) */}
-                {showBack && (
+                {showBack ? (
                   <button
                     onClick={onBack ? onBack : () => router.back()}
-                    className="p-1.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1 text-xs font-semibold"
+                    className="p-1.5 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-semibold"
                     title="Orqaga"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-4 h-4 text-slate-700" />
                     <span className="hidden sm:inline">Orqaga</span>
                   </button>
+                ) : (
+                  /* Mobile Store Avatar (taps to /profile) */
+                  <Link
+                    href="/profile"
+                    className="lg:hidden flex-shrink-0 w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs active:scale-95 transition-transform"
+                    title="Profilga o'tish"
+                  >
+                    {user?.store_name?.[0] || user?.full_name?.[0] || 'Q'}
+                  </Link>
                 )}
 
                 {/* Breadcrumbs or Page Title */}
@@ -574,11 +488,11 @@ export function AppShell({
                     </nav>
                   ) : title ? (
                     <div className="min-w-0">
-                      <h1 className="text-lg sm:text-xl font-bold text-slate-900 truncate leading-tight">
+                      <h1 className="text-base sm:text-xl font-bold text-slate-900 truncate leading-tight">
                         {title}
                       </h1>
                       {subtitle && (
-                        <p className="text-xs text-slate-500 truncate leading-none mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-slate-500 truncate leading-none mt-0.5">
                           {subtitle}
                         </p>
                       )}
