@@ -1,10 +1,11 @@
-
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('uz-UZ', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount) + " so'm"
+  if (typeof amount !== 'number' || isNaN(amount)) return "0 so'm"
+  const isNegative = amount < 0
+  const absoluteAmount = Math.abs(Math.round(amount))
+  const formatted = absoluteAmount
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return `${isNegative ? '-' : ''}${formatted} so'm`
 }
 
 /**
