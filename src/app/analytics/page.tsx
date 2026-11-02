@@ -342,159 +342,141 @@ export default function AnalyticsPage() {
           <>
             {/* 🌟 USER ONBOARDING BANNER: Agar ushbu davrda umuman qarz bo'lmasa */}
             {data.summary.totalDebtsCount === 0 && (
-              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-3xl p-5 sm:p-7 text-white shadow-lg shadow-blue-500/15 relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="relative z-10 max-w-2xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white text-xs font-semibold backdrop-blur-md mb-2.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                    Analitika bo&apos;limi
+              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-3.5 sm:p-5 text-white shadow-md shadow-blue-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 text-amber-300 shadow-xs">
+                    <Sparkles className="w-4 h-4" />
                   </div>
-                  <h2 className="text-lg sm:text-2xl font-black tracking-tight">
-                    Tanlangan davrda hali qarz yozuvlari kiritilmagan
-                  </h2>
-                  <p className="text-xs sm:text-sm text-blue-100 mt-1.5 leading-relaxed">
-                    Mijozlarga berilgan nasiya va to&apos;lovlarni kiritishni boshlang. Birinchi qarz
-                    kiritilishi bilanoq, tizim avtomatik ravishda pul oqimi grafigi, undirish foizi
-                    va kechikkan qarzdorlarni tahlil qilib boradi.
-                  </p>
-                  <div className="mt-4 flex items-center gap-2.5 flex-wrap">
-                    <Link href="/dashboard">
-                      <Button className="bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl shadow-md h-9 sm:h-10 px-4 text-xs">
-                        <Plus className="w-3.5 h-3.5 mr-1.5" />
-                        Birinchi qarzni kiritish
-                      </Button>
-                    </Link>
-                    {period !== 'monthly' && (
-                      <Button
-                        variant="outline"
-                        onClick={() => setPeriod('monthly')}
-                        className="border-white/30 text-white hover:bg-white/10 rounded-xl h-9 sm:h-10 px-4 text-xs font-semibold"
-                      >
-                        30 kunlik davrga qaytish
-                      </Button>
-                    )}
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-bold text-white truncate">
+                      Bu davrda hali qarz yozuvlari yo&apos;q
+                    </h3>
+                    <p className="text-xs text-blue-100/90 truncate">
+                      Nasiyalar kiritilgach, avtomatik grafiklar va tahlillar shakllanadi
+                    </p>
                   </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+                  <Link href="/dashboard">
+                    <Button className="bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl h-8 px-3 text-xs shadow-xs">
+                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      Qarz kiritish
+                    </Button>
+                  </Link>
+                  {period !== 'monthly' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setPeriod('monthly')}
+                      className="border-white/30 text-white hover:bg-white/10 rounded-xl h-8 px-2.5 text-xs font-semibold"
+                    >
+                      30 kun
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* 1. Kengaytirilgan KPI kartalari (Ambient Glow & Watermark Icon) */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+            {/* 1. Kengaytirilgan KPI kartalari */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Berilgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 border border-blue-200/80 hover:border-blue-300 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                {/* Ambient Backlight Glow */}
-                <div className="absolute -bottom-6 -right-6 w-20 h-20 sm:w-28 sm:h-28 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-                {/* Watermark Icon */}
-                <TrendingUp className="absolute -bottom-1 -right-1 sm:-bottom-3 sm:-right-3 w-14 h-14 sm:w-24 sm:h-24 text-blue-600/[0.08] sm:text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/20 border border-blue-200/80 hover:border-blue-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
+                <TrendingUp className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-blue-600/[0.07] sm:text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-blue-100/90 text-blue-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                        <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-blue-950 truncate">Berilgan</span>
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100/90 text-blue-600 flex items-center justify-center shadow-xs flex-shrink-0">
+                      <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    <span className="text-[8px] sm:text-[10px] text-blue-700 font-bold bg-blue-100/80 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
-                      {data.summary.totalDebtsCount || 0} ta
-                    </span>
+                    <span className="text-xs font-bold text-slate-700 truncate">Berilgan</span>
                   </div>
-                  <p className="text-base sm:text-2xl font-black text-blue-950 tracking-tight truncate">
-                    {formatCurrency(data.summary.totalIssued)}
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 font-medium truncate">
-                    O&apos;rtacha: <span className="font-semibold text-slate-700">{formatCurrency(data.summary.averageDebtAmount || 0)}</span>
+
+                  <div className="my-2">
+                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                      {formatCurrency(data.summary.totalIssued)}
+                    </p>
+                  </div>
+
+                  <p className="text-[11px] text-blue-600 font-semibold truncate">
+                    {data.summary.totalDebtsCount || 0} ta qarz berildi
                   </p>
                 </div>
               </div>
 
               {/* Qaytgan / Undirilgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 border border-emerald-200/80 hover:border-emerald-300 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                {/* Ambient Backlight Glow */}
-                <div className="absolute -bottom-6 -right-6 w-20 h-20 sm:w-28 sm:h-28 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-                {/* Watermark Icon */}
-                <TrendingDown className="absolute -bottom-1 -right-1 sm:-bottom-3 sm:-right-3 w-14 h-14 sm:w-24 sm:h-24 text-emerald-600/[0.08] sm:text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/20 border border-emerald-200/80 hover:border-emerald-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+                <TrendingDown className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-emerald-600/[0.07] sm:text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-emerald-100/90 text-emerald-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                        <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-emerald-950 truncate">Qaytgan</span>
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100/90 text-emerald-600 flex items-center justify-center shadow-xs flex-shrink-0">
+                      <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    <span className="text-[8px] sm:text-[10px] text-emerald-700 font-extrabold bg-emerald-100/90 px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
-                      <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
-                      {data.summary.repaymentRate}%
-                    </span>
+                    <span className="text-xs font-bold text-slate-700 truncate">Qaytgan</span>
                   </div>
-                  <p className="text-base sm:text-2xl font-black text-emerald-950 tracking-tight truncate">
-                    {formatCurrency(data.summary.totalReturned)}
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-emerald-700 mt-0.5 sm:mt-1 font-medium truncate">
-                    {data.summary.repaymentRate >= 80 ? 'Yig&apos;im a&apos;lo' : 'Tushumlar davomida'}
+
+                  <div className="my-2">
+                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                      {formatCurrency(data.summary.totalReturned)}
+                    </p>
+                  </div>
+
+                  <p className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 truncate">
+                    <Sparkles className="w-3 h-3 flex-shrink-0" />
+                    <span>{data.summary.repaymentRate}% yig&apos;ildi</span>
                   </p>
                 </div>
               </div>
 
               {/* Qoldiq */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 border border-amber-200/80 hover:border-amber-300 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                {/* Ambient Backlight Glow */}
-                <div className="absolute -bottom-6 -right-6 w-20 h-20 sm:w-28 sm:h-28 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
-                {/* Watermark Icon */}
-                <Clock className="absolute -bottom-1 -right-1 sm:-bottom-3 sm:-right-3 w-14 h-14 sm:w-24 sm:h-24 text-amber-600/[0.08] sm:text-amber-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/20 border border-amber-200/80 hover:border-amber-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
+                <Clock className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-amber-600/[0.07] sm:text-amber-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-amber-950 truncate">Qoldiq qarz</span>
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shadow-xs flex-shrink-0">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    <span className="text-[8px] sm:text-[10px] text-amber-700 font-bold bg-amber-100/80 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
-                      Kutilmoqda
-                    </span>
+                    <span className="text-xs font-bold text-slate-700 truncate">Qoldiq qarz</span>
                   </div>
-                  <p className="text-base sm:text-2xl font-black text-amber-950 tracking-tight truncate">
-                    {formatCurrency(data.summary.totalRemaining)}
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 font-medium truncate">
-                    <span className="font-bold text-slate-700">{data.summary.activeDebtorsCount || 0} ta</span> qarzdorda
+
+                  <div className="my-2">
+                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                      {formatCurrency(data.summary.totalRemaining)}
+                    </p>
+                  </div>
+
+                  <p className="text-[11px] text-amber-700 font-medium truncate">
+                    {data.summary.activeDebtorsCount || 0} ta qarzdorda
                   </p>
                 </div>
               </div>
 
               {/* Muddati o'tgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-rose-50/60 via-white to-rose-50/30 border border-rose-200/80 hover:border-rose-300 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                {/* Ambient Backlight Glow */}
-                <div className="absolute -bottom-6 -right-6 w-20 h-20 sm:w-28 sm:h-28 bg-rose-500/15 rounded-full blur-2xl pointer-events-none" />
-                {/* Watermark Icon */}
-                <ShieldAlert className="absolute -bottom-1 -right-1 sm:-bottom-3 sm:-right-3 w-14 h-14 sm:w-24 sm:h-24 text-rose-600/[0.08] sm:text-rose-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-rose-50/60 via-white to-rose-50/20 border border-rose-200/80 hover:border-rose-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-rose-500/15 rounded-full blur-2xl pointer-events-none" />
+                <ShieldAlert className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-rose-600/[0.07] sm:text-rose-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-rose-100/90 text-rose-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                        <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-rose-950 truncate">Muddati o&apos;tgan</span>
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-100/90 text-rose-600 flex items-center justify-center shadow-xs flex-shrink-0">
+                      <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    {data.summary.overdueCount > 0 ? (
-                      <span className="text-[8px] sm:text-[10px] text-rose-700 font-bold bg-rose-100 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
-                        ⚠️ Xavfli
-                      </span>
-                    ) : (
-                      <span className="text-[8px] sm:text-[10px] text-emerald-700 font-bold bg-emerald-100 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
-                        Nazoratda
-                      </span>
-                    )}
+                    <span className="text-xs font-bold text-slate-700 truncate">Muddati o&apos;tgan</span>
                   </div>
-                  <p className="text-base sm:text-2xl font-black text-rose-950 tracking-tight truncate">
-                    {data.summary.overdueCount} ta mijoz
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-rose-700 font-semibold mt-0.5 sm:mt-1 truncate">
-                    {formatCurrency(data.summary.overdueAmount)} kechikkan
+
+                  <div className="my-2">
+                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                      {data.summary.overdueCount} ta mijoz
+                    </p>
+                  </div>
+
+                  <p className="text-[11px] text-rose-600 font-semibold truncate">
+                    {data.summary.overdueCount > 0
+                      ? `${formatCurrency(data.summary.overdueAmount)} xavfli`
+                      : 'Hammasi joyida'}
                   </p>
                 </div>
               </div>

@@ -113,22 +113,24 @@ export function DashboardStats({
           >
             {/* 1. Ambient Backlight Glow */}
             <div
-              className={`absolute -bottom-6 -right-6 w-28 h-28 ${stat.ambientGlow} rounded-full blur-2xl pointer-events-none`}
+              className={`absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 ${stat.ambientGlow} rounded-full blur-2xl pointer-events-none`}
             />
 
             {/* 2. Watermark Icon */}
             <Icon
-              className={`absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 ${stat.watermarkColor} -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6`}
+              className={`absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 ${stat.watermarkColor} -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6`}
             />
 
             {/* 3. Foreground Content */}
-            <div className="relative z-10 space-y-2">
+            <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   {stat.title}
                 </span>
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${stat.iconBg}`}>
-                  <Icon className="w-4 h-4" />
+                <div
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${stat.iconBg}`}
+                >
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
               </div>
 
