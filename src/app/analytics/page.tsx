@@ -378,40 +378,54 @@ export default function AnalyticsPage() {
               </div>
             )}
 
-            {/* 1. Kengaytirilgan KPI kartalari */}
+            {/* 1. Kengaytirilgan KPI kartalari (Ambient Glow & Watermark Icon) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Berilgan */}
-              <Card className="bg-gradient-to-br from-blue-50/80 via-white to-blue-50/40 border-blue-200/80 shadow-2xs rounded-3xl overflow-hidden relative">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-blue-900 flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-blue-600" />
-                      Berilgan
-                    </span>
-                    <span className="text-[10px] text-blue-600 font-bold bg-blue-100/80 px-2 py-0.5 rounded-full">
+              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 border border-blue-200/80 hover:border-blue-300 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                {/* Ambient Backlight Glow */}
+                <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
+                {/* Watermark Icon */}
+                <TrendingUp className="absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100/90 text-blue-600 flex items-center justify-center shadow-xs">
+                        <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-blue-950">Berilgan</span>
+                    </div>
+                    <span className="text-[10px] text-blue-700 font-bold bg-blue-100/80 px-2 py-0.5 rounded-full">
                       {data.summary.totalDebtsCount || 0} ta qarz
                     </span>
                   </div>
                   <p className="text-lg sm:text-2xl font-black text-blue-950 tracking-tight">
                     {formatCurrency(data.summary.totalIssued)}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                  <p className="text-[11px] text-slate-500 mt-1 font-medium truncate">
                     O&apos;rtacha:{' '}
                     <span className="font-semibold text-slate-700">
                       {formatCurrency(data.summary.averageDebtAmount || 0)}
                     </span>
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Qaytgan / Undirilgan */}
-              <Card className="bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/40 border-emerald-200/80 shadow-2xs rounded-3xl overflow-hidden relative">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-emerald-900 flex items-center gap-1.5">
-                      <TrendingDown className="w-4 h-4 text-emerald-600" />
-                      Qaytgan
-                    </span>
+              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 border border-emerald-200/80 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                {/* Ambient Backlight Glow */}
+                <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+                {/* Watermark Icon */}
+                <TrendingDown className="absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100/90 text-emerald-600 flex items-center justify-center shadow-xs">
+                        <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-emerald-950">Qaytgan</span>
+                    </div>
                     <span className="text-[10px] text-emerald-700 font-extrabold bg-emerald-100/90 px-2 py-0.5 rounded-full flex items-center gap-1">
                       <Sparkles className="w-2.5 h-2.5" />
                       {data.summary.repaymentRate}% yig&apos;im
@@ -420,24 +434,31 @@ export default function AnalyticsPage() {
                   <p className="text-lg sm:text-2xl font-black text-emerald-950 tracking-tight">
                     {formatCurrency(data.summary.totalReturned)}
                   </p>
-                  <p className="text-[11px] text-emerald-700 mt-1 font-medium">
+                  <p className="text-[11px] text-emerald-700 mt-1 font-medium truncate">
                     {data.summary.repaymentRate >= 80
                       ? 'Yig&apos;ish darajasi a&apos;lo'
                       : data.summary.repaymentRate > 0
                       ? 'Yig&apos;im davom etmoqda'
                       : 'Kutilayotgan tushumlar'}
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Qoldiq */}
-              <Card className="bg-gradient-to-br from-amber-50/80 via-white to-amber-50/40 border-amber-200/80 shadow-2xs rounded-3xl overflow-hidden relative">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-amber-900 flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-amber-600" />
-                      Qoldiq qarz
-                    </span>
+              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 border border-amber-200/80 hover:border-amber-300 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                {/* Ambient Backlight Glow */}
+                <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
+                {/* Watermark Icon */}
+                <Clock className="absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 text-amber-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shadow-xs">
+                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-amber-950">Qoldiq qarz</span>
+                    </div>
                     <span className="text-[10px] text-amber-700 font-bold bg-amber-100/80 px-2 py-0.5 rounded-full">
                       Kutilmoqda
                     </span>
@@ -445,23 +466,30 @@ export default function AnalyticsPage() {
                   <p className="text-lg sm:text-2xl font-black text-amber-950 tracking-tight">
                     {formatCurrency(data.summary.totalRemaining)}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                  <p className="text-[11px] text-slate-500 mt-1 font-medium truncate">
                     <span className="font-bold text-slate-700">
                       {data.summary.activeDebtorsCount || 0} ta
                     </span>{' '}
                     faol qarzdorda
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Muddati o'tgan */}
-              <Card className="bg-gradient-to-br from-rose-50/80 via-white to-rose-50/40 border-rose-200/80 shadow-2xs rounded-3xl overflow-hidden relative">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-rose-900 flex items-center gap-1.5">
-                      <ShieldAlert className="w-4 h-4 text-rose-600" />
-                      Muddati o&apos;tgan
-                    </span>
+              <div className="group relative overflow-hidden bg-gradient-to-br from-rose-50/60 via-white to-rose-50/30 border border-rose-200/80 hover:border-rose-300 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                {/* Ambient Backlight Glow */}
+                <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-rose-500/15 rounded-full blur-2xl pointer-events-none" />
+                {/* Watermark Icon */}
+                <ShieldAlert className="absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 text-rose-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-100/90 text-rose-600 flex items-center justify-center shadow-xs">
+                        <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-rose-950">Muddati o&apos;tgan</span>
+                    </div>
                     {data.summary.overdueCount > 0 ? (
                       <span className="text-[10px] text-rose-700 font-bold bg-rose-100 px-2 py-0.5 rounded-full">
                         ⚠️ Xavfli
@@ -475,11 +503,11 @@ export default function AnalyticsPage() {
                   <p className="text-lg sm:text-2xl font-black text-rose-950 tracking-tight">
                     {data.summary.overdueCount} ta mijoz
                   </p>
-                  <p className="text-[11px] text-rose-700 font-semibold mt-1">
+                  <p className="text-[11px] text-rose-700 font-semibold mt-1 truncate">
                     {formatCurrency(data.summary.overdueAmount)} kechikkan
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* 2. Asosiy Vizual Grafik (BarChart Cashflow) */}
