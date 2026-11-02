@@ -188,7 +188,7 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
                       currentPlan === 'PRO'
                         ? 'bg-amber-500 hover:bg-amber-600 text-white'
                         : currentPlan === 'PLUS'
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : 'bg-slate-200 text-slate-700'
                     }`}
                   >

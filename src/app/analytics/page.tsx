@@ -464,7 +464,7 @@ export default function AnalyticsPage() {
                   effectivePlan === 'PRO'
                     ? 'text-amber-600'
                     : effectivePlan === 'PLUS'
-                    ? 'text-purple-600'
+                    ? 'text-emerald-600'
                     : 'text-blue-600'
                 }`}
               >
