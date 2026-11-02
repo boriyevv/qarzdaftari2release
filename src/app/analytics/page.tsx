@@ -141,6 +141,7 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [subPlan, setSubPlan] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [activePieIndex, setActivePieIndex] = useState<number | null>(null)
 
   const effectivePlan = (subPlan || user?.plan_type || 'FREE').toUpperCase()
   const hasAccess = Boolean(user?.is_trial_active || (effectivePlan && effectivePlan !== 'FREE'))
@@ -401,8 +402,8 @@ export default function AnalyticsPage() {
     if (active && payload && payload.length) {
       const item = payload[0].payload
       return (
-        <div className="bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-xl border border-slate-800 text-xs space-y-1">
-          <p className="font-bold flex items-center gap-1.5">
+        <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-2xl border border-slate-700/80 text-xs space-y-1 relative z-50 pointer-events-none min-w-[150px]">
+          <p className="font-bold flex items-center gap-1.5 text-slate-100">
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
             {item.name}
           </p>
@@ -791,7 +792,7 @@ export default function AnalyticsPage() {
                       <div className="h-[180px] sm:h-[200px] w-full relative flex items-center justify-center">
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
-                            <Tooltip content={<CustomPieTooltip />} />
+                            <Tooltip content={<CustomPieTooltip />} wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }} />
                             <Pie
                               data={statusChartData}
                               cx="50%"
@@ -800,6 +801,8 @@ export default function AnalyticsPage() {
                               outerRadius={78}
                               paddingAngle={4}
                               dataKey="value"
+                              onMouseEnter={(_, index) => setActivePieIndex(index)}
+                              onMouseLeave={() => setActivePieIndex(null)}
                             >
                               {statusChartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -807,8 +810,12 @@ export default function AnalyticsPage() {
                             </Pie>
                           </PieChart>
                         </ResponsiveContainer>
-                        {/* Donut Markaziy Ko'rsatkich */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        {/* Donut Markaziy Ko'rsatkich - Hover qilinganda Tooltip bilan to'qnashmasligi uchun avtomatik yashiriladi */}
+                        <div
+                          className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-150 z-0 ${
+                            activePieIndex !== null ? 'opacity-0' : 'opacity-100'
+                          }`}
+                        >
                           <span className="text-lg sm:text-xl font-black text-slate-900">
                             {data.summary.repaymentRate}%
                           </span>
