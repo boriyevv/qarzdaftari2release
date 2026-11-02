@@ -25,7 +25,20 @@ import {
   Phone,
   ExternalLink,
   MessageSquare,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Loader2,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { exportAnalyticsToExcel, exportAnalyticsToPDF } from '@/lib/export/analytics-export'
 import {
   Dialog,
   DialogContent,
@@ -96,6 +109,18 @@ interface AnalyticsData {
     amount: number
     debtCount?: number
     isOverdue?: boolean
+  }>
+  debts?: Array<{
+    id: string
+    debtor_name: string
+    debtor_phone: string
+    amount: number
+    paid_amount: number
+    remaining_amount: number
+    status: string
+    status_label?: string
+    debt_date: string
+    due_date: string
   }>
 }
 
@@ -182,6 +207,43 @@ export default function AnalyticsPage() {
       setSmsStatus({ type: 'error', message: 'Server bilan aloqa uzildi' })
     } finally {
       setIsSendingSMS(false)
+    }
+  }
+
+  // Hisobot Eksport qilish holati
+  const [exporting, setExporting] = useState<string | null>(null)
+
+  const handleExport = async (format: 'excel' | 'pdf') => {
+    if (!data) return
+    setExporting(format)
+    try {
+      const options = {
+        storeName: user?.store_name || user?.full_name || "Qarz Daftari",
+        period,
+        summary: {
+          totalIssued: data.summary.totalIssued,
+          totalReturned: data.summary.totalReturned,
+          totalRemaining: data.summary.totalRemaining,
+          repaymentRate: data.summary.repaymentRate,
+          overdueCount: data.summary.overdueCount,
+          overdueAmount: data.summary.overdueAmount,
+          averageDebtAmount: data.summary.averageDebtAmount || 0,
+          totalDebtsCount: data.summary.totalDebtsCount || 0,
+          activeDebtorsCount: data.summary.activeDebtorsCount || 0,
+        },
+        topDebtors: data.topDebtors || [],
+        debts: data.debts || [],
+      }
+
+      if (format === 'excel') {
+        exportAnalyticsToExcel(options)
+      } else {
+        exportAnalyticsToPDF(options)
+      }
+    } catch (err) {
+      console.error('Export error:', err)
+    } finally {
+      setExporting(null)
     }
   }
 
@@ -407,6 +469,55 @@ export default function AnalyticsPage() {
                 {effectivePlan}
               </span>
             </Badge>
+
+            {/* 📥 Eksport Dropdown Menyusi */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  disabled={Boolean(exporting) || loading || !data}
+                  className="rounded-xl border-slate-200 hover:border-blue-300 font-bold text-xs h-8 px-3 shadow-2xs bg-white text-slate-700 hover:text-blue-600 flex items-center gap-1.5 transition-colors"
+                >
+                  {exporting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5 text-blue-600" />
+                  )}
+                  <span>{exporting ? 'Yuklanmoqda...' : 'Eksport'}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-slate-200 bg-white">
+                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">
+                  Hisobotni yuklab olish
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                <DropdownMenuItem
+                  onClick={() => handleExport('excel')}
+                  className="rounded-xl flex items-center gap-2.5 p-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100/90 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                    <FileSpreadsheet className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-bold">Excel hisobot</p>
+                    <p className="text-[10px] text-slate-400 font-normal">.xlsx jadval formati</p>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => handleExport('pdf')}
+                  className="rounded-xl flex items-center gap-2.5 p-2 text-xs font-semibold text-slate-700 hover:text-rose-700 hover:bg-rose-50 cursor-pointer transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-rose-100/90 text-rose-700 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-bold">PDF hisobot</p>
+                    <p className="text-[10px] text-slate-400 font-normal">A4 rasmiy hujjat</p>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

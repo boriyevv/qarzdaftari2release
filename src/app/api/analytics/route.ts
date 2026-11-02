@@ -313,6 +313,29 @@ export async function GET(request: NextRequest) {
 
     const activeDebtorsCount = Array.from(debtorMap.values()).filter(d => d.amount > 0).length
 
+    // Batafsil qarzlar ro'yxati (Eksport va hisobotlar uchun)
+    const exportDebts = targetDebtsForBalance.map(d => {
+      const amt = Number(d.amount) || 0
+      const paid = Number(d.paid_amount) || 0
+      const remaining = Math.max(0, amt - paid)
+      const isPaid = d.status === 'paid' || (amt > 0 && paid >= amt)
+      const isOverdue = !isPaid && d.due_date && new Date(d.due_date) < now
+
+      return {
+        id: d.id,
+        debtor_name: d.debtor_name || 'Noma\'lum',
+        debtor_phone: d.debtor_phone || '',
+        amount: amt,
+        paid_amount: paid,
+        remaining_amount: remaining,
+        status: isPaid ? 'paid' : (isOverdue ? 'overdue' : 'pending'),
+        status_label: isPaid ? 'To\'langan' : (isOverdue ? 'Kechikkan' : 'Kutilmoqda'),
+        debt_date: d.debt_date || d.created_at?.split('T')[0] || '',
+        due_date: d.due_date || 'Belgilanmagan',
+        created_at: d.created_at,
+      }
+    })
+
     // Javob obyekti
     return NextResponse.json({
       period,
@@ -333,6 +356,7 @@ export async function GET(request: NextRequest) {
       statusDistribution,
       months,
       topDebtors,
+      debts: exportDebts,
     })
   } catch (error: any) {
     console.error('❌ Analytics API error:', error)
