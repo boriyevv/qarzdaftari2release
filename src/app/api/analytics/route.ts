@@ -85,17 +85,30 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Do'kondagi barcha faol qarzlar (umumiy qoldiq va top qarzdorlarni aniqlash uchun)
+    const { data: allActiveDebts } = await adminSupabase
+      .from('debts')
+      .select('*')
+      .eq('user_id', profile.id)
+      .is('deleted_at', null)
+
+    const allDebtsList = allActiveDebts || []
     const safeDebts = debts || []
 
     // 1. Asosiy KPI hisob-kitoblari
+    // Davr bo'yicha pul oqimi:
     const totalIssued = safeDebts.reduce((sum, d) => sum + (Number(d.amount) || 0), 0)
     const totalReturned = safeDebts.reduce((sum, d) => sum + (Number(d.paid_amount) || 0), 0)
-    const totalRemaining = safeDebts.reduce((sum, d) => {
+
+    // Joriy do'kon balansi va muddati o'tganlar (Dashboard bilan 100% mutanosib):
+    const targetDebtsForBalance = allDebtsList.length > 0 ? allDebtsList : safeDebts
+
+    const totalRemaining = targetDebtsForBalance.reduce((sum, d) => {
       const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
       return sum + Math.max(0, remaining)
     }, 0)
 
-    const overdueDebts = safeDebts.filter(d => {
+    const overdueDebts = targetDebtsForBalance.filter(d => {
       const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
       return remaining > 0 && d.due_date && new Date(d.due_date) < now
     })
@@ -108,11 +121,13 @@ export async function GET(request: NextRequest) {
 
     const repaymentRate = totalIssued > 0
       ? Math.min(100, Math.round((totalReturned / totalIssued) * 100))
-      : 0
+      : (allDebtsList.length > 0
+          ? Math.min(100, Math.round((allDebtsList.reduce((s, d) => s + (Number(d.paid_amount) || 0), 0) / Math.max(1, allDebtsList.reduce((s, d) => s + (Number(d.amount) || 0), 0))) * 100))
+          : 0)
 
     const averageDebtAmount = safeDebts.length > 0
       ? Math.round(totalIssued / safeDebts.length)
-      : 0
+      : (allDebtsList.length > 0 ? Math.round(allDebtsList.reduce((s, d) => s + (Number(d.amount) || 0), 0) / allDebtsList.length) : 0)
 
     // 2. Qarzlar holati bo'yicha taqsimot (Status Distribution)
     let paidCount = 0
@@ -263,7 +278,8 @@ export async function GET(request: NextRequest) {
       isOverdue: boolean
     }>()
 
-    safeDebts.forEach(debt => {
+    // Top qarzdorlar uchun do'kondagi barcha mavjud faol qarzlardan foydalanamiz
+    targetDebtsForBalance.forEach(debt => {
       const key = debt.debtor_phone || debt.debtor_name || 'Noma\'lum'
       const amt = Number(debt.amount) || 0
       const paid = Number(debt.paid_amount) || 0

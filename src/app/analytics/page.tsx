@@ -22,7 +22,19 @@ import {
   Plus,
   Calendar,
   ArrowRight,
+  Phone,
+  ExternalLink,
+  MessageSquare,
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
 import { formatCurrency, formatCurrencyShort } from '@/lib/utils/currency'
@@ -107,6 +119,71 @@ export default function AnalyticsPage() {
 
   const effectivePlan = (subPlan || user?.plan_type || 'FREE').toUpperCase()
   const hasAccess = Boolean(user?.is_trial_active || (effectivePlan && effectivePlan !== 'FREE'))
+
+  // SMS Reminder Modal State
+  const [selectedDebtor, setSelectedDebtor] = useState<{
+    name: string
+    phone: string
+    amount: number
+  } | null>(null)
+  const [smsModalOpen, setSmsModalOpen] = useState(false)
+  const [smsMessage, setSmsMessage] = useState('')
+  const [smsCredits, setSmsCredits] = useState<number>(0)
+  const [isSendingSMS, setIsSendingSMS] = useState(false)
+  const [smsStatus, setSmsStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  const handleOpenSMS = (debtor: { name: string; phone: string; amount: number }) => {
+    setSelectedDebtor(debtor)
+    const storeTitle = user?.store_name || "Qarz Daftari"
+    const template = `Hurmatli ${debtor.name}, sizda ${formatCurrency(debtor.amount)} qarz mavjud. To'lashingizni so'raymiz. ${storeTitle}.`
+    setSmsMessage(template)
+    setSmsStatus(null)
+
+    const initialCredits = user?.sms_credits?.balance ?? 0
+    setSmsCredits(initialCredits)
+
+    fetch('/api/sms-credits')
+      .then((res) => res.json())
+      .then((d) => {
+        if (typeof d.remaining_credits === 'number') {
+          setSmsCredits(d.remaining_credits)
+        }
+      })
+      .catch(() => {})
+
+    setSmsModalOpen(true)
+  }
+
+  const handleSendSMS = async () => {
+    if (!selectedDebtor || !smsMessage.trim() || smsCredits <= 0) return
+    setIsSendingSMS(true)
+    setSmsStatus(null)
+    try {
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipient_phone: selectedDebtor.phone,
+          message: smsMessage,
+          type: 'payment_reminder',
+        }),
+      })
+      const result = await res.json()
+      if (res.ok) {
+        setSmsStatus({ type: 'success', message: 'SMS eslatma muvaffaqiyatli yuborildi!' })
+        setSmsCredits((prev) => Math.max(0, prev - 1))
+        setTimeout(() => {
+          setSmsModalOpen(false)
+        }, 1500)
+      } else {
+        setSmsStatus({ type: 'error', message: result.error || 'SMS yuborishda xatolik yuz berdi' })
+      }
+    } catch {
+      setSmsStatus({ type: 'error', message: 'Server bilan aloqa uzildi' })
+    } finally {
+      setIsSendingSMS(false)
+    }
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -340,147 +417,150 @@ export default function AnalyticsPage() {
           </div>
         ) : data ? (
           <>
-            {/* 🌟 USER ONBOARDING BANNER: Agar ushbu davrda umuman qarz bo'lmasa */}
-            {data.summary.totalDebtsCount === 0 && (
-              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-2xl p-3.5 sm:p-5 text-white shadow-md shadow-blue-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 text-amber-300 shadow-xs">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white truncate">
-                      Bu davrda hali qarz yozuvlari yo&apos;q
-                    </h3>
-                    <p className="text-xs text-blue-100/90 truncate">
-                      Nasiyalar kiritilgach, avtomatik grafiklar va tahlillar shakllanadi
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
-                  <Link href="/dashboard">
-                    <Button className="bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl h-8 px-3 text-xs shadow-xs">
-                      <Plus className="w-3.5 h-3.5 mr-1" />
-                      Qarz kiritish
-                    </Button>
-                  </Link>
-                  {period !== 'monthly' && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setPeriod('monthly')}
-                      className="border-white/30 text-white hover:bg-white/10 rounded-xl h-8 px-2.5 text-xs font-semibold"
-                    >
-                      30 kun
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* 1. Kengaytirilgan KPI kartalari */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {/* 1. Kengaytirilgan Asosiy KPI kartalari (Dashboard bilan 100% uyg'un va keng) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Berilgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/20 border border-blue-200/80 hover:border-blue-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-                <TrendingUp className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-blue-600/[0.07] sm:text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 border border-blue-200/80 hover:border-blue-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
+                <TrendingUp className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100/90 text-blue-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                      <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Berilgan Nasiya
+                    </span>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center bg-blue-600 text-white shadow-md shadow-blue-500/25">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <span className="text-xs font-bold text-slate-700 truncate">Berilgan</span>
                   </div>
 
-                  <div className="my-2">
-                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                  <div className="space-y-1">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
                       {formatCurrency(data.summary.totalIssued)}
-                    </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                        {data.summary.totalDebtsCount || 0} ta qarz yozuvi
+                      </p>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 text-blue-700 border-blue-200/60">
+                        {period === 'monthly' ? '30 kunlik' : period === 'semi_annual' ? '6 oylik' : '1 yillik'}
+                      </span>
+                    </div>
                   </div>
-
-                  <p className="text-[11px] text-blue-600 font-semibold truncate">
-                    {data.summary.totalDebtsCount || 0} ta qarz berildi
-                  </p>
                 </div>
               </div>
 
               {/* Qaytgan / Undirilgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/20 border border-emerald-200/80 hover:border-emerald-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-                <TrendingDown className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-emerald-600/[0.07] sm:text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 border border-emerald-200/80 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
+                <TrendingDown className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100/90 text-emerald-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                      <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Qaytarilgan
+                    </span>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center bg-emerald-600 text-white shadow-md shadow-emerald-500/25">
+                      <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <span className="text-xs font-bold text-slate-700 truncate">Qaytgan</span>
                   </div>
 
-                  <div className="my-2">
-                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                  <div className="space-y-1">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
                       {formatCurrency(data.summary.totalReturned)}
-                    </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                        Kutilayotgan tushumlar
+                      </p>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-100/80 text-emerald-700 border-emerald-200/60">
+                        {data.summary.repaymentRate}% yig&apos;ildi
+                      </span>
+                    </div>
                   </div>
-
-                  <p className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 truncate">
-                    <Sparkles className="w-3 h-3 flex-shrink-0" />
-                    <span>{data.summary.repaymentRate}% yig&apos;ildi</span>
-                  </p>
                 </div>
               </div>
 
               {/* Qoldiq */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/20 border border-amber-200/80 hover:border-amber-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
-                <Clock className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-amber-600/[0.07] sm:text-amber-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 border border-amber-200/80 hover:border-amber-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
+                <Clock className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-amber-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100/90 text-amber-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Qoldiq Qarz
+                    </span>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center bg-amber-600 text-white shadow-md shadow-amber-500/25">
+                      <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <span className="text-xs font-bold text-slate-700 truncate">Qoldiq qarz</span>
                   </div>
 
-                  <div className="my-2">
-                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                  <div className="space-y-1">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
                       {formatCurrency(data.summary.totalRemaining)}
-                    </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                        {data.summary.activeDebtorsCount || 0} ta qarzdorda
+                      </p>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100/80 text-amber-700 border-amber-200/60">
+                        Kutilmoqda
+                      </span>
+                    </div>
                   </div>
-
-                  <p className="text-[11px] text-amber-700 font-medium truncate">
-                    {data.summary.activeDebtorsCount || 0} ta qarzdorda
-                  </p>
                 </div>
               </div>
 
               {/* Muddati o'tgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-rose-50/60 via-white to-rose-50/20 border border-rose-200/80 hover:border-rose-300 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 sm:w-28 sm:h-28 bg-rose-500/15 rounded-full blur-2xl pointer-events-none" />
-                <ShieldAlert className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-16 h-16 sm:w-24 sm:h-24 text-rose-600/[0.07] sm:text-rose-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className={`group relative overflow-hidden bg-gradient-to-br ${data.summary.overdueCount > 0 ? 'from-rose-50/60 via-white to-rose-50/30 border-rose-200/80 hover:border-rose-300' : 'from-slate-50/60 via-white to-slate-50/30 border-slate-200/80 hover:border-slate-300'} border rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs`}>
+                <div className={`absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 ${data.summary.overdueCount > 0 ? 'bg-rose-500/15' : 'bg-slate-500/10'} rounded-full blur-2xl pointer-events-none`} />
+                <ShieldAlert className={`absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 ${data.summary.overdueCount > 0 ? 'text-rose-600/10' : 'text-slate-600/10'} -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6`} />
 
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-100/90 text-rose-600 flex items-center justify-center shadow-xs flex-shrink-0">
-                      <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Muddati O&apos;tgan
+                    </span>
+                    <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${data.summary.overdueCount > 0 ? 'bg-rose-600 text-white shadow-md shadow-rose-500/25' : 'bg-slate-700 text-white shadow-xs'}`}>
+                      <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <span className="text-xs font-bold text-slate-700 truncate">Muddati o&apos;tgan</span>
                   </div>
 
-                  <div className="my-2">
-                    <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate">
+                  <div className="space-y-1">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
                       {data.summary.overdueCount} ta mijoz
-                    </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                        {data.summary.overdueCount > 0
+                          ? `${formatCurrency(data.summary.overdueAmount)} xavfli`
+                          : 'Hammasi joyida'}
+                      </p>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${data.summary.overdueCount > 0 ? 'bg-rose-100/90 text-rose-700 border-rose-200/60' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                        {data.summary.overdueCount > 0 ? 'Diqqat talab' : 'Nazoratda'}
+                      </span>
+                    </div>
                   </div>
-
-                  <p className="text-[11px] text-rose-600 font-semibold truncate">
-                    {data.summary.overdueCount > 0
-                      ? `${formatCurrency(data.summary.overdueAmount)} xavfli`
-                      : 'Hammasi joyida'}
-                  </p>
                 </div>
               </div>
             </div>
+
+            {/* 🌟 Kichik va ixcham info banner: faqat qarz yozuvlari kiritilmagan bo'lsa */}
+            {data.summary.totalDebtsCount === 0 && (
+              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-3.5 border border-blue-100 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 text-slate-700">
+                  <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Tanlangan davrda qarz yozuvlari mavjud emas.</span>
+                </div>
+                <Link href="/dashboard">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl h-7 px-3 text-xs shadow-2xs">
+                    <Plus className="w-3 h-3 mr-1" />
+                    Qarz qo&apos;shish
+                  </Button>
+                </Link>
+              </div>
+            )}
 
             {/* 2. Asosiy Vizual Grafik (BarChart Cashflow) */}
             <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden">
@@ -699,17 +779,26 @@ export default function AnalyticsPage() {
                       {data.topDebtors.map((debtor, index) => (
                         <div
                           key={debtor.phone || index}
-                          className="flex items-center justify-between p-3 bg-slate-50/80 hover:bg-slate-100/80 transition-colors border border-slate-100 rounded-2xl"
+                          className="flex items-center justify-between p-3 sm:p-3.5 bg-slate-50/80 hover:bg-slate-100/80 transition-colors border border-slate-100 rounded-2xl gap-3"
                         >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-xl bg-blue-100/90 text-blue-700 flex items-center justify-center font-black text-xs flex-shrink-0">
+                          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-100/90 text-blue-700 flex items-center justify-center font-black text-xs flex-shrink-0">
                               {index + 1}
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <p className="font-bold text-sm text-slate-900 truncate">
-                                  {debtor.name}
-                                </p>
+                                {debtor.phone ? (
+                                  <Link
+                                    href={`/debtor/${debtor.phone}`}
+                                    className="font-bold text-sm text-slate-900 hover:text-blue-600 transition-colors truncate"
+                                  >
+                                    {debtor.name}
+                                  </Link>
+                                ) : (
+                                  <span className="font-bold text-sm text-slate-900 truncate">
+                                    {debtor.name}
+                                  </span>
+                                )}
                                 {debtor.isOverdue && (
                                   <Badge
                                     variant="destructive"
@@ -719,17 +808,50 @@ export default function AnalyticsPage() {
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-slate-500 truncate">{debtor.phone}</p>
+                              <p className="text-xs text-slate-500 truncate">{debtor.phone || 'Telefon kiritilmagan'}</p>
                             </div>
                           </div>
 
-                          <div className="text-right flex-shrink-0 ml-3">
-                            <p className="font-black text-blue-600 text-sm sm:text-base">
-                              {formatCurrency(debtor.amount)}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-medium">
-                              {debtor.debtCount || 1} ta faol qarz
-                            </p>
+                          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                            <div className="text-right">
+                              <p className="font-black text-blue-600 text-sm sm:text-base">
+                                {formatCurrency(debtor.amount)}
+                              </p>
+                              <p className="text-[10px] text-slate-400 font-medium">
+                                {debtor.debtCount || 1} ta faol qarz
+                              </p>
+                            </div>
+
+                            {/* Tezkor Aloqa va SMS tugmalari */}
+                            <div className="flex items-center gap-1">
+                              {debtor.phone && (
+                                <a
+                                  href={`tel:${debtor.phone}`}
+                                  title="Qo'ng'iroq qilish"
+                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 border border-slate-200/80 flex items-center justify-center transition-colors shadow-2xs"
+                                >
+                                  <Phone className="w-3.5 h-3.5" />
+                                </a>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenSMS(debtor)}
+                                title="SMS Eslatma yuborish"
+                                className="w-7 h-7 sm:w-8 sm:h-8 p-0 rounded-xl bg-white hover:bg-blue-50 hover:text-blue-600 text-slate-600 border border-slate-200/80 flex items-center justify-center transition-colors shadow-2xs"
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                              </Button>
+                              {debtor.phone && (
+                                <Link
+                                  href={`/debtor/${debtor.phone}`}
+                                  title="Mijoz profiliga o'tish"
+                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white hover:bg-slate-200 text-slate-500 border border-slate-200/80 hidden sm:flex items-center justify-center transition-colors shadow-2xs"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </Link>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -855,6 +977,111 @@ export default function AnalyticsPage() {
           </div>
         )}
       </div>
+
+      {/* 📩 SMS Eslatma Yuborish Modali */}
+      <Dialog open={smsModalOpen} onOpenChange={setSmsModalOpen}>
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border border-slate-200 shadow-xl">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Send className="w-5 h-5 text-blue-600" />
+              SMS Eslatma yuborish
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              {selectedDebtor?.name} ({selectedDebtor?.phone || 'Telefon yo\'q'}) mijoziga to&apos;lov eslatmasi
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* SMS Credits Balans Ko'rsatkichi */}
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
+              <span className="text-slate-600 font-medium flex items-center gap-1.5">
+                <MessageSquare className="w-4 h-4 text-slate-400" />
+                SMS balansingiz:
+              </span>
+              <Badge
+                variant={smsCredits > 0 ? "secondary" : "destructive"}
+                className="font-bold text-xs rounded-lg"
+              >
+                {smsCredits} ta kredit
+              </Badge>
+            </div>
+
+            {smsCredits === 0 && (
+              <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-2xl text-xs text-amber-800 flex items-start justify-between gap-2">
+                <span>SMS yuborish uchun balansingizda kredit mavjud emas.</span>
+                <Link
+                  href="/sms-credits"
+                  target="_blank"
+                  className="font-bold text-amber-900 underline flex-shrink-0"
+                >
+                  Sotib olish ↗
+                </Link>
+              </div>
+            )}
+
+            {/* Xabar Matni */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <label className="font-semibold text-slate-700">Xabar matni:</label>
+                <span>{smsMessage.length} belgi</span>
+              </div>
+              <Textarea
+                value={smsMessage}
+                onChange={(e) => setSmsMessage(e.target.value)}
+                rows={4}
+                className="rounded-2xl border-slate-200 text-sm focus:border-blue-500 resize-none p-3"
+                placeholder="Xabar matnini kiriting..."
+              />
+            </div>
+
+            {/* Status Xabari */}
+            {smsStatus && (
+              <div
+                className={`p-3 rounded-2xl text-xs font-semibold flex items-center gap-2 ${
+                  smsStatus.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}
+              >
+                {smsStatus.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                )}
+                <span>{smsStatus.message}</span>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex sm:justify-between items-center gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setSmsModalOpen(false)}
+              className="rounded-xl border-slate-200 font-semibold text-xs h-9 px-4"
+              disabled={isSendingSMS}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              onClick={handleSendSMS}
+              disabled={isSendingSMS || smsCredits <= 0 || !smsMessage.trim()}
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 font-bold text-xs h-9 px-5 shadow-xs text-white"
+            >
+              {isSendingSMS ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Yuborilmoqda...
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5 mr-1.5" />
+                  SMS yuborish (1 kredit)
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   )
 }
