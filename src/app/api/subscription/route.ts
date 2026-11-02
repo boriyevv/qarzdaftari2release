@@ -1,6 +1,7 @@
 // src/app/api/subscription/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getCurrentUser } from '@/lib/auth/middleware'
 import { uzumPayment } from '@/lib/payments/uzum'
 import { parsePaymentOrder, processSuccessfulPayment } from '@/lib/payments/common'
 
@@ -8,35 +9,21 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const adminSupabase = createAdminClient()
     
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Get current user (supports both email and phone OTP sessions)
+    const profile = await getCurrentUser()
     
-    if (authError || !user) {
+    if (!profile) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get user profile with subscription
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id, plan_type, subscription_status, subscription_expires_at, last_payment_date')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      )
-    }
-
     // Auto-sync any pending Uzum transactions
     try {
-      const { data: pendingUzumTx } = await supabase
+      const { data: pendingUzumTx } = await adminSupabase
         .from('payment_transactions')
         .select('*')
         .eq('user_id', profile.id)
@@ -49,29 +36,47 @@ export async function GET(request: NextRequest) {
       if (pendingUzumTx && uzumPayment.isConfigured()) {
         const orderId = pendingUzumTx.external_id || pendingUzumTx.external_data?.orderId
         if (orderId) {
-          const uzumStatus = await uzumPayment.getOrderStatus(orderId)
-          if (uzumStatus && (uzumStatus.status === 'COMPLETED' || uzumStatus.status === 'TOP_UP_COMPLETED')) {
-            const parsedOrder = pendingUzumTx.external_data?.order || parsePaymentOrder(pendingUzumTx.external_data?.rawTransactionId)
-            if (parsedOrder) {
-              await processSuccessfulPayment(supabase, {
-                provider: 'uzum',
-                order: parsedOrder,
-                amount: pendingUzumTx.amount,
-                externalId: orderId,
-                externalData: uzumStatus,
-                transactionRecordId: pendingUzumTx.id,
-              })
-              const { data: updatedProfile } = await supabase
-                .from('users')
-                .select('id, plan_type, subscription_status, subscription_expires_at, last_payment_date')
-                .eq('id', profile.id)
-                .single()
-              if (updatedProfile) {
-                profile.plan_type = updatedProfile.plan_type
-                profile.subscription_status = updatedProfile.subscription_status
-                profile.subscription_expires_at = updatedProfile.subscription_expires_at
-                profile.last_payment_date = updatedProfile.last_payment_date
+          try {
+            const uzumStatus = await uzumPayment.getOrderStatus(orderId)
+            if (uzumStatus && (uzumStatus.status === 'COMPLETED' || uzumStatus.status === 'TOP_UP_COMPLETED')) {
+              const parsedOrder = pendingUzumTx.external_data?.order || parsePaymentOrder(pendingUzumTx.external_data?.rawTransactionId)
+              if (parsedOrder) {
+                await processSuccessfulPayment(adminSupabase, {
+                  provider: 'uzum',
+                  order: parsedOrder,
+                  amount: pendingUzumTx.amount,
+                  externalId: orderId,
+                  externalData: uzumStatus,
+                  transactionRecordId: pendingUzumTx.id,
+                })
+                const { data: updatedProfile } = await adminSupabase
+                  .from('users')
+                  .select('id, plan_type, subscription_status, subscription_expires_at, last_payment_date')
+                  .eq('id', profile.id)
+                  .single()
+                if (updatedProfile) {
+                  profile.plan_type = updatedProfile.plan_type
+                  profile.subscription_status = updatedProfile.subscription_status
+                  profile.subscription_expires_at = updatedProfile.subscription_expires_at
+                  profile.last_payment_date = updatedProfile.last_payment_date
+                }
               }
+            } else if (uzumStatus && ['DECLINED', 'REVERSED'].includes(uzumStatus.status)) {
+              await adminSupabase
+                .from('payment_transactions')
+                .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+                .eq('id', pendingUzumTx.id)
+            }
+          } catch (uzumErr: any) {
+            const errMsg = uzumErr?.message || String(uzumErr)
+            if (errMsg.includes('3005') || errMsg.includes('not found') || errMsg.includes('rejected')) {
+              console.warn(`⚠️ Uzum order ${orderId} not found or rejected. Marking transaction as cancelled.`)
+              await adminSupabase
+                .from('payment_transactions')
+                .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+                .eq('id', pendingUzumTx.id)
+            } else {
+              console.warn('⚠️ Uzum getOrderStatus warning:', errMsg)
             }
           }
         }
@@ -81,7 +86,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get latest subscriptions
-    const { data: subscriptions } = await supabase
+    const { data: subscriptions } = await adminSupabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', profile.id)

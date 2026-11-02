@@ -77,6 +77,7 @@ _Eslatma: Har qanday yangi g'oyani ushbu faylga qo'shib borishingiz mumkin. Anti
 
 ## MY NOTES
 
-(1) Chech the navigation from dashboard to others because the current version is kinda daunting to navigate easily
-(2) Work on other payment provider, such as Payme and Click
-(3) AGAIN the UI design still kinda lacks
+- [x] **(1) Check the navigation from dashboard to others**: Yagona `AppShell` tizimi yaratildi, layout sakrashlari bartaraf etildi, breadcrumbs va barqaror navigatsiya barcha sahifalarga bog'landi. ----- (4)
+- [ ] **(2) Work on other payment provider, such as Payme and Click**
+- [ ] **(3) AGAIN the UI design still kinda lacks**
+- [x] **(4) Work immediately on sidebar on all the routes**: Barcha marshrutlarda (`/dashboard`, `/analytics`, `/sms-credits`, `/pricing`, `/profile`, `/debtor/[phone]`) zamonaviy Collapsible Sidebar va mobil Drawer integratsiya qilindi. Dashboarddagi 288px'lik og'ir ikkinchi sidebar zamonaviy gorizontal `FolderFilterBar` chiplari bilan almashtirildi. ----- (1)

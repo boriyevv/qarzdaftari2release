@@ -1,6 +1,7 @@
 // src/app/api/payments/create/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getCurrentUser } from '@/lib/auth/middleware'
 import { clickPayment } from '@/lib/payments/click'
 import { paymePayment } from '@/lib/payments/payme'
 import { uzumPayment } from '@/lib/payments/uzum'
@@ -10,33 +11,19 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const adminSupabase = createAdminClient()
     
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Get current user (supports both Supabase email auth and phone OTP session)
+    const profile = await getCurrentUser()
     
-    if (authError || !user) {
+    if (!profile) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id, plan_type')
-      .eq('auth_id', user.id)
-      .single()
-
-      console.log('📋 Profile:', profile, '| Plan:', profile?.plan_type)
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      )
-    }
+    console.log('📋 Profile:', profile.id, '| Plan:', profile?.plan_type)
 
     const body = await request.json()
     console.log('📦 Body:', body)
@@ -88,6 +75,8 @@ export async function POST(request: NextRequest) {
 
     switch (provider) {
       case 'click':
+      case 'click_card':
+      case 'card':
         paymentUrl = clickPayment.generatePaymentUrl({
           amount,
           userId: profile.id,
@@ -114,7 +103,7 @@ export async function POST(request: NextRequest) {
           planType,
           transactionId,
           returnUrl: uzumReturnUrl,
-          supabase,
+          supabase: adminSupabase,
         })
         break
 
@@ -126,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log activity
-    await supabase.from('activity_logs').insert({
+    await adminSupabase.from('activity_logs').insert({
       user_id: profile.id,
       action: 'payment_initiated',
       entity_type: 'subscription',

@@ -1,21 +1,18 @@
-// // src/app/dashboard/page.tsx
-// // Fully responsive with mobile FAB, drawer sidebar, drag & drop
+// src/app/dashboard/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useUser } from '@/lib/contexts/user-context'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { FoldersSidebarResponsive } from '@/components/folders/folders-sidebar-responsive'
+import { FolderFilterBar } from '@/components/folders/folder-filter-bar'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { DebtsListDraggable } from '@/components/debts/debts-list-draggable'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { SubscriptionBanner } from '@/components/dashboard/subscription-banner'
 import { OnboardingTooltip } from '@/components/onboarding/tooltip-guide'
-import { MainNav } from '@/components/layout/main-nav'
-
-
+import { AppShell } from '@/components/layout/app-shell'
+import { Plus } from 'lucide-react'
 
 interface Debt {
   id: string
@@ -34,22 +31,12 @@ interface Debt {
   } | null
 }
 
-
-
-
-
 export default function DashboardPage() {
-
-  
-  //  const { user, loading: userLoading } = useUser()
-  
   const { user, loading: userLoading } = useUser()
-  console.log('🔍 userLoading:', userLoading, '| user:', user?.full_name)
   const router = useRouter()
   const [debts, setDebts] = useState<Debt[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFolder, setActiveFolder] = useState('all')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false)
 
   useEffect(() => {
@@ -85,14 +72,8 @@ export default function DashboardPage() {
     }
   }
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.href = '/login'
-  }
-
   const handleFolderChange = (folderId: string) => {
     setActiveFolder(folderId)
-    setIsSidebarOpen(false)
   }
 
   if (userLoading || !user) {
@@ -100,7 +81,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Yuklanmoqda...</p>
+          <p className="mt-4 text-slate-600 text-sm">Yuklanmoqda...</p>
         </div>
       </div>
     )
@@ -113,181 +94,77 @@ export default function DashboardPage() {
   const overdueCount = debts.filter((d) => d.status === 'overdue').length
 
   return (
-    <>
-      {/* ========================================
-          MOBILE LAYOUT (< lg breakpoint)
-          ======================================== */}
-      <div className="lg:hidden min-h-screen bg-slate-50 pb-20">
-        <SubscriptionBanner/>
-        <OnboardingTooltip/>
-        {/* Mobile Header */}
-        <header className="bg-white border-b sticky top-0 z-20 shadow-sm">
-          <div className="px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* Hamburger Menu */}
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
+    <AppShell
+      title="Dashboard"
+      subtitle={user.store_name || "Do'kon boshqaruvi"}
+      showAddDebtButton={true}
+      onAddDebtSuccess={fetchDebts}
+      actions={
+        <Button
+          onClick={() => setIsAddDebtOpen(true)}
+          className="hidden sm:inline-flex bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm h-9 px-3.5 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
+        >
+          <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+          Yangi Qarz
+        </Button>
+      }
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6">
+        {/* Subscription & Onboarding Guides */}
+        <SubscriptionBanner />
+        <OnboardingTooltip />
 
-              <div>
-                <h1 className="text-lg font-bold">Dashboard</h1>
-                <p className="text-xs text-slate-600 truncate max-w-[150px]">
-                  {user.store_name}
-                </p>
-              </div>
-            </div>
+        {/* Financial Overview Stats Cards */}
+        <DashboardStats
+          totalDebts={totalDebts}
+          totalAmount={totalAmount}
+          totalPaid={totalPaid}
+          totalRemaining={totalRemaining}
+          overdueCount={overdueCount}
+        />
 
-            <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
-          </div>
-        </header>
-
-        {/* Mobile Stats */}
-        <div className="p-4">
-          <DashboardStats
-            totalDebts={totalDebts}
-            totalAmount={totalAmount}
-            totalPaid={totalPaid}
-            totalRemaining={totalRemaining}
-            overdueCount={overdueCount}
+        {/* Horizontal Folder Filter Bar */}
+        <div className="pt-2">
+          <FolderFilterBar
+            activeFolder={activeFolder}
+            onFolderChange={handleFolderChange}
           />
         </div>
 
-        {/* Mobile Debts List */}
-        <div className="px-4">
+        {/* Debts List */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-4 sm:p-6 min-h-[300px]">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-blue-600"></div>
+              <p className="text-slate-500 text-xs mt-3">Qarzlar yuklanmoqda...</p>
             </div>
           ) : (
             <DebtsListDraggable debts={debts} onUpdate={fetchDebts} />
           )}
         </div>
-
-        {/* Mobile FAB (Floating Action Button) */}
-        <div className="fixed bottom-16 right-6 z-30">
-          <button
-            onClick={() => setIsAddDebtOpen(true)}
-            className="h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center justify-center"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-        </div>
-
-<MainNav />
-
-        {/* Mobile Sidebar Drawer */}
-        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <SheetContent side="left" className="w-80 p-0">
-            <FoldersSidebarResponsive
-              activeFolder={activeFolder}
-              onFolderChange={handleFolderChange}
-              onClose={() => setIsSidebarOpen(false)}
-            />
-          </SheetContent>
-        </Sheet>
-      </div>
-            
-
-      {/* ========================================
-          DESKTOP LAYOUT (>= lg breakpoint)
-          ======================================== */}
-      <div className="hidden lg:flex min-h-screen bg-slate-50">
-        {/* Desktop Sidebar */}
-        <div className="w-80 border-r bg-white h-screen sticky top-0">
-          <FoldersSidebarResponsive
-            activeFolder={activeFolder}
-            onFolderChange={setActiveFolder}
-          />
-        </div>
-
-        {/* Desktop Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen">
-          {/* Desktop Header */}
-          <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
-            <div className="px-6 py-4">
-             <SubscriptionBanner/>
-
-
-
-              <div className="flex items-center justify-between mt-4">
-                <div>
-                  <h1 className="text-2xl font-bold">Dashboard</h1>
-                  <p className="text-sm text-slate-600">{user.store_name}</p>
-                </div>
-                <div className="hidden lg:flex items-center gap-3">
-                  <Button onClick={() => setIsAddDebtOpen(true)}>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Yangi Qarz
-                  </Button>
-                  <Button variant="outline" onClick={handleLogout}>
-                    Chiqish
-
-                    <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Desktop Stats */}
-          <div className="p-6">
-            <DashboardStats
-              totalDebts={totalDebts}
-              totalAmount={totalAmount}
-              totalPaid={totalPaid}
-              totalRemaining={totalRemaining}
-              overdueCount={overdueCount}
-            />
-          </div>
-
-            
-          {/* Desktop Debts List */}
-          <div className="flex-1 px-6 pb-6">
-
-
-
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : (
-              <DebtsListDraggable debts={debts} onUpdate={fetchDebts} />
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* Add Debt Modal (Shared for both mobile and desktop) */}
+      {/* Mobile Floating Action Button (FAB) */}
+      <div className="lg:hidden fixed bottom-20 right-5 z-40">
+        <button
+          onClick={() => setIsAddDebtOpen(true)}
+          className="h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center"
+          aria-label="Yangi qarz qo'shish"
+        >
+          <Plus className="w-7 h-7 stroke-[2.5]" />
+        </button>
+      </div>
+
+      {/* Add Debt Modal */}
       <AddDebtModal
         open={isAddDebtOpen}
         onOpenChange={setIsAddDebtOpen}
+        folderId={activeFolder === 'all' ? null : activeFolder}
         onSuccess={async () => {
           fetchDebts()
           setIsAddDebtOpen(false)
         }}
       />
-    </>
+    </AppShell>
   )
 }
-
-
-

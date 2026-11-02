@@ -2,11 +2,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
   Home,
   BarChart3,
-  CreditCard,
   MessageSquare,
   User,
   Crown,
@@ -14,7 +13,6 @@ import {
   LogOut,
   Sparkles,
   ChevronRight,
-  ShieldCheck,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useUser } from '@/lib/contexts/user-context'
@@ -24,12 +22,10 @@ interface NavItem {
   href: string
   icon: React.ComponentType<{ className?: string }>
   badge?: string
-  badgeVariant?: 'default' | 'secondary' | 'destructive'
 }
 
 export function MainNav({ userPlan }: { userPlan?: string }) {
   const pathname = usePathname()
-  const router = useRouter()
   const { user } = useUser()
 
   const currentPlan = (user?.plan_type || userPlan || 'FREE').toUpperCase()
@@ -111,7 +107,7 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
                       group relative flex items-center justify-between px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
                       ${
                         isActive
-                          ? 'bg-gradient-to-r from-blue-50 to-indigo-50/60 text-blue-600 shadow-xs'
+                          ? 'bg-gradient-to-r from-blue-50 to-indigo-50/60 text-blue-600 shadow-2xs font-semibold'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50/80'
                       }
                     `}
@@ -183,7 +179,6 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
                   </Badge>
                 </div>
 
-                {/* If Free Plan, Upgrade prompt */}
                 {currentPlan === 'FREE' && (
                   <Link
                     href="/pricing"
@@ -221,7 +216,7 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
 
       {/* Mobile Glass Bottom Nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200/80 z-50 shadow-lg">
-        <div className="grid grid-cols-5 gap-1 py-1 px-2">
+        <div className="grid grid-cols-5 gap-1 py-1.5 px-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
@@ -233,7 +228,7 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
                   flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-colors
                   ${
                     isActive
-                      ? 'text-blue-600 bg-blue-50/60'
+                      ? 'text-blue-600 bg-blue-50/60 font-bold'
                       : 'text-slate-500 hover:text-slate-900'
                   }
                 `}
@@ -253,3 +248,5 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
     </>
   )
 }
+
+export { AppShell } from '@/components/layout/app-shell'

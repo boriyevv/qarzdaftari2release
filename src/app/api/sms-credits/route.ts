@@ -1,39 +1,26 @@
 // src/app/api/sms-credits/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getCurrentUser } from '@/lib/auth/middleware'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const adminSupabase = createAdminClient()
     
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Get current user (supports both Supabase email auth and phone OTP session)
+    const profile = await getCurrentUser()
     
-    if (authError || !user) {
+    if (!profile) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      )
-    }
-
     // Get SMS credits
-    const { data: credits } = await supabase
+    const { data: credits } = await adminSupabase
       .from('sms_credits')
       .select('credits, used_credits')
       .eq('user_id', profile.id)
@@ -43,7 +30,7 @@ export async function GET(request: NextRequest) {
     const remainingCredits = totalCredits - usedCredits
 
     // Get recent purchases
-    const { data: purchases } = await supabase
+    const { data: purchases } = await adminSupabase
       .from('sms_credit_purchases')
       .select('credits, amount, created_at')
       .eq('user_id', profile.id)
@@ -51,7 +38,7 @@ export async function GET(request: NextRequest) {
       .limit(5)
 
     // Get usage history
-    const { data: usage } = await supabase
+    const { data: usage } = await adminSupabase
       .from('sms_usage_log')
       .select('recipient_phone, created_at')
       .eq('user_id', profile.id)

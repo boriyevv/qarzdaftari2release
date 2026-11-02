@@ -3,12 +3,23 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Check, CreditCard, Zap, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react'
+import {
+  Check,
+  X,
+  ArrowRight,
+  Zap,
+  Crown,
+  Sparkles,
+  Shield,
+  Star,
+  Rocket,
+  Gift,
+  ChevronRight,
+  HelpCircle,
+  ChevronDown,
+  CheckCircle2,
+  Lock,
+} from 'lucide-react'
 import {
   PLANS,
   BILLING_CYCLES,
@@ -18,16 +29,45 @@ import {
   formatPrice,
   formatPricePerMonth,
   getDiscount,
+  getPlanPrice,
   type BillingCycle
 } from '@/lib/constants/plans'
-import { MainNav } from '@/components/layout/main-nav'
+import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
+import { ClickOnSiteModal } from '@/components/payments/click-on-site-modal'
+import { UzumPaymentModal } from '@/components/payments/uzum-payment-modal'
 import {
   PaymentMethodsRow,
   UzumBankLogo,
   PaymeLogo,
   ClickLogo,
 } from '@/components/payments/payment-logos'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+const CYCLE_OPTIONS: { value: BillingCycle; label: string; discount?: number }[] = [
+  { value: 'monthly', label: 'Oylik' },
+  { value: 'semi_annual', label: '6 oylik', discount: 5 },
+  { value: 'annual', label: 'Yillik', discount: 10 },
+]
+
+const FAQS = [
+  {
+    q: "Tarifni keyinchalik o'zgartirish yoki oshirish mumkinmi?",
+    a: "Ha, albatta. Istalgan vaqtda Plus tarifidan Pro tarifiga yangilashingiz mumkin. Amal qilish muddati va to'lovingiz avtomatik hisoblab chiqiladi.",
+  },
+  {
+    q: "Qanday to'lov usullari qo'llab-quvvatlanadi?",
+    a: "Uzum Bank, Click va Payme orqali to'lov qabul qilinadi. Barcha Uzcard, Humo, Visa va Mastercard kartalari ishlaydi. To'lovlar 100% xavfsiz shlyuzlar orqali o'tadi.",
+  },
+  {
+    q: "SMS xabarnomalar qanday ishlaydi?",
+    a: "Telegram eslatmalar barcha tariflarda cheksiz va bepul ishlaydi. SMS xabarlar esa mijozning telefoniga to'g'ridan-to'g'ri SMS yuborish uchun xizmat qiladi va alohida SMS kreditlar orqali sarflanadi.",
+  },
+  {
+    q: "To'lov xavfsizligi kafolatlanganmi?",
+    a: "Ha. Saytda karta ma'lumotlari saqlanmaydi. Barcha to'lovlar O'zbekiston Respublikasi Markaziy Banki litsenziyasiga ega rasmiy to'lov tizimlari (Uzum Bank, Click, Payme) orqali 3D-Secure himoyasi bilan amalga oshiriladi.",
+  },
+]
 
 export default function PricingPage() {
   const { user, refreshUser } = useUser()
@@ -35,6 +75,11 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [showProviderModal, setShowProviderModal] = useState(false)
+  const [showClickOnSiteModal, setShowClickOnSiteModal] = useState(false)
+  const [clickInitialTab, setClickInitialTab] = useState<'card' | 'invoice'>('card')
+  const [showUzumModal, setShowUzumModal] = useState(false)
+  const [uzumPaymentUrl, setUzumPaymentUrl] = useState<string | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   // Ensure latest user subscription status is refreshed
   useEffect(() => {
@@ -59,6 +104,14 @@ export default function PricingPage() {
   const handleProviderSelect = async (provider: string) => {
     if (!selectedPlan) return
 
+    // Open on-site Click payment modal directly in the website
+    if (provider === 'click' || provider === 'click_card') {
+      setClickInitialTab(provider === 'click_card' ? 'card' : 'invoice')
+      setShowProviderModal(false)
+      setShowClickOnSiteModal(true)
+      return
+    }
+
     setLoading(provider)
 
     try {
@@ -75,6 +128,12 @@ export default function PricingPage() {
       const data = await response.json()
 
       if (data.paymentUrl) {
+        if (provider === 'uzum') {
+          setUzumPaymentUrl(data.paymentUrl)
+          setShowProviderModal(false)
+          setShowUzumModal(true)
+          return
+        }
         window.location.href = data.paymentUrl
       } else {
         alert(data.error || 'Xato yuz berdi')
@@ -88,346 +147,642 @@ export default function PricingPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 lg:pl-64 pb-24 lg:pb-16 transition-all">
-      <MainNav />
+  const userPlan = (user?.plan_type || 'FREE').toUpperCase()
 
-      <main className="w-full">
-        <div className="container mx-auto px-4 py-10 sm:py-14 max-w-6xl">
+  // Selected plan details for modal
+  const selectedPlanObj = selectedPlan ? PLANS[selectedPlan as keyof typeof PLANS] : null
+  const selectedPlanPrice = selectedPlan ? getPlanPrice(selectedPlan as any, billingCycle) : 0
+
+  return (
+    <AppShell
+      title="Tariflar"
+      subtitle="Biznesingiz uchun to'g'ri tarifni tanlang"
+      showAddDebtButton={false}
+    >
+      <div className="w-full">
+        <div className="container mx-auto px-4 py-8 sm:py-12 max-w-6xl">
           {/* Header */}
-          <div className="text-center space-y-3 mb-10">
-            <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3.5 py-1 font-semibold text-xs rounded-full">
+          <div className="text-center space-y-3.5 mb-10 sm:mb-12">
+            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200/80 text-blue-700 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               Tariflar va Rejalar
-            </Badge>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-[2.65rem] font-extrabold text-slate-900 tracking-tight leading-tight">
               Biznesingiz uchun to&apos;g&apos;ri tarifni tanlang
             </h1>
-            <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto">
-              Shaffof narxlar, yashirin komissiyalarsiz. Uzum Bank, Click va Payme orqali 100% xavfsiz to&apos;lang.
+            <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
+              Shaffof narxlar, yashirin to&apos;lovlarsiz. Uzum Bank, Click va Payme orqali 100% xavfsiz to&apos;lang.
             </p>
-          </div>
 
-          {/* Billing Cycle Toggle */}
-          <div className="flex justify-center mb-10">
-            <Tabs value={billingCycle} onValueChange={(v) => setBillingCycle(v as BillingCycle)}>
-              <TabsList className="grid w-full grid-cols-3 max-w-md bg-slate-200/80 p-1 rounded-2xl">
-                <TabsTrigger value="monthly" className="rounded-xl font-semibold text-xs py-2">
-                  Oylik
-                </TabsTrigger>
-                <TabsTrigger value="semi_annual" className="rounded-xl font-semibold text-xs py-2">
-                  <div className="flex items-center gap-1">
-                    6 oylik
-                    <Badge variant="secondary" className="ml-1 text-[10px] bg-slate-100 text-slate-700">-5%</Badge>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="annual" className="rounded-xl font-semibold text-xs py-2">
-                  <div className="flex items-center gap-1">
-                    Yillik
-                    <Badge className="ml-1 text-[10px] bg-emerald-600 text-white font-bold">-10%</Badge>
-                  </div>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            {/* Billing Cycle Pill Toggle */}
+            <div className="pt-3 flex justify-center">
+              <div className="inline-flex items-center bg-slate-200/80 p-1 rounded-2xl shadow-inner border border-slate-200">
+                {CYCLE_OPTIONS.map((opt) => {
+                  const isActive = billingCycle === opt.value
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setBillingCycle(opt.value)}
+                      className={`relative px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-white text-slate-900 shadow-md border border-slate-200/60'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      {opt.discount && (
+                        <span
+                          className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md tracking-tight ${
+                            isActive
+                              ? opt.value === 'annual'
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'bg-blue-600 text-white shadow-xs'
+                              : opt.value === 'annual'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}
+                        >
+                          -{opt.discount}%
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Active Subscription Banner for Logged-In User */}
           {user && user.plan_type && user.plan_type !== 'FREE' && (
-            <div className="max-w-4xl mx-auto mb-10 p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border border-emerald-300/80 rounded-2xl flex items-center justify-between gap-4 shadow-xs">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-md flex-shrink-0">
-                  ✓
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-emerald-950 text-base sm:text-lg">
-                      Sizda {user.plan_type} tarifi faol
-                    </span>
-                    <Badge className="bg-emerald-600 text-white text-[11px] font-semibold py-0.5 px-2.5">
-                      Faol Obuna
-                    </Badge>
+            <div className="max-w-4xl mx-auto mb-10 relative overflow-hidden bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border border-emerald-300/90 rounded-2xl p-4 sm:p-5 shadow-xs">
+              <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0">
+                    <Check className="w-5 h-5 stroke-[3]" />
                   </div>
-                  <p className="text-xs sm:text-sm text-emerald-800 mt-1">
-                    To&apos;lov muvaffaqiyatli qabul qilingan. Barcha {user.plan_type} imkoniyatlaridan to&apos;liq foydalanishingiz mumkin.
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-extrabold text-slate-900 text-base sm:text-lg">
+                        Sizda {user.plan_type} tarifi faol
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        Faol Obuna
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-emerald-900/80 mt-0.5">
+                      Barcha {user.plan_type} imkoniyatlaridan to&apos;liq foydalanishingiz mumkin.
+                    </p>
+                  </div>
                 </div>
+
+                {user.plan_type === 'PLUS' && (
+                  <button
+                    onClick={() => handleSelectPlan('PRO')}
+                    className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 flex-shrink-0"
+                  >
+                    <Crown className="w-3.5 h-3.5" />
+                    Pro ga oshirish
+                  </button>
+                )}
               </div>
             </div>
           )}
 
           {/* Plans Grid */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
             {Object.values(PLANS).map((plan) => {
               const price = plan.prices[billingCycle]
               const discount = getDiscount(plan.name as any, billingCycle)
               const months = BILLING_CYCLE_MONTHS[billingCycle]
+              const monthlyPrice = plan.prices.monthly
 
-              const userPlan = (user?.plan_type || 'FREE').toUpperCase()
               const isCurrentPlan = !!user && userPlan === plan.name
               const isDowngrade =
                 !!user &&
                 ((userPlan === 'PRO' && (plan.name === 'PLUS' || plan.name === 'FREE')) ||
                  (userPlan === 'PLUS' && plan.name === 'FREE'))
               const isUpgrade = !!user && userPlan === 'PLUS' && plan.name === 'PRO'
+              const isFree = plan.name === 'FREE'
+              const isPro = plan.name === 'PRO'
 
+              // Card styling states
+              let cardBorderClass = 'border-slate-200/90 shadow-sm bg-white hover:border-slate-300 hover:shadow-lg'
+              let cardHeaderBg = 'bg-slate-50/70 border-b border-slate-100'
+              let iconBg = 'bg-slate-100 text-slate-700'
+
+              if (isCurrentPlan) {
+                cardBorderClass = 'border-2 border-emerald-500 shadow-xl ring-4 ring-emerald-500/10 bg-white'
+                cardHeaderBg = 'bg-gradient-to-br from-emerald-50/70 to-teal-50/50 border-b border-emerald-100'
+                iconBg = 'bg-emerald-600 text-white shadow-xs'
+              } else if (isPro) {
+                cardBorderClass = isUpgrade
+                  ? 'border-2 border-purple-500 shadow-xl ring-4 ring-purple-500/10 bg-white hover:border-purple-600'
+                  : 'border border-purple-200 shadow-md bg-white hover:border-purple-300 hover:shadow-xl'
+                cardHeaderBg = 'bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-white border-b border-purple-100'
+                iconBg = 'bg-purple-600 text-white shadow-xs'
+              } else if (plan.popular) {
+                cardBorderClass = 'border-2 border-blue-500 shadow-xl ring-4 ring-blue-500/10 bg-white hover:border-blue-600'
+                cardHeaderBg = 'bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-white border-b border-blue-100'
+                iconBg = 'bg-blue-600 text-white shadow-xs'
+              }
+
+              // CTA Button Configuration
               let buttonText = 'Sotib olish'
               let buttonDisabled = false
-              let buttonVariant: 'default' | 'outline' = plan.popular ? 'default' : 'outline'
+              let buttonClass = 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'
 
               if (!user) {
-                buttonText = price === 0 ? 'Bepul boshlash' : "Tanlash va Ro'yxatdan o'tish"
+                buttonText = isFree ? 'Bepul boshlash' : "Tanlash va Ro'yxatdan o'tish"
                 buttonDisabled = false
+                buttonClass = isFree
+                  ? 'bg-white hover:bg-slate-50 text-slate-900 border border-slate-300'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20'
               } else if (isCurrentPlan) {
                 buttonText = 'Hozirgi tarifingiz'
                 buttonDisabled = true
-                buttonVariant = 'outline'
+                buttonClass = 'bg-emerald-50 text-emerald-700 border-2 border-emerald-300/80 cursor-default font-bold'
               } else if (isDowngrade) {
                 buttonText = 'Amaldagi tarifdan past'
                 buttonDisabled = true
-                buttonVariant = 'outline'
+                buttonClass = 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
               } else if (isUpgrade) {
                 buttonText = 'Tarifni oshirish (Upgrade)'
                 buttonDisabled = false
-                buttonVariant = 'default'
+                buttonClass = 'bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:via-indigo-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/25 font-bold'
+              } else if (plan.popular) {
+                buttonClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 font-bold'
               }
 
               return (
-                <Card
+                <div
                   key={plan.name}
-                  className={`relative transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 ${
-                    isCurrentPlan
-                      ? 'border-emerald-500 border-2 shadow-xl ring-4 ring-emerald-500/10 bg-white'
-                      : plan.popular
-                      ? 'border-blue-500 border-2 shadow-xl bg-white'
-                      : 'border border-slate-200/80 shadow-sm bg-white hover:shadow-md'
-                  }`}
+                  className={`relative rounded-3xl border flex flex-col justify-between transition-all duration-300 ${cardBorderClass}`}
                 >
+                  {/* Top Floating Badge */}
                   {isCurrentPlan ? (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-emerald-600 text-white px-4 py-1 font-bold text-xs shadow-sm">
-                        ✓ Hozirgi tarifingiz
-                      </Badge>
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md shadow-emerald-600/30">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        Hozirgi tarifingiz
+                      </span>
+                    </div>
+                  ) : isUpgrade ? (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md shadow-purple-600/30 animate-pulse">
+                        <Rocket className="w-3.5 h-3.5" />
+                        Tavsiya etilgan upgrade
+                      </span>
                     </div>
                   ) : plan.popular ? (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 font-bold text-xs shadow-sm">
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md shadow-blue-600/30">
+                        <Star className="w-3.5 h-3.5 fill-current" />
                         Eng ommabop
-                      </Badge>
+                      </span>
+                    </div>
+                  ) : isPro ? (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 bg-slate-900 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md">
+                        <Crown className="w-3.5 h-3.5" />
+                        Professional
+                      </span>
                     </div>
                   ) : null}
 
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-slate-900">{plan.displayName}</CardTitle>
-                    <CardDescription className="text-xs text-slate-500">{plan.description}</CardDescription>
-
-                    <div className="mt-4 space-y-1">
-                      {/* Main Price */}
-                      <div>
-                        <span className="text-4xl font-extrabold text-slate-900" suppressHydrationWarning>
-                          {price === 0 ? '0' : formatPrice(price)}
-                        </span>
-                        {price > 0 && months > 1 && (
-                          <span className="text-slate-600 text-sm">/{BILLING_CYCLE_LABELS[billingCycle]}</span>
-                        )}
-                        {price > 0 && months === 1 && (
-                          <span className="text-slate-600 text-sm">/oy</span>
-                        )}
+                  {/* Card Header */}
+                  <div>
+                    <div className={`p-6 sm:p-7 rounded-t-3xl ${cardHeaderBg}`}>
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                            {plan.displayName}
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-0.5 font-medium leading-relaxed">
+                            {plan.description}
+                          </p>
+                        </div>
+                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                          {isPro ? (
+                            <Crown className="w-5 h-5" />
+                          ) : plan.popular ? (
+                            <Zap className="w-5 h-5" />
+                          ) : (
+                            <Gift className="w-5 h-5 text-slate-700" />
+                          )}
+                        </div>
                       </div>
 
-                      {/* Monthly Equivalent */}
-                      {price > 0 && months > 1 && (
-                        <div className="text-xs text-slate-500 font-medium" suppressHydrationWarning>
-                          {formatPricePerMonth(price, months)} ga teng
-                        </div>
-                      )}
+                      {/* Price Display */}
+                      <div className="pt-2">
+                        {isFree ? (
+                          <div className="space-y-1">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-4xl font-extrabold text-slate-900 tracking-tight">0</span>
+                              <span className="text-base font-bold text-slate-500">so&apos;m</span>
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium">
+                              30 kun to&apos;liq funksiyalardan bepul sinov
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-1.5">
+                            <div className="flex items-baseline gap-1.5 flex-wrap">
+                              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" suppressHydrationWarning>
+                                {billingCycle === 'monthly'
+                                  ? formatPrice(price)
+                                  : formatPrice(Math.round(price / months))}
+                              </span>
+                              <span className="text-sm font-bold text-slate-500">/oy</span>
+                            </div>
 
-                      {/* Discount Badge */}
-                      {discount.amount > 0 && (
-                        <div className="pt-2">
-                          <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold" suppressHydrationWarning>
-                            <Zap className="w-3 h-3 mr-1 text-emerald-600" />
-                            {formatPrice(discount.amount)} tejash
-                          </Badge>
-                        </div>
+                            {/* Multi-month billing details */}
+                            {months > 1 && (
+                              <div className="flex items-center gap-2 flex-wrap pt-0.5" suppressHydrationWarning>
+                                <span className="text-xs text-slate-400 line-through">
+                                  {formatPrice(monthlyPrice * months)}
+                                </span>
+                                <span className="text-xs font-bold text-slate-700 bg-white/90 border border-slate-200/80 px-2 py-0.5 rounded-md shadow-2xs">
+                                  {formatPrice(price)} / {BILLING_CYCLE_LABELS[billingCycle].toLowerCase()}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Savings Badge */}
+                            {discount.amount > 0 && (
+                              <div className="pt-1">
+                                <span className="inline-flex items-center gap-1 bg-emerald-100/90 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-md border border-emerald-200/80" suppressHydrationWarning>
+                                  <Zap className="w-3 h-3 text-emerald-600 fill-current" />
+                                  {formatPrice(discount.amount)} tejaladi
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Features List */}
+                    <div className="p-6 sm:p-7 space-y-3.5">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                        Imkoniyatlar
+                      </p>
+
+                      <FeatureItem
+                        text={`${plan.features.max_debts === -1 ? 'Cheksiz' : plan.features.max_debts} ta qarz yozish`}
+                        highlight={plan.features.max_debts === -1}
+                      />
+                      <FeatureItem
+                        text={`${plan.features.max_folders === -1 ? 'Cheksiz' : plan.features.max_folders} ta papka (folder)`}
+                        highlight={plan.features.max_folders === -1}
+                      />
+                      <FeatureItem
+                        text="Telegram eslatmalar"
+                        enabled={plan.features.telegram_notifications}
+                        subtext="Cheksiz & bepul"
+                      />
+                      <FeatureItem
+                        text="SMS eslatmalar"
+                        enabled={true}
+                        subtext="Kreditlar orqali"
+                        isSmsNotice
+                      />
+                      <FeatureItem
+                        text={`Analitika (${plan.features.analytics_period === 'monthly' ? '1 oylik' : plan.features.analytics_period === 'annual' ? '1 yillik chuqur' : '-'})`}
+                        enabled={plan.features.analytics}
+                        highlight={plan.features.analytics_period === 'annual'}
+                      />
+                      <FeatureItem
+                        text="Excel va PDF eksport"
+                        enabled={plan.features.export}
+                      />
+                      {plan.features.api_access && (
+                        <FeatureItem text="API orqali integratsiya" highlight />
+                      )}
+                      {plan.features.priority_support && (
+                        <FeatureItem text="Ustuvor (Priority) texnik yordam" highlight />
                       )}
                     </div>
-                  </CardHeader>
+                  </div>
 
-                  <CardContent className="space-y-3 pt-2">
-                    <Feature
-                      text={`${plan.features.max_debts === -1 ? 'Cheksiz' : plan.features.max_debts} ta qarz`}
-                    />
-                    <Feature
-                      text={`${plan.features.max_folders === -1 ? 'Cheksiz' : plan.features.max_folders} ta folder`}
-                    />
-                    <Feature
-                      text="Telegram eslatmalar"
-                      enabled={plan.features.telegram_notifications}
-                    />
-                    <Feature
-                      text="SMS eslatmalar"
-                      enabled={plan.features.sms_notifications}
-                    />
-                    <Feature
-                      text={`Analytics (${plan.features.analytics_period === 'monthly' ? '1 oylik' : plan.features.analytics_period === 'annual' ? '1 yillik' : '-'})`}
-                      enabled={plan.features.analytics}
-                    />
-                    <Feature
-                      text="Export (Excel/PDF)"
-                      enabled={plan.features.export}
-                    />
-                    {plan.features.api_access && (
-                      <Feature text="API kirish" />
-                    )}
-                    {plan.features.priority_support && (
-                      <Feature text="Priority support" />
-                    )}
-                  </CardContent>
-
-                  <CardFooter className="pt-4">
-                    <Button
-                      className={`w-full font-semibold rounded-xl h-11 transition-all ${
-                        isCurrentPlan
-                          ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-300 hover:bg-emerald-100 cursor-default shadow-xs'
-                          : plan.popular
-                          ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20'
-                          : ''
-                      }`}
-                      variant={buttonVariant}
-                      onClick={() => handleSelectPlan(plan.name)}
+                  {/* Card Footer CTA */}
+                  <div className="p-6 sm:p-7 pt-2">
+                    <button
+                      type="button"
                       disabled={buttonDisabled}
+                      onClick={() => handleSelectPlan(plan.name)}
+                      className={`w-full h-12 rounded-2xl text-sm transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98] ${buttonClass}`}
                     >
-                      {buttonText}
-                    </Button>
-                  </CardFooter>
-                </Card>
+                      {isUpgrade && <Rocket className="w-4 h-4" />}
+                      {isCurrentPlan && <Check className="w-4 h-4 stroke-[3]" />}
+                      <span>{buttonText}</span>
+                      {!buttonDisabled && !isUpgrade && <ArrowRight className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
               )
             })}
           </div>
 
-          {/* Savings Highlight */}
+          {/* Savings Highlight Callout */}
           {billingCycle !== 'monthly' && (
-            <div className="mt-12 text-center">
-              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-6 py-3 shadow-xs">
-                <Zap className="w-5 h-5 text-emerald-600" />
-                <span className="text-emerald-900 font-semibold text-sm">
-                  {billingCycle === 'semi_annual' ? '6 oylik' : 'Yillik'} to&apos;lovda {BILLING_CYCLE_DISCOUNTS[billingCycle]}% tejang!
+            <div className="mt-10 text-center">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl px-5 py-2.5 shadow-xs">
+                <Zap className="w-4 h-4 text-emerald-600 fill-current" />
+                <span className="text-emerald-950 font-bold text-xs sm:text-sm">
+                  {billingCycle === 'semi_annual' ? '6 oylik' : 'Yillik'} to&apos;lovda {BILLING_CYCLE_DISCOUNTS[billingCycle]}% chegirmadan foydalanmoqdasiz!
                 </span>
               </div>
             </div>
           )}
 
-          {/* Payment & Security Compliance Banner */}
-          <div className="mt-16 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm text-center space-y-4">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Qo&apos;llab-quvvatlanadigan to&apos;lov tizimlari va bank kartalari
-            </p>
+          {/* Supported Payments & Security Compliance Banner */}
+          <div className="mt-16 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs text-center space-y-5">
+            <div className="flex items-center justify-center gap-2 text-slate-500">
+              <Shield className="w-4 h-4 text-blue-600" />
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                Qo&apos;llab-quvvatlanadigan to&apos;lov tizimlari va bank kartalari
+              </p>
+            </div>
+
             <PaymentMethodsRow />
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-slate-500 pt-4 border-t border-slate-100">
-              <Link href="/payment-terms" className="hover:text-blue-600 transition underline underline-offset-4">
+
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-500 pt-4 border-t border-slate-100">
+              <Link href="/payment-terms" className="hover:text-blue-600 transition underline underline-offset-4 decoration-slate-300">
                 To&apos;lov usullari va mablag&apos;larni qaytarish qoidalari
               </Link>
               <span className="text-slate-300">•</span>
-              <Link href="/security" className="hover:text-blue-600 transition underline underline-offset-4">
-                Xavfsizlik va firibgarlikni nazorat qilish (Antifraud)
+              <Link href="/security" className="hover:text-blue-600 transition underline underline-offset-4 decoration-slate-300">
+                Xavfsizlik va Antifraud nazorati
               </Link>
               <span className="text-slate-300">•</span>
-              <Link href="/terms" className="hover:text-blue-600 transition underline underline-offset-4">
+              <Link href="/terms" className="hover:text-blue-600 transition underline underline-offset-4 decoration-slate-300">
                 Ommaviy oferta
               </Link>
             </div>
           </div>
 
-          {/* FAQ Link */}
-          <div className="mt-12 text-center">
-            <p className="text-sm text-slate-600">
-              Savolingiz bormi? <Link href="/contact" className="text-blue-600 font-semibold hover:underline">Biz bilan bog&apos;laning</Link>
-            </p>
+          {/* Interactive FAQ Section */}
+          <div className="mt-16 max-w-3xl mx-auto space-y-4">
+            <div className="text-center space-y-1.5 mb-8">
+              <div className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-bold uppercase tracking-wider">
+                <HelpCircle className="w-3.5 h-3.5" />
+                Ko&apos;p beriladigan savollar
+              </div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Savollaringiz bormi?
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {FAQS.map((faq, idx) => {
+                const isOpen = openFaq === idx
+                return (
+                  <div
+                    key={idx}
+                    className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs transition-all"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : idx)}
+                      className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-sm hover:text-blue-600 transition-colors"
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-blue-600' : ''
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="text-center pt-6">
+              <p className="text-xs sm:text-sm text-slate-500">
+                Qo&apos;shimcha savollaringiz bormi?{' '}
+                <Link href="/contact" className="text-blue-600 font-bold hover:underline">
+                  Qo&apos;llab-quvvatlash xizmati bilan bog&apos;laning
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
 
-      {/* Payment Provider Selection Modal */}
+      {/* Payment Provider Selection Modal - The Big Three */}
       <Dialog open={showProviderModal} onOpenChange={setShowProviderModal}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">To&apos;lov usulini tanlang</DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Qaysi to&apos;lov tizimi orqali to&apos;lashni ma&apos;qul ko&apos;rasiz?
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-[440px] rounded-3xl p-0 border border-slate-200 shadow-2xl bg-white overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 [&>button.absolute]:hover:bg-slate-200 [&>button.absolute]:text-slate-500 [&>button.absolute]:top-4 [&>button.absolute]:right-4 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:border [&>button.absolute]:border-slate-200/80">
+          {/* Modal Header */}
+          <div className="p-6 pb-4 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-100">
+            <DialogHeader className="space-y-1 text-left">
+              <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+                To&apos;lov usulini tanlang
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                Qaysi to&apos;lov tizimi orqali to&apos;lashni ma&apos;qul ko&apos;rasiz?
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-3 pt-2">
-            <Button
-              className="w-full justify-start h-18 py-2.5 px-4 hover:border-purple-400 hover:bg-purple-50/40 transition-all rounded-xl"
-              variant="outline"
+            {/* Selected Plan Summary Pill */}
+            {selectedPlanObj && (
+              <div className="mt-3.5 p-3 rounded-2xl bg-slate-100/90 border border-slate-200/80 flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-extrabold text-slate-900">{selectedPlanObj.displayName}</span>
+                  <span className="text-slate-500 ml-1">
+                    ({billingCycle === 'annual' ? 'Yillik' : billingCycle === 'semi_annual' ? '6 oylik' : 'Oylik'})
+                  </span>
+                </div>
+                <div className="font-black text-slate-900 text-sm">
+                  {formatPrice(selectedPlanPrice)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Provider Options - The Big Three */}
+          <div className="p-5 space-y-3">
+            {/* 1. UZUM BANK */}
+            <button
+              type="button"
+              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 hover:border-purple-400 hover:bg-purple-50/40 transition-all duration-200 shadow-2xs hover:shadow-md text-left"
               onClick={() => handleProviderSelect('uzum')}
               disabled={loading !== null}
             >
-              <div className="flex items-center gap-3.5 w-full">
-                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white border border-purple-200/80 p-1.5 flex items-center justify-center shadow-xs">
-                  <UzumBankLogo className="h-10 w-auto" />
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-purple-50 border border-purple-200/80 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <UzumBankLogo className="h-8 w-auto" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <span>Uzum Bank</span>
+                  <span className="bg-purple-100 text-purple-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                    Tavsiya etiladi
+                  </span>
                 </div>
-                <div className="text-left flex-1">
-                  <div className="font-semibold text-slate-900 flex items-center gap-2">
-                    Uzum Bank
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-[10px] font-semibold py-0 px-1.5">
-                      Tavsiya etiladi
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-slate-500">Uzcard va Humo kartalari orqali to&apos;lov</div>
+                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                  Uzcard, Humo, Visa va Mastercard orqali saytda to&apos;lov
                 </div>
               </div>
-            </Button>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            </button>
 
-            <Button
-              className="w-full justify-start h-18 py-2.5 px-4 hover:border-blue-400 hover:bg-blue-50/40 transition-all rounded-xl"
-              variant="outline"
+            {/* 2. CLICK */}
+            <button
+              type="button"
+              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 hover:border-blue-400 hover:bg-blue-50/40 transition-all duration-200 shadow-2xs hover:shadow-md text-left"
               onClick={() => handleProviderSelect('click')}
               disabled={loading !== null}
             >
-              <div className="flex items-center gap-3.5 w-full">
-                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white border border-blue-200/80 p-2 flex items-center justify-center shadow-xs">
-                  <ClickLogo className="h-7 w-auto" />
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-50 border border-blue-200/80 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <ClickLogo className="h-6 w-auto" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <span>Click</span>
+                  <span className="bg-blue-100 text-blue-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                    Saytda to&apos;lov
+                  </span>
                 </div>
-                <div className="text-left flex-1">
-                  <div className="font-semibold text-slate-900">Click</div>
-                  <div className="text-xs text-slate-500">Click Up yoki karta orqali to&apos;lov</div>
+                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                  Bank kartasi yoki Click Up ilovasi orqali to&apos;lov
                 </div>
               </div>
-            </Button>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            </button>
 
-            <Button
-              className="w-full justify-start h-18 py-2.5 px-4 hover:border-emerald-400 hover:bg-emerald-50/40 transition-all rounded-xl"
-              variant="outline"
+            {/* 3. PAYME */}
+            <button
+              type="button"
+              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 hover:border-teal-400 hover:bg-teal-50/40 transition-all duration-200 shadow-2xs hover:shadow-md text-left"
               onClick={() => handleProviderSelect('payme')}
               disabled={loading !== null}
             >
-              <div className="flex items-center gap-3.5 w-full">
-                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white border border-emerald-200/80 p-2 flex items-center justify-center shadow-xs">
-                  <PaymeLogo className="h-7 w-auto" />
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-teal-50 border border-teal-200/80 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <PaymeLogo className="h-6 w-auto" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <span>Payme</span>
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                    Tezkor
+                  </span>
                 </div>
-                <div className="text-left flex-1">
-                  <div className="font-semibold text-slate-900">Payme</div>
-                  <div className="text-xs text-slate-500">Ilova yoki karta orqali tezkor to&apos;lov</div>
+                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                  Payme ilovasi yoki bank kartasi orqali to&apos;lov
                 </div>
               </div>
-            </Button>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            </button>
+          </div>
+
+          {/* Modal Footer */}
+          <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-500">
+            <Lock className="w-3.5 h-3.5 text-slate-400" />
+            <span>To&apos;lov 100% xavfsiz va shifrlangan</span>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+
+      {/* On-Site Click Payment Modal */}
+      {selectedPlan && (
+        <ClickOnSiteModal
+          open={showClickOnSiteModal}
+          onOpenChange={setShowClickOnSiteModal}
+          amount={getPlanPrice(selectedPlan as any, billingCycle as any)}
+          planType={selectedPlan as any}
+          billingCycle={billingCycle}
+          type="subscription"
+          initialTab={clickInitialTab}
+          defaultPhone={user?.phone}
+          onSuccess={() => {
+            refreshUser?.()
+            window.location.href = '/dashboard?payment=success'
+          }}
+        />
+      )}
+
+      {/* On-Site Uzum Payment Modal */}
+      {selectedPlan && (
+        <UzumPaymentModal
+          open={showUzumModal}
+          onOpenChange={setShowUzumModal}
+          paymentUrl={uzumPaymentUrl}
+          amount={getPlanPrice(selectedPlan as any, billingCycle as any)}
+          planTitle={`${selectedPlan} rejasi (${billingCycle === 'annual' ? 'Yillik' : billingCycle === 'semi_annual' ? '6 oylik' : 'Oylik'})`}
+          onSuccess={() => {
+            refreshUser?.()
+            window.location.href = '/dashboard?payment=success'
+          }}
+        />
+      )}
+    </AppShell>
   )
 }
 
-function Feature({ text, enabled = true }: { text: string, enabled?: boolean }) {
+function FeatureItem({
+  text,
+  enabled = true,
+  highlight = false,
+  subtext,
+  isSmsNotice = false,
+}: {
+  text: string
+  enabled?: boolean
+  highlight?: boolean
+  subtext?: string
+  isSmsNotice?: boolean
+}) {
   return (
-    <div className={`flex items-center gap-2.5 ${!enabled ? 'opacity-40 line-through' : ''}`}>
-      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
-        enabled ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
-      }`}>
-        <Check className="w-3 h-3 stroke-[3]" />
+    <div className={`flex items-start gap-2.5 ${!enabled ? 'opacity-40' : ''}`}>
+      <div
+        className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+          !enabled
+            ? 'bg-slate-100 text-slate-400'
+            : isSmsNotice
+            ? 'bg-blue-100 text-blue-700'
+            : highlight
+            ? 'bg-emerald-600 text-white shadow-2xs'
+            : 'bg-emerald-100 text-emerald-700'
+        }`}
+      >
+        {enabled ? (
+          <Check className="w-3 h-3 stroke-[3]" />
+        ) : (
+          <X className="w-2.5 h-2.5 stroke-[2.5]" />
+        )}
       </div>
-      <span className="text-xs sm:text-sm text-slate-700">{text}</span>
+
+      <div className="flex-1 min-w-0 text-xs sm:text-sm">
+        <span
+          className={`${
+            !enabled
+              ? 'text-slate-400 line-through'
+              : highlight
+              ? 'text-slate-900 font-bold'
+              : 'text-slate-700 font-medium'
+          }`}
+        >
+          {text}
+        </span>
+        {subtext && (
+          <span
+            className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded ${
+              isSmsNotice
+                ? 'bg-blue-50 text-blue-600 border border-blue-200/60'
+                : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            {subtext}
+          </span>
+        )}
+      </div>
     </div>
   )
 }

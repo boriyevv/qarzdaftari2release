@@ -35,24 +35,42 @@ export async function GET() {
         if (pendingUzumTx) {
           const orderId = pendingUzumTx.external_id || pendingUzumTx.external_data?.orderId
           if (orderId) {
-            const uzumStatus = await uzumPayment.getOrderStatus(orderId)
-            if (uzumStatus && (uzumStatus.status === 'COMPLETED' || uzumStatus.status === 'TOP_UP_COMPLETED')) {
-              const parsedOrder = pendingUzumTx.external_data?.order || parsePaymentOrder(pendingUzumTx.external_data?.rawTransactionId)
-              if (parsedOrder) {
-                await processSuccessfulPayment(adminSupabase, {
-                  provider: 'uzum',
-                  order: parsedOrder,
-                  amount: pendingUzumTx.amount,
-                  externalId: orderId,
-                  externalData: uzumStatus,
-                  transactionRecordId: pendingUzumTx.id,
-                })
-                const { data: updatedProf } = await adminSupabase
-                  .from('users')
-                  .select('*, sms_credits:sms_credits(*)')
-                  .eq('id', prof.id)
-                  .maybeSingle()
-                if (updatedProf) return updatedProf
+            try {
+              const uzumStatus = await uzumPayment.getOrderStatus(orderId)
+              if (uzumStatus && (uzumStatus.status === 'COMPLETED' || uzumStatus.status === 'TOP_UP_COMPLETED')) {
+                const parsedOrder = pendingUzumTx.external_data?.order || parsePaymentOrder(pendingUzumTx.external_data?.rawTransactionId)
+                if (parsedOrder) {
+                  await processSuccessfulPayment(adminSupabase, {
+                    provider: 'uzum',
+                    order: parsedOrder,
+                    amount: pendingUzumTx.amount,
+                    externalId: orderId,
+                    externalData: uzumStatus,
+                    transactionRecordId: pendingUzumTx.id,
+                  })
+                  const { data: updatedProf } = await adminSupabase
+                    .from('users')
+                    .select('*, sms_credits:sms_credits(*)')
+                    .eq('id', prof.id)
+                    .maybeSingle()
+                  if (updatedProf) return updatedProf
+                }
+              } else if (uzumStatus && ['DECLINED', 'REVERSED'].includes(uzumStatus.status)) {
+                await adminSupabase
+                  .from('payment_transactions')
+                  .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+                  .eq('id', pendingUzumTx.id)
+              }
+            } catch (uzumErr: any) {
+              const errMsg = uzumErr?.message || String(uzumErr)
+              if (errMsg.includes('3005') || errMsg.includes('not found') || errMsg.includes('rejected')) {
+                console.warn(`⚠️ Uzum order ${orderId} not found or rejected. Marking transaction as cancelled.`)
+                await adminSupabase
+                  .from('payment_transactions')
+                  .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+                  .eq('id', pendingUzumTx.id)
+              } else {
+                console.warn('⚠️ Uzum getOrderStatus warning:', errMsg)
               }
             }
           }

@@ -10,29 +10,33 @@ export async function getCurrentUser() {
     const adminSupabase = createAdminClient()
 
     // 1. Check Supabase Auth user (email users)
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    try {
+      const supabase = await createClient()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (!authError && user) {
-      // Find profile by auth_id
-      const { data: profile } = await adminSupabase
-        .from('users')
-        .select('*')
-        .eq('auth_id', user.id)
-        .maybeSingle()
-
-      if (profile) return profile
-
-      // Or by phone if auth user has phone
-      if (user.phone) {
-        const { data: phoneProfile } = await adminSupabase
+      if (!authError && user) {
+        // Find profile by auth_id
+        const { data: profile } = await adminSupabase
           .from('users')
           .select('*')
-          .eq('phone', user.phone)
+          .eq('auth_id', user.id)
           .maybeSingle()
 
-        if (phoneProfile) return phoneProfile
+        if (profile) return profile
+
+        // Or by phone if auth user has phone
+        if (user.phone) {
+          const { data: phoneProfile } = await adminSupabase
+            .from('users')
+            .select('*')
+            .eq('phone', user.phone)
+            .maybeSingle()
+
+          if (phoneProfile) return phoneProfile
+        }
       }
+    } catch (authErr) {
+      // Ignore Supabase auth error and fallback to phone session cookie
     }
 
     // 2. Check phone_user_session cookie (phone users)
