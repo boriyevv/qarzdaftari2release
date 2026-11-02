@@ -499,10 +499,10 @@ export default function PricingPage() {
 
           {/* Supported Payments & Security Compliance Banner */}
           <div className="mt-16 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs text-center space-y-5">
-            <div className="flex items-center justify-center gap-2 text-slate-500">
-              <Shield className="w-4 h-4 text-blue-600" />
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                Qo&apos;llab-quvvatlanadigan to&apos;lov tizimlari va bank kartalari
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/80 border border-blue-200/70 text-blue-900 mx-auto">
+              <Shield className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+                Rasmiy to&apos;lov tizimlari va bank kartalari
               </p>
             </div>
 

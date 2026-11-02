@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { MessageSquare, AlertCircle } from 'lucide-react'
+import { MessageSquare, AlertCircle, ExternalLink } from 'lucide-react'
 
 import {
   Dialog,
@@ -345,33 +345,31 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
                 />
               </div>
 
-              {/* Credits badge */}
-              {smsCredits === 0 ? (
-                <Alert variant="destructive" className="py-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    SMS kredit yo&apos;q.{' '}
-                    <a href="/sms-credits" className="underline font-medium">
-                      Sotib oling
-                    </a>
-                  </AlertDescription>
-                </Alert>
-              ) : (
-                <div className="flex items-center justify-between text-xs p-2 bg-green-50 rounded">
-                  <span className="text-green-900">Mavjud:</span>
-                  <span className="font-bold text-green-700">{smsCredits} SMS</span>
+              {/* Credits badge - shown only when credits available */}
+              {smsCredits > 0 && (
+                <div className="flex items-center justify-between text-xs p-2 bg-emerald-50 text-emerald-800 rounded-lg">
+                  <span>Mavjud:</span>
+                  <span className="font-bold">{smsCredits} SMS</span>
                 </div>
               )}
 
-              {/* No-credits warning when SMS is toggled ON */}
+              {/* No-credits warning ONLY when SMS toggle is turned ON */}
               {sendSMS && smsCredits === 0 && (
-                <Alert variant="destructive" className="py-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    SMS yuborish uchun kredit kerak. SMS ni o&apos;chiring yoki kredit
-                    sotib oling.
-                  </AlertDescription>
-                </Alert>
+                <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs animate-in fade-in duration-200">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span className="truncate">SMS yuborish uchun kredit yo&apos;q</span>
+                  </div>
+                  <a
+                    href="/sms-credits"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-700 font-bold hover:underline flex items-center gap-0.5 flex-shrink-0 text-xs"
+                  >
+                    <span>Sotib olish</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               )}
 
               {/* Custom message section */}
