@@ -19,6 +19,9 @@ import {
   ShieldAlert,
   Send,
   Sparkles,
+  Plus,
+  Calendar,
+  ArrowRight,
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
@@ -222,6 +225,13 @@ export default function AnalyticsPage() {
       ].filter((item) => item.value > 0 || item.count > 0)
     : []
 
+  // Grafikda real harakat borligini tekshirish
+  const hasChartActivity = Boolean(
+    data?.chartData &&
+      data.chartData.length > 0 &&
+      data.chartData.some((item) => (item.issued || 0) > 0 || (item.returned || 0) > 0)
+  )
+
   // Recharts uchun xavfsiz custom tooltip
   const CustomBarTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -330,6 +340,44 @@ export default function AnalyticsPage() {
           </div>
         ) : data ? (
           <>
+            {/* 🌟 USER ONBOARDING BANNER: Agar ushbu davrda umuman qarz bo'lmasa */}
+            {data.summary.totalDebtsCount === 0 && (
+              <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-3xl p-5 sm:p-7 text-white shadow-lg shadow-blue-500/15 relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="relative z-10 max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-white text-xs font-semibold backdrop-blur-md mb-2.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    Analitika bo&apos;limi
+                  </div>
+                  <h2 className="text-lg sm:text-2xl font-black tracking-tight">
+                    Tanlangan davrda hali qarz yozuvlari kiritilmagan
+                  </h2>
+                  <p className="text-xs sm:text-sm text-blue-100 mt-1.5 leading-relaxed">
+                    Mijozlarga berilgan nasiya va to&apos;lovlarni kiritishni boshlang. Birinchi qarz
+                    kiritilishi bilanoq, tizim avtomatik ravishda pul oqimi grafigi, undirish foizi
+                    va kechikkan qarzdorlarni tahlil qilib boradi.
+                  </p>
+                  <div className="mt-4 flex items-center gap-2.5 flex-wrap">
+                    <Link href="/dashboard">
+                      <Button className="bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl shadow-md h-9 sm:h-10 px-4 text-xs">
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        Birinchi qarzni kiritish
+                      </Button>
+                    </Link>
+                    {period !== 'monthly' && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setPeriod('monthly')}
+                        className="border-white/30 text-white hover:bg-white/10 rounded-xl h-9 sm:h-10 px-4 text-xs font-semibold"
+                      >
+                        30 kunlik davrga qaytish
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 1. Kengaytirilgan KPI kartalari */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Berilgan */}
@@ -373,7 +421,11 @@ export default function AnalyticsPage() {
                     {formatCurrency(data.summary.totalReturned)}
                   </p>
                   <p className="text-[11px] text-emerald-700 mt-1 font-medium">
-                    Yig&apos;ish samaradorligi a&apos;lo
+                    {data.summary.repaymentRate >= 80
+                      ? 'Yig&apos;ish darajasi a&apos;lo'
+                      : data.summary.repaymentRate > 0
+                      ? 'Yig&apos;im davom etmoqda'
+                      : 'Kutilayotgan tushumlar'}
                   </p>
                 </CardContent>
               </Card>
@@ -445,19 +497,21 @@ export default function AnalyticsPage() {
                   </CardDescription>
                 </div>
                 {/* Legend indicator */}
-                <div className="flex items-center gap-3 text-xs font-semibold">
-                  <span className="flex items-center gap-1.5 text-slate-600">
-                    <span className="w-3 h-3 rounded-md bg-blue-500" />
-                    Berildi
-                  </span>
-                  <span className="flex items-center gap-1.5 text-slate-600">
-                    <span className="w-3 h-3 rounded-md bg-emerald-500" />
-                    Qaytdi
-                  </span>
-                </div>
+                {hasChartActivity && (
+                  <div className="flex items-center gap-3 text-xs font-semibold">
+                    <span className="flex items-center gap-1.5 text-slate-600">
+                      <span className="w-3 h-3 rounded-md bg-blue-500" />
+                      Berildi
+                    </span>
+                    <span className="flex items-center gap-1.5 text-slate-600">
+                      <span className="w-3 h-3 rounded-md bg-emerald-500" />
+                      Qaytdi
+                    </span>
+                  </div>
+                )}
               </CardHeader>
-              <CardContent className="pt-4 sm:pt-6 pb-2">
-                {mounted && data.chartData && data.chartData.length > 0 ? (
+              <CardContent className="pt-4 sm:pt-6 pb-4">
+                {mounted && hasChartActivity ? (
                   <div className="h-[280px] sm:h-[320px] w-full min-h-[280px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
@@ -500,8 +554,27 @@ export default function AnalyticsPage() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[240px] flex items-center justify-center text-slate-400 text-xs">
-                    Ushbu davrda grafik chizish uchun ma&apos;lumot mavjud emas
+                  /* 🎯 CHART EMPTY STATE: Qulay va tushunarli holat */
+                  <div className="h-[260px] sm:h-[280px] flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-slate-150 rounded-2xl bg-slate-50/60">
+                    <div className="w-13 h-13 rounded-2xl bg-blue-100/80 text-blue-600 flex items-center justify-center mb-3 shadow-2xs">
+                      <BarChart3 className="w-6 h-6" />
+                    </div>
+                    <h4 className="font-bold text-slate-800 text-sm">
+                      Pul oqimi grafigi shakllanmoqda
+                    </h4>
+                    <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4 leading-relaxed">
+                      Ushbu davrda qarz yoki to&apos;lov kiritilgach, bu yerda haftalik tushumlar va
+                      berilgan nasiyalar dinamikasi avtomatik aks etadi.
+                    </p>
+                    <Link href="/dashboard">
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-9 px-4 shadow-sm shadow-blue-500/20"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        Qarz kiritish
+                      </Button>
+                    </Link>
                   </div>
                 )}
               </CardContent>
@@ -581,8 +654,18 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="py-12 text-center text-slate-400 text-xs">
-                      Taqsimot ma&apos;lumotlari topilmadi
+                    /* 🎯 DONUT EMPTY STATE: Barcha hisob-kitoblar toza */
+                    <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
+                      <div className="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 shadow-2xs">
+                        <CheckCircle2 className="w-7 h-7" />
+                      </div>
+                      <h4 className="font-bold text-slate-800 text-sm">
+                        Barcha hisob-kitoblar toza
+                      </h4>
+                      <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
+                        Ushbu davrda faol yoki kechiktirilgan qarzlar yo&apos;q. Yangi qarzlar kiritilganda
+                        to&apos;lovlar holati shu yerda taqsimlanadi.
+                      </p>
                     </div>
                   )}
 
@@ -590,7 +673,7 @@ export default function AnalyticsPage() {
                   <div className="mt-4 p-3 bg-blue-50/80 border border-blue-100 rounded-2xl text-[11px] text-blue-900 flex items-start gap-2">
                     <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                     <span>
-                      Qarz qaytarilish samaradorligini 85% dan yuqori saqlash pul oqimingiz
+                      Qarz qaytarilish samaradorligini 85% dan yuqori saqlash biznesingiz pul oqimi
                       barqarorligini ta&apos;minlaydi.
                     </span>
                   </div>
@@ -611,7 +694,7 @@ export default function AnalyticsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-4 flex-1">
-                  {data.topDebtors.length > 0 ? (
+                  {data.topDebtors && data.topDebtors.length > 0 ? (
                     <div className="space-y-2.5">
                       {data.topDebtors.map((debtor, index) => (
                         <div
@@ -652,8 +735,27 @@ export default function AnalyticsPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="py-12 text-center text-slate-400 text-xs">
-                      Qarzdorlar ro&apos;yxati bo&apos;sh
+                    /* 🎯 TOP DEBTORS EMPTY STATE */
+                    <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
+                      <div className="w-13 h-13 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 shadow-2xs">
+                        <Users className="w-6 h-6" />
+                      </div>
+                      <h4 className="font-bold text-slate-800 text-sm">
+                        Qarzdor mijozlar yo&apos;q
+                      </h4>
+                      <p className="text-xs text-slate-500 max-w-xs mt-1 mb-4 leading-relaxed">
+                        Hozirda qarzdorlar ro&apos;yxati toza yoki barcha qarzlar to&apos;liq yopilgan.
+                      </p>
+                      <Link href="/dashboard">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold h-8 px-3"
+                        >
+                          <Plus className="w-3.5 h-3.5 mr-1" />
+                          Yangi qarz qo&apos;shish
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </CardContent>
@@ -661,17 +763,18 @@ export default function AnalyticsPage() {
             </div>
 
             {/* 4. Oylik taqsimot jadvali */}
-            {data.months && data.months.length > 0 && (
-              <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden">
-                <CardHeader className="pb-3 border-b border-slate-100">
-                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
-                    Oylik batafsil taqsimot
-                  </CardTitle>
-                  <CardDescription className="text-xs text-slate-500">
-                    Har bir oy bo&apos;yicha berilgan, undirilgan va qoldiq hisob-kitobi
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4">
+            <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden">
+              <CardHeader className="pb-3 border-b border-slate-100">
+                <CardTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  Oylik batafsil taqsimot
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500">
+                  Har bir oy bo&apos;yicha berilgan, undirilgan va qoldiq hisob-kitobi
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {data.months && data.months.length > 0 ? (
                   <div className="space-y-4">
                     {data.months.map((month) => (
                       <div
@@ -719,13 +822,36 @@ export default function AnalyticsPage() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  /* 🎯 OYLIK JADVAL EMPTY STATE */
+                  <div className="py-8 text-center text-slate-500 text-xs">
+                    <p className="font-semibold text-slate-700">Oylik arxiv ma&apos;lumotlari hali shakllanmagan</p>
+                    <p className="text-slate-400 mt-1">
+                      Yangi oylar o&apos;tishi bilan oylik taqqosiy statistika avtomatik jamlanadi.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </>
         ) : (
-          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-2xs">
-            <p className="text-slate-600 text-sm font-medium">Ma&apos;lumot topilmadi</p>
+          /* 🎯 BUTUN SAHIFA UCHUN EMPTY HERO STATE (agar API hech narsa qaytarmasa) */
+          <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-2xs max-w-lg mx-auto">
+            <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 shadow-xs">
+              <BarChart3 className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">
+              Analitika ma&apos;lumotlari topilmadi
+            </h3>
+            <p className="text-xs text-slate-500 mt-1.5 mb-5 max-w-xs mx-auto leading-relaxed">
+              Do&apos;koningizda hali qarzlar mavjud emas. Yangi qarz qo&apos;shib, analitika hisobotlarini shakllantiring.
+            </p>
+            <Link href="/dashboard">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-10 px-5 shadow-sm shadow-blue-500/20">
+                <Plus className="w-4 h-4 mr-1.5" />
+                Dashboardga o&apos;tish va qarz qo&apos;shish
+              </Button>
+            </Link>
           </div>
         )}
       </div>
