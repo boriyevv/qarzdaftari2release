@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingUp, TrendingDown, AlertCircle, Users, Lock, BarChart3 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
+import { useUser } from '@/lib/contexts/user-context'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type Period = 'monthly' | 'semi_annual' | 'annual'
 
@@ -37,27 +39,37 @@ interface MonthData {
 }
 
 export default function AnalyticsPage() {
+  const { user, loading: userLoading } = useUser()
   const [period, setPeriod] = useState<Period>('monthly')
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<AnalyticsData | null>(null)
-  const [userPlan, setUserPlan] = useState<string>('FREE')
+  const [subPlan, setSubPlan] = useState<string | null>(null)
+
+  const effectivePlan = (subPlan || user?.plan_type || 'FREE').toUpperCase()
+  const hasAccess = Boolean(user?.is_trial_active || (effectivePlan && effectivePlan !== 'FREE'))
 
   useEffect(() => {
-    fetchAnalytics()
-    fetchUserPlan()
-  }, [period])
-
-  const fetchUserPlan = async () => {
-    try {
-      const response = await fetch('/api/subscription')
-      const result = await response.json()
-      if (response.ok) {
-        setUserPlan(result.subscription.plan_type)
+    const fetchUserPlan = async () => {
+      try {
+        const response = await fetch('/api/subscription')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.subscription?.plan_type) {
+            setSubPlan(result.subscription.plan_type)
+          }
+        }
+      } catch (error) {
+        console.error('Fetch plan error:', error)
       }
-    } catch (error) {
-      console.error('Fetch plan error:', error)
     }
-  }
+    fetchUserPlan()
+  }, [])
+
+  useEffect(() => {
+    if (!userLoading && hasAccess) {
+      fetchAnalytics()
+    }
+  }, [period, userLoading, hasAccess])
 
   const fetchAnalytics = async () => {
     setLoading(true)
@@ -75,22 +87,24 @@ export default function AnalyticsPage() {
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return (
-      new Intl.NumberFormat('uz-UZ', {
-        style: 'decimal',
-        minimumFractionDigits: 0,
-      }).format(amount) + " so'm"
-    )
-  }
-
   const canAccessPeriod = (requestedPeriod: Period) => {
-    if (userPlan === 'PRO') return true
-    if (userPlan === 'PLUS' && requestedPeriod === 'monthly') return true
+    if (effectivePlan === 'PRO' || user?.is_trial_active) return true
+    if (effectivePlan === 'PLUS' && requestedPeriod === 'monthly') return true
     return false
   }
 
-  if (userPlan === 'FREE') {
+  if (userLoading) {
+    return (
+      <AppShell title="Analytics" subtitle="Biznesingiz statistikasi va moliyaviy oqimi">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-slate-500 mt-3 text-xs">Hisob ma&apos;lumotlari yuklanmoqda...</p>
+        </div>
+      </AppShell>
+    )
+  }
+
+  if (!hasAccess) {
     return (
       <AppShell title="Analytics" subtitle="Biznesingiz statistikasi">
         <div className="max-w-md mx-auto py-12 px-4">
@@ -154,7 +168,7 @@ export default function AnalyticsPage() {
           </Tabs>
 
           <Badge variant="outline" className="text-xs font-semibold py-1 px-3 bg-white">
-            Tarif: <span className="font-bold text-blue-600 ml-1">{userPlan}</span>
+            Tarif: <span className="font-bold text-blue-600 ml-1">{effectivePlan}</span>
           </Badge>
         </div>
 

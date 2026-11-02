@@ -12,6 +12,9 @@ interface User {
     store_name: string
     auth_method: 'email' | 'phone'
     plan_type: string
+    is_trial_active?: boolean
+    subscription_status?: string
+    subscription_expires_at?: string | null
     sms_credits?: {
         balance: number
         total_purchased: number

@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       .limit(5)
 
     // Get payment history
-    const { data: payments } = await supabase
+    const { data: payments } = await adminSupabase
       .from('payment_transactions')
       .select('*')
       .eq('user_id', profile.id)
