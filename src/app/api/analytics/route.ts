@@ -4,6 +4,16 @@ import { getCurrentUser } from '@/lib/auth/middleware'
 
 export const dynamic = 'force-dynamic'
 
+const UZ_MONTHS = [
+  'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
+  'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'
+]
+
+const UZ_MONTHS_SHORT = [
+  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun',
+  'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'
+]
+
 export async function GET(request: NextRequest) {
   try {
     const adminSupabase = createAdminClient()
@@ -18,8 +28,8 @@ export async function GET(request: NextRequest) {
 
     const userPlan = (profile.plan_type || 'FREE').toUpperCase()
     const hasAccess = profile.is_trial_active || userPlan !== 'FREE'
-    
-    console.log('📊 Analytics - Access check:', {
+
+    console.log('📊 Analytics API - Access check:', {
       plan: userPlan,
       isTrial: profile.is_trial_active,
       hasAccess
@@ -46,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     const now = new Date()
     let startDate = new Date()
-    
+
     switch (period) {
       case 'semi_annual':
         startDate.setMonth(now.getMonth() - 6)
@@ -55,9 +65,10 @@ export async function GET(request: NextRequest) {
         startDate.setFullYear(now.getFullYear() - 1)
         break
       default:
-        startDate.setMonth(now.getMonth() - 1)
+        startDate.setDate(now.getDate() - 30) // Oxirgi 30 kun
     }
 
+    // Davr bo'yicha qarzlarni olish
     const { data: debts, error: debtsError } = await adminSupabase
       .from('debts')
       .select('*')
@@ -66,45 +77,110 @@ export async function GET(request: NextRequest) {
       .is('deleted_at', null)
       .order('created_at', { ascending: true })
 
-    console.log('📊 Analytics - Debts:', { 
-      count: debts?.length || 0, 
-      error: debtsError?.message 
-    })
-
     if (debtsError) {
+      console.error('❌ Analytics - Debts fetch error:', debtsError)
       return NextResponse.json(
         { error: 'Failed to fetch debts', details: debtsError.message },
         { status: 500 }
       )
     }
 
-    if (!debts || debts.length === 0) {
-      return NextResponse.json({
-        period,
-        months: [],
-        summary: {
-          totalIssued: 0,
-          totalReturned: 0,
-          totalRemaining: 0,
-          overdueCount: 0,
-          overdueAmount: 0,
-        },
-        topDebtors: [],
-      })
+    const safeDebts = debts || []
+
+    // 1. Asosiy KPI hisob-kitoblari
+    const totalIssued = safeDebts.reduce((sum, d) => sum + (Number(d.amount) || 0), 0)
+    const totalReturned = safeDebts.reduce((sum, d) => sum + (Number(d.paid_amount) || 0), 0)
+    const totalRemaining = safeDebts.reduce((sum, d) => {
+      const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
+      return sum + Math.max(0, remaining)
+    }, 0)
+
+    const overdueDebts = safeDebts.filter(d => {
+      const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
+      return remaining > 0 && d.due_date && new Date(d.due_date) < now
+    })
+
+    const overdueCount = overdueDebts.length
+    const overdueAmount = overdueDebts.reduce((sum, d) => {
+      const rem = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
+      return sum + Math.max(0, rem)
+    }, 0)
+
+    const repaymentRate = totalIssued > 0
+      ? Math.min(100, Math.round((totalReturned / totalIssued) * 100))
+      : 0
+
+    const averageDebtAmount = safeDebts.length > 0
+      ? Math.round(totalIssued / safeDebts.length)
+      : 0
+
+    // 2. Qarzlar holati bo'yicha taqsimot (Status Distribution)
+    let paidCount = 0
+    let paidAmount = 0
+    let pendingCount = 0
+    let pendingAmount = 0
+    let overdueStatusCount = 0
+    let overdueStatusAmount = 0
+
+    safeDebts.forEach(d => {
+      const amt = Number(d.amount) || 0
+      const paid = Number(d.paid_amount) || 0
+      const remaining = Math.max(0, amt - paid)
+      const isPaid = d.status === 'paid' || (amt > 0 && paid >= amt)
+      const isOverdue = !isPaid && d.due_date && new Date(d.due_date) < now
+
+      if (isPaid) {
+        paidCount++
+        paidAmount += amt
+      } else if (isOverdue) {
+        overdueStatusCount++
+        overdueStatusAmount += remaining
+      } else {
+        pendingCount++
+        pendingAmount += remaining
+      }
+    })
+
+    const totalDebtsCount = safeDebts.length
+    const statusDistribution = {
+      paid: {
+        count: paidCount,
+        amount: paidAmount,
+        percentage: totalDebtsCount > 0 ? Math.round((paidCount / totalDebtsCount) * 100) : 0,
+      },
+      pending: {
+        count: pendingCount,
+        amount: pendingAmount,
+        percentage: totalDebtsCount > 0 ? Math.round((pendingCount / totalDebtsCount) * 100) : 0,
+      },
+      overdue: {
+        count: overdueStatusCount,
+        amount: overdueStatusAmount,
+        percentage: totalDebtsCount > 0 ? Math.round((overdueStatusCount / totalDebtsCount) * 100) : 0,
+      },
     }
 
-    const monthsMap = new Map<string, any>()
-    
-    debts.forEach(debt => {
+    // 3. Oylik taqsimot (Months Breakdown)
+    const monthsMap = new Map<string, {
+      month: string
+      monthShort: string
+      issued: number
+      returned: number
+      remaining: number
+      overdueCount: number
+    }>()
+
+    safeDebts.forEach(debt => {
       const date = new Date(debt.created_at)
-      const monthKey = date.toLocaleDateString('uz-UZ', {
-        year: 'numeric',
-        month: 'long',
-      })
+      const monthIndex = date.getMonth()
+      const year = date.getFullYear()
+      const monthKey = `${UZ_MONTHS[monthIndex]} ${year}`
+      const monthShort = `${UZ_MONTHS_SHORT[monthIndex]}`
 
       if (!monthsMap.has(monthKey)) {
         monthsMap.set(monthKey, {
           month: monthKey,
+          monthShort,
           issued: 0,
           returned: 0,
           remaining: 0,
@@ -112,42 +188,106 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      const monthData = monthsMap.get(monthKey)!
-      monthData.issued += debt.amount
-      monthData.returned += debt.paid_amount
-      monthData.remaining += (debt.amount - debt.paid_amount)
-      
-      if (debt.due_date && new Date(debt.due_date) < now && debt.status === 'pending') {
-        monthData.overdueCount++
+      const m = monthsMap.get(monthKey)!
+      const amt = Number(debt.amount) || 0
+      const paid = Number(debt.paid_amount) || 0
+      const rem = Math.max(0, amt - paid)
+
+      m.issued += amt
+      m.returned += paid
+      m.remaining += rem
+
+      if (rem > 0 && debt.due_date && new Date(debt.due_date) < now) {
+        m.overdueCount++
       }
     })
 
-    const months = Array.from(monthsMap.values())
+    const months = Array.from(monthsMap.values()).map(m => ({
+      ...m,
+      repaymentRate: m.issued > 0 ? Math.min(100, Math.round((m.returned / m.issued) * 100)) : 0,
+    }))
 
-    const summary = {
-      totalIssued: debts.reduce((sum, d) => sum + d.amount, 0),
-      totalReturned: debts.reduce((sum, d) => sum + d.paid_amount, 0),
-      totalRemaining: debts.reduce((sum, d) => sum + (d.amount - d.paid_amount), 0),
-      overdueCount: debts.filter(d => 
-        d.due_date && new Date(d.due_date) < now && d.status === 'pending'
-      ).length,
-      overdueAmount: debts
-        .filter(d => d.due_date && new Date(d.due_date) < now && d.status === 'pending')
-        .reduce((sum, d) => sum + (d.amount - d.paid_amount), 0),
+    // 4. Vizual grafik uchun ma'lumotlar (Chart Data)
+    let chartData: Array<{
+      name: string
+      dateLabel?: string
+      issued: number
+      returned: number
+      remaining: number
+    }> = []
+
+    if (period === 'monthly') {
+      // 30 kunlik davrni 4 ta xronologik haftaga ajratamiz
+      const weekBuckets = [
+        { name: '1-hafta', dateLabel: '1 - 7 kun', issued: 0, returned: 0, remaining: 0 },
+        { name: '2-hafta', dateLabel: '8 - 14 kun', issued: 0, returned: 0, remaining: 0 },
+        { name: '3-hafta', dateLabel: '15 - 21 kun', issued: 0, returned: 0, remaining: 0 },
+        { name: '4-hafta', dateLabel: '22 - 30 kun', issued: 0, returned: 0, remaining: 0 },
+      ]
+
+      safeDebts.forEach(debt => {
+        const created = new Date(debt.created_at).getTime()
+        const daysDiff = Math.max(0, Math.floor((now.getTime() - created) / (1000 * 60 * 60 * 24)))
+        // 0-7 kun = 4-hafta (eng yangisi), 22-30 kun = 1-hafta (eng eskisi)
+        let weekIndex = 3 - Math.min(3, Math.floor(daysDiff / 7.5))
+        if (weekIndex < 0) weekIndex = 0
+        if (weekIndex > 3) weekIndex = 3
+
+        const amt = Number(debt.amount) || 0
+        const paid = Number(debt.paid_amount) || 0
+        const rem = Math.max(0, amt - paid)
+
+        weekBuckets[weekIndex].issued += amt
+        weekBuckets[weekIndex].returned += paid
+        weekBuckets[weekIndex].remaining += rem
+      })
+
+      chartData = weekBuckets
+    } else {
+      // 6 oylik yoki yillik uchun oylar bo'yicha ketma-ketlik
+      chartData = months.map(m => ({
+        name: m.monthShort,
+        dateLabel: m.month,
+        issued: m.issued,
+        returned: m.returned,
+        remaining: m.remaining,
+      }))
     }
 
-    const debtorMap = new Map<string, any>()
-    
-    debts.forEach(debt => {
-      const key = debt.debtor_phone
+    // 5. Eng ko'p qarzdorlar (Top Debtors)
+    const debtorMap = new Map<string, {
+      name: string
+      phone: string
+      amount: number
+      debtCount: number
+      isOverdue: boolean
+    }>()
+
+    safeDebts.forEach(debt => {
+      const key = debt.debtor_phone || debt.debtor_name || 'Noma\'lum'
+      const amt = Number(debt.amount) || 0
+      const paid = Number(debt.paid_amount) || 0
+      const remaining = Math.max(0, amt - paid)
+      const isOverdue = remaining > 0 && debt.due_date && new Date(debt.due_date) < now
+
       if (!debtorMap.has(key)) {
         debtorMap.set(key, {
-          name: debt.debtor_name,
-          phone: debt.debtor_phone,
+          name: debt.debtor_name || 'Noma\'lum mijoz',
+          phone: debt.debtor_phone || '',
           amount: 0,
+          debtCount: 0,
+          isOverdue: false,
         })
       }
-      debtorMap.get(key)!.amount += (debt.amount - debt.paid_amount)
+
+      const debtor = debtorMap.get(key)!
+      debtor.amount += remaining
+      if (remaining > 0) {
+        debtor.debtCount += 1
+      }
+      if (isOverdue) {
+        debtor.isOverdue = true
+      }
     })
 
     const topDebtors = Array.from(debtorMap.values())
@@ -155,10 +295,27 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 5)
 
+    const activeDebtorsCount = Array.from(debtorMap.values()).filter(d => d.amount > 0).length
+
+    // Javob obyekti
     return NextResponse.json({
       period,
+      startDate: startDate.toISOString(),
+      endDate: now.toISOString(),
+      summary: {
+        totalIssued,
+        totalReturned,
+        totalRemaining,
+        repaymentRate,
+        overdueCount,
+        overdueAmount,
+        averageDebtAmount,
+        totalDebtsCount,
+        activeDebtorsCount,
+      },
+      chartData,
+      statusDistribution,
       months,
-      summary,
       topDebtors,
     })
   } catch (error: any) {

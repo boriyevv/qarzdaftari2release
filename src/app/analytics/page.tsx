@@ -13,28 +13,58 @@ import { formatCurrency } from '@/lib/utils/currency'
 
 type Period = 'monthly' | 'semi_annual' | 'annual'
 
+interface ChartItem {
+  name: string
+  dateLabel?: string
+  issued: number
+  returned: number
+  remaining: number
+}
+
+interface StatusItem {
+  count: number
+  amount: number
+  percentage: number
+}
+
 interface AnalyticsData {
   period: Period
-  months: MonthData[]
+  startDate?: string
+  endDate?: string
   summary: {
     totalIssued: number
     totalReturned: number
     totalRemaining: number
+    repaymentRate: number
     overdueCount: number
     overdueAmount: number
+    averageDebtAmount?: number
+    totalDebtsCount?: number
+    activeDebtorsCount?: number
   }
+  chartData?: ChartItem[]
+  statusDistribution?: {
+    paid: StatusItem
+    pending: StatusItem
+    overdue: StatusItem
+  }
+  months: MonthData[]
   topDebtors: Array<{
     name: string
     phone: string
     amount: number
+    debtCount?: number
+    isOverdue?: boolean
   }>
 }
 
 interface MonthData {
   month: string
+  monthShort?: string
   issued: number
   returned: number
   remaining: number
+  repaymentRate?: number
   overdueCount: number
 }
 
