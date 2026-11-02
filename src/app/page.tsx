@@ -203,21 +203,30 @@ export default function Home() {
 						>
 							To'lov shartlari
 						</Link>
-						<div className='pt-3 border-t border-slate-700 flex flex-col gap-2'>
+						<div className='pt-3 border-t border-slate-700/80 flex flex-col gap-2.5'>
 							<Button
-								variant='outline'
-								size='sm'
+								variant='ghost'
+								size='default'
 								asChild
-								className='w-full text-slate-200 border-slate-700'
+								className='w-full h-11 text-sm font-semibold text-slate-200 hover:text-white border border-slate-700/80 hover:border-slate-600 bg-slate-800/80 hover:bg-slate-700/80 rounded-xl transition-all'
 							>
-								<Link href='/login'>Kirish</Link>
+								<Link href='/login' onClick={() => setMobileMenuOpen(false)}>
+									Kirish
+								</Link>
 							</Button>
 							<Button
-								size='sm'
+								size='default'
 								asChild
-								className='w-full bg-blue-600 hover:bg-blue-500 text-white'
+								className='w-full h-11 text-sm font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-md shadow-blue-600/25 transition-all'
 							>
-								<Link href='/register'>Bepul boshlash</Link>
+								<Link
+									href='/register'
+									onClick={() => setMobileMenuOpen(false)}
+									className='flex items-center justify-center gap-1.5'
+								>
+									<span>Bepul boshlash</span>
+									<ArrowRight className='w-4 h-4' />
+								</Link>
 							</Button>
 						</div>
 					</div>
