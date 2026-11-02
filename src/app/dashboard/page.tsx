@@ -3,14 +3,13 @@
 
 import { useState, useEffect } from 'react'
 import { useUser } from '@/lib/contexts/user-context'
-import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { FolderFilterBar } from '@/components/folders/folder-filter-bar'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { DebtsListDraggable } from '@/components/debts/debts-list-draggable'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { SubscriptionBanner } from '@/components/dashboard/subscription-banner'
-import { OnboardingTooltip } from '@/components/onboarding/tooltip-guide'
+import { InteractiveTour } from '@/components/onboarding/interactive-tour'
 import { AppShell } from '@/components/layout/app-shell'
 import { Plus } from 'lucide-react'
 
@@ -99,32 +98,25 @@ export default function DashboardPage() {
       subtitle={user.store_name || "Do'kon boshqaruvi"}
       showAddDebtButton={true}
       onAddDebtSuccess={fetchDebts}
-      actions={
-        <Button
-          onClick={() => setIsAddDebtOpen(true)}
-          className="hidden sm:inline-flex bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm h-9 px-3.5 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
-        >
-          <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
-          Yangi Qarz
-        </Button>
-      }
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6">
         {/* Subscription & Onboarding Guides */}
         <SubscriptionBanner />
-        <OnboardingTooltip />
+        <InteractiveTour />
 
         {/* Financial Overview Stats Cards */}
-        <DashboardStats
-          totalDebts={totalDebts}
-          totalAmount={totalAmount}
-          totalPaid={totalPaid}
-          totalRemaining={totalRemaining}
-          overdueCount={overdueCount}
-        />
+        <div id="tour-stats">
+          <DashboardStats
+            totalDebts={totalDebts}
+            totalAmount={totalAmount}
+            totalPaid={totalPaid}
+            totalRemaining={totalRemaining}
+            overdueCount={overdueCount}
+          />
+        </div>
 
         {/* Horizontal Folder Filter Bar */}
-        <div className="pt-2">
+        <div id="tour-folders" className="pt-2">
           <FolderFilterBar
             activeFolder={activeFolder}
             onFolderChange={handleFolderChange}
@@ -132,7 +124,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Debts List */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-4 sm:p-6 min-h-[300px]">
+        <div
+          id="tour-debts-list"
+          className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-4 sm:p-6 min-h-[300px]"
+        >
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-blue-600"></div>
@@ -147,6 +142,7 @@ export default function DashboardPage() {
       {/* Mobile Floating Action Button (FAB) */}
       <div className="lg:hidden fixed bottom-20 right-5 z-40">
         <button
+          id="tour-add-debt-mobile"
           onClick={() => setIsAddDebtOpen(true)}
           className="h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center"
           aria-label="Yangi qarz qo'shish"

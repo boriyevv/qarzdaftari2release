@@ -22,6 +22,7 @@ import {
   CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
+  Compass,
 } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { Badge } from '@/components/ui/badge'
@@ -35,6 +36,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
   badge?: string
   badgeVariant?: 'default' | 'secondary' | 'destructive'
+  tourId?: string
 }
 
 interface BreadcrumbItem {
@@ -125,6 +127,14 @@ export function AppShell({
     }
   }
 
+  const handleStartTour = () => {
+    if (pathname === '/dashboard') {
+      window.dispatchEvent(new CustomEvent('qarzdaftari:start-tour'))
+    } else {
+      router.push('/dashboard?tour=start')
+    }
+  }
+
   const currentPlan = (user?.plan_type || 'FREE').toUpperCase()
 
   const navItems: NavItem[] = [
@@ -132,27 +142,32 @@ export function AppShell({
       label: 'Dashboard',
       href: '/dashboard',
       icon: Home,
+      tourId: 'tour-nav-dashboard',
     },
     {
       label: 'Analytics',
       href: '/analytics',
       icon: BarChart3,
       badge: currentPlan === 'FREE' ? 'Pro' : undefined,
+      tourId: 'tour-nav-analytics',
     },
     {
       label: 'SMS Kredits',
       href: '/sms-credits',
       icon: MessageSquare,
+      tourId: 'tour-nav-sms',
     },
     {
       label: 'Tariflar',
       href: '/pricing',
       icon: Crown,
+      tourId: 'tour-nav-pricing',
     },
     {
       label: 'Profil',
       href: '/profile',
       icon: User,
+      tourId: 'tour-nav-profile',
     },
   ]
 
@@ -169,6 +184,7 @@ export function AppShell({
           return (
             <Link
               key={item.href}
+              id={item.tourId}
               href={item.href}
               onClick={onItemClick}
               title={compact ? item.label : undefined}
@@ -315,6 +331,15 @@ export function AppShell({
                       {user.store_name?.[0] || user.full_name?.[0] || 'U'}
                     </div>
                     <button
+                      type="button"
+                      onClick={handleStartTour}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Tizim qo'llanmasi (Tur)"
+                      aria-label="Tizim qo'llanmasi"
+                    >
+                      <Compass className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={handleLogout}
                       className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Hisobdan chiqish"
@@ -364,6 +389,16 @@ export function AppShell({
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     )}
+
+                    {/* Tizim qo'llanmasi (Onboarding Walkthrough) Button */}
+                    <button
+                      type="button"
+                      onClick={handleStartTour}
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 rounded-xl transition-all border border-blue-200/60 bg-white shadow-2xs active:scale-95"
+                    >
+                      <Compass className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Tizim qo&apos;llanmasi</span>
+                    </button>
 
                     <button
                       onClick={handleLogout}
@@ -421,7 +456,7 @@ export function AppShell({
             {/* Mobile Drawer Bottom User Card */}
             <div className="p-4 border-t border-slate-100">
               {user ? (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
@@ -440,6 +475,18 @@ export function AppShell({
                       {currentPlan}
                     </Badge>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false)
+                      handleStartTour()
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-blue-600 bg-blue-50/70 rounded-xl hover:bg-blue-100/70 transition-colors border border-blue-200/50"
+                  >
+                    <Compass className="w-3.5 h-3.5" />
+                    <span>Tizim qo&apos;llanmasi</span>
+                  </button>
 
                   <button
                     onClick={handleLogout}
@@ -546,6 +593,7 @@ export function AppShell({
 
                 {showAddDebtButton && (
                   <Button
+                    id="tour-add-debt"
                     onClick={() => setIsAddDebtOpen(true)}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
                   >
@@ -588,6 +636,7 @@ export function AppShell({
               return (
                 <Link
                   key={item.href}
+                  id={item.tourId ? `${item.tourId}-mobile` : undefined}
                   href={item.href}
                   className={`
                     flex flex-col items-center justify-center py-1 px-1 rounded-xl text-[10px] font-semibold transition-colors
