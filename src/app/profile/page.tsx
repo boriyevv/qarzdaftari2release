@@ -26,6 +26,7 @@ import {
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { isSoundEnabled, setSoundEnabled, playSuccessSound } from '@/lib/sounds'
+import { CashiersManagement } from '@/components/profile/cashiers-management'
 
 export default function ProfilePage() {
   const { user } = useUser()
@@ -216,6 +217,9 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Cashiers & Staff Management (Multi-user Mode) */}
+        <CashiersManagement />
 
         {/* Account Details Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

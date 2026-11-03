@@ -86,6 +86,13 @@ export async function POST(request: Request) {
         )
       }
 
+      if (profile.is_active === false) {
+        return NextResponse.json(
+          { error: "Akkauntingiz vaqtincha to'xtatilgan. Do'kon ma'muriyatiga murojaat qiling." },
+          { status: 403 }
+        )
+      }
+
       const response = NextResponse.json({
         success: true,
         profile,
@@ -98,6 +105,95 @@ export async function POST(request: Request) {
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 7, // 7 kun
+      })
+
+      return response
+    }
+
+    // 3. Cashier Login (Phone or Username + Password)
+    if (auth_method === 'cashier') {
+      const { identifier, password } = body
+      if (!identifier || !password) {
+        return NextResponse.json(
+          { error: "Telefon/foydalanuvchi nomi va parol kiritilishi shart" },
+          { status: 400 }
+        )
+      }
+
+      const raw = String(identifier).trim()
+      const cleanPhone = raw.startsWith('+') ? raw : '+998' + raw.replace(/\D/g, '')
+
+      // Look up cashier by phone or username
+      let { data: profile } = await adminSupabase
+        .from('users')
+        .select('*')
+        .or(`phone.eq.${cleanPhone},username.ilike.${raw}`)
+        .maybeSingle()
+
+      if (!profile) {
+        return NextResponse.json(
+          { error: "Kassir hisobi topilmadi. Ma'lumotlarni tekshiring." },
+          { status: 404 }
+        )
+      }
+
+      if (profile.is_active === false) {
+        return NextResponse.json(
+          { error: "Ushbu kassir hisobi do'kon egasi tomonidan vaqtincha to'xtatilgan." },
+          { status: 403 }
+        )
+      }
+
+      const cashierEmail = profile.email || `cashier_${(profile.phone || '').replace(/\D/g, '')}@debtbook.uz`
+
+      // Authenticate via Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: cashierEmail,
+        password,
+      })
+
+      if (authError || !authData.user) {
+        return NextResponse.json(
+          { error: "Kassir paroli noto'g'ri kiritildi" },
+          { status: 401 }
+        )
+      }
+
+      const role = profile.locale_settings?.role || 'cashier'
+      const store_owner_id = profile.locale_settings?.store_owner_id || profile.id
+      const permissions = profile.locale_settings?.permissions || ['*']
+
+      const response = NextResponse.json({
+        success: true,
+        user: authData.user,
+        profile: {
+          ...profile,
+          role,
+          store_owner_id,
+          permissions,
+        },
+      })
+
+      const cookieStore = await cookies()
+      const allCookies = cookieStore.getAll()
+
+      allCookies.forEach((cookie) => {
+        response.cookies.set(cookie.name, cookie.value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        })
+      })
+
+      // Also set phone session cookie as backup
+      response.cookies.set('phone_user_session', profile.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
       })
 
       return response

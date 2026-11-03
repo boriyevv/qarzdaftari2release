@@ -42,6 +42,11 @@ import {
   Copy,
   Check,
   Sparkles,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Receipt,
+  Bell,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -64,8 +69,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { formatCurrency, formatCurrencyShort } from '@/lib/utils/currency'
+import { useUser } from '@/lib/contexts/user-context'
+import { exportDebtsToExcel, exportDebtsToPDF, exportSingleDebtReceiptPDF } from '@/lib/export/debts-export'
 import { AddPaymentModal } from './add-payment-modal'
 import { EditDebtModal } from './edit-debt-modal'
+import { AutoRemindersModal } from './auto-reminders-modal'
 
 export interface Debt {
   id: string
@@ -404,9 +412,11 @@ function SMSDialog({
 function SortableDebtRow({
   debt,
   onAction,
+  isCashier,
 }: {
   debt: Debt
   onAction: (action: string, debt: Debt) => void
+  isCashier?: boolean
 }) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
@@ -629,13 +639,20 @@ function SortableDebtRow({
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5 shadow-xl border-slate-200/80">
+            <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5 shadow-xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 z-50">
               <DropdownMenuItem
                 onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
                 className="rounded-xl text-xs font-semibold py-2 cursor-pointer"
               >
                 <ExternalLink className="w-3.5 h-3.5 mr-2 text-slate-500" />
                 Profilni ko&apos;rish
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => exportSingleDebtReceiptPDF(debt)}
+                className="rounded-xl text-xs font-semibold py-2 cursor-pointer text-indigo-600 dark:text-indigo-400"
+              >
+                <Receipt className="w-3.5 h-3.5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                Chek / Kvitansiya (PDF)
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onAction('edit', debt)}
@@ -651,14 +668,18 @@ function SortableDebtRow({
                 <Send className="w-3.5 h-3.5 mr-2 text-blue-500" />
                 SMS (O&apos;zim yozaman)
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => onAction('delete', debt)}
-                className="rounded-xl text-xs font-semibold py-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-600" />
-                O&apos;chirish
-              </DropdownMenuItem>
+              {!isCashier && (
+                <>
+                  <DropdownMenuSeparator className="dark:bg-slate-800" />
+                  <DropdownMenuItem
+                    onClick={() => onAction('delete', debt)}
+                    className="rounded-xl text-xs font-semibold py-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-600" />
+                    O&apos;chirish
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -820,6 +841,7 @@ export function DebtsListDraggable({
   onAddNewDebt,
 }: DebtsListDraggableProps) {
   const router = useRouter()
+  const { user } = useUser()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'overdue' | 'paid'>('all')
   const [sortBy, setSortBy] = useState<'remaining-desc' | 'remaining-asc' | 'due-asc' | 'date-desc' | 'name-asc'>('date-desc')
@@ -829,7 +851,32 @@ export function DebtsListDraggable({
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isSMSOpen, setIsSMSOpen] = useState(false)
   const [smsTypeToOpen, setSmsTypeToOpen] = useState<'default' | 'custom'>('default')
+  const [isAutoRemindersOpen, setIsAutoRemindersOpen] = useState(false)
   const [localDebts, setLocalDebts] = useState<Debt[]>(debts)
+
+  const handleExport = (format: 'excel' | 'pdf') => {
+    const filterNames: Record<string, string> = {
+      all: 'Barcha qarzlar',
+      active: 'Faol qarzdorlar',
+      overdue: "Muddati o'tgan qarzlar",
+      paid: "To'langan qarzlar",
+    }
+    const filterLabel = filterNames[statusFilter] || 'Barchasi'
+
+    if (format === 'excel') {
+      exportDebtsToExcel({
+        storeName: user?.store_name || user?.full_name || 'Qarz Daftari',
+        filterLabel,
+        debts: displayedDebts,
+      })
+    } else {
+      exportDebtsToPDF({
+        storeName: user?.store_name || user?.full_name || 'Qarz Daftari',
+        filterLabel,
+        debts: displayedDebts,
+      })
+    }
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -960,11 +1007,18 @@ export function DebtsListDraggable({
         setIsSMSOpen(true)
         break
       case 'delete':
+        if (user?.role === 'cashier') {
+          alert("Kassir qarzni o'chirish huquqiga ega emas. Faqat do'kon egasi o'chira oladi.")
+          return
+        }
         if (confirm(`${debt.debtor_name} ning qarz yozuvini o'chirmoqchimisiz?`)) {
           try {
             const response = await fetch(`/api/debts/${debt.id}`, { method: 'DELETE' })
             if (response.ok) {
               onUpdate()
+            } else {
+              const data = await response.json()
+              alert(data.error || "O'chirishda xatolik yuz berdi")
             }
           } catch (error) {
             console.error('Delete error:', error)
@@ -1001,23 +1055,79 @@ export function DebtsListDraggable({
             )}
           </div>
 
-          {/* Sort Select */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
-              <ArrowUpDown className="w-3.5 h-3.5" />
-              Saralash:
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-850 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          {/* Controls: Sort + Export */}
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+            {/* Sort Select */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-slate-400 hidden sm:flex items-center gap-1">
+                <ArrowUpDown className="w-3.5 h-3.5" />
+                Saralash:
+              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-850 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="date-desc">Eng yangi qo&apos;shilganlar</option>
+                <option value="remaining-desc">Qoldiq: Kattadan kichikka</option>
+                <option value="remaining-asc">Qoldiq: Kichikdan kattaga</option>
+                <option value="due-asc">Muddat: Eng yaqin</option>
+                <option value="name-asc">Qarzdor ismi (A-Z)</option>
+              </select>
+            </div>
+
+            {/* Auto Reminders Button */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsAutoRemindersOpen(true)}
+              className="h-10 px-3.5 rounded-2xl border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-900/40 flex items-center gap-1.5 transition-colors"
+              title="Yaqinlashgan qarzlar uchun avtomatik eslatmalar"
             >
-              <option value="date-desc">Eng yangi qo&apos;shilganlar</option>
-              <option value="remaining-desc">Qoldiq: Kattadan kichikka</option>
-              <option value="remaining-asc">Qoldiq: Kichikdan kattaga</option>
-              <option value="due-asc">Muddat: Eng yaqin</option>
-              <option value="name-asc">Qarzdor ismi (A-Z)</option>
-            </select>
+              <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Avto Eslatma</span>
+            </Button>
+
+            {/* Export Dropdown Button */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 px-3.5 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors"
+                  title="Qarzlar ro'yxatini yuklab olish"
+                >
+                  <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Eksport</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 p-1.5 rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl z-50 animate-in fade-in-50 zoom-in-95"
+              >
+                <DropdownMenuItem
+                  onClick={() => handleExport('excel')}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 dark:hover:text-emerald-400 cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-bold">Excel (.xlsx)</p>
+                    <p className="text-[10px] text-slate-400 font-normal">Jadval va hisob-kitoblar</p>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => handleExport('pdf')}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-400 cursor-pointer mt-0.5"
+                >
+                  <FileText className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-bold">PDF Hisobot (A4)</p>
+                    <p className="text-[10px] text-slate-400 font-normal">Chop etish va hisobot uchun</p>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -1206,6 +1316,7 @@ export function DebtsListDraggable({
                           key={debt.id}
                           debt={debt}
                           onAction={handleAction}
+                          isCashier={user?.role === 'cashier'}
                         />
                       ))}
                     </SortableContext>
@@ -1240,6 +1351,12 @@ export function DebtsListDraggable({
       )}
 
       {/* ─── MODALS ──────────────────────────────────────────────────── */}
+      <AutoRemindersModal
+        open={isAutoRemindersOpen}
+        onOpenChange={setIsAutoRemindersOpen}
+        onSuccess={onUpdate}
+      />
+
       {selectedDebt && (
         <>
           <AddPaymentModal

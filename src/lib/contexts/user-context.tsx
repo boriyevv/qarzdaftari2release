@@ -15,6 +15,9 @@ interface User {
     is_trial_active?: boolean
     subscription_status?: string
     subscription_expires_at?: string | null
+    role?: 'owner' | 'cashier' | 'admin'
+    store_owner_id?: string
+    permissions?: string[]
     sms_credits?: {
         balance: number
         total_purchased: number

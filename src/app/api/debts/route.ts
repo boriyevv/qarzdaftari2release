@@ -19,6 +19,7 @@ export async function GET(request: Request) {
     }
 
     const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
 
     // Parse query params
     const { searchParams } = new URL(request.url)
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
         folder:folders(id, name, color),
         payments:payments(id, amount, payment_date)
       `)
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
@@ -107,12 +108,13 @@ export async function POST(request: Request) {
     }
 
     const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
 
     // Check plan limits (only active debts count)
     const { count } = await adminSupabase
       .from('debts')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .in('status', ['pending', 'overdue'])
       .is('deleted_at', null)
 
@@ -139,18 +141,25 @@ export async function POST(request: Request) {
       const { data: defaultFolder } = await adminSupabase
         .from('folders')
         .select('id')
-        .eq('user_id', profile.id)
+        .eq('user_id', storeOwnerId)
         .eq('is_default', true)
         .single()
 
       folderId = defaultFolder?.id
     }
 
+    // Cashier attribution in note
+    let debtNote = result.data.note || ''
+    if (profile.role === 'cashier') {
+      const cashierTag = `[Kassir: ${profile.full_name}]`
+      debtNote = debtNote ? `${debtNote} ${cashierTag}` : cashierTag
+    }
+
     // Create debt
     const { data: debt, error } = await adminSupabase
       .from('debts')
       .insert({
-        user_id: profile.id,
+        user_id: storeOwnerId,
         folder_id: folderId,
         debtor_name: result.data.debtor_name,
         debtor_phone: result.data.debtor_phone,
@@ -158,7 +167,7 @@ export async function POST(request: Request) {
         paid_amount: 0,
         debt_date: result.data.debt_date || new Date().toISOString().split('T')[0],
         due_date: result.data.due_date,
-        note: result.data.note,
+        note: debtNote,
         status: 'pending',
       })
       .select()

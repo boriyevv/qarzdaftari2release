@@ -160,12 +160,16 @@ export function AppShell({
       icon: MessageSquare,
       tourId: 'tour-nav-sms',
     },
-    {
-      label: 'Tariflar',
-      href: '/pricing',
-      icon: Crown,
-      tourId: 'tour-nav-pricing',
-    },
+    ...(user?.role === 'cashier'
+      ? []
+      : [
+          {
+            label: 'Tariflar',
+            href: '/pricing',
+            icon: Crown,
+            tourId: 'tour-nav-pricing',
+          },
+        ]),
     {
       label: 'Profil',
       href: '/profile',
@@ -377,20 +381,26 @@ export function AppShell({
                         </div>
                       </div>
 
-                      <Badge
-                        className={`text-[10px] font-extrabold uppercase px-1.5 py-0 flex-shrink-0 ${
-                          currentPlan === 'PRO'
-                            ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                            : currentPlan === 'PLUS'
-                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                            : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {currentPlan}
-                      </Badge>
+                      {user.role === 'cashier' ? (
+                        <Badge className="bg-purple-600 text-white text-[10px] font-extrabold uppercase px-1.5 py-0 flex-shrink-0">
+                          Kassir
+                        </Badge>
+                      ) : (
+                        <Badge
+                          className={`text-[10px] font-extrabold uppercase px-1.5 py-0 flex-shrink-0 ${
+                            currentPlan === 'PRO'
+                              ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                              : currentPlan === 'PLUS'
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          {currentPlan}
+                        </Badge>
+                      )}
                     </div>
 
-                    {currentPlan === 'FREE' && (
+                    {user.role !== 'cashier' && currentPlan === 'FREE' && (
                       <Link
                         href="/pricing"
                         className="flex items-center justify-between px-2.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all"
@@ -559,9 +569,15 @@ export function AppShell({
                       <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block truncate max-w-[140px]">
                         {user.store_name}
                       </span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                        {currentPlan} tarif
-                      </span>
+                      {user.role === 'cashier' ? (
+                        <span className="text-[10px] text-purple-600 dark:text-purple-400 font-bold block">
+                          Kassir: {user.full_name}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium block">
+                          {currentPlan} tarif
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}

@@ -97,9 +97,22 @@ export async function GET() {
           .maybeSingle()
 
         if (phoneProfile) {
+          if (phoneProfile.is_active === false) {
+            return NextResponse.json({ error: 'Akkaunt faolsizlantirilgan' }, { status: 403 })
+          }
           console.log('✅ Phone profile found via session cookie:', phoneProfile.full_name)
           const syncedProfile = await syncPendingUzum(phoneProfile)
-          return NextResponse.json({ profile: syncedProfile })
+          const role = syncedProfile.locale_settings?.role || (syncedProfile.is_admin ? 'admin' : 'owner')
+          const store_owner_id = syncedProfile.locale_settings?.store_owner_id || syncedProfile.id
+          const permissions = syncedProfile.locale_settings?.permissions || ['*']
+          return NextResponse.json({
+            profile: {
+              ...syncedProfile,
+              role,
+              store_owner_id,
+              permissions,
+            }
+          })
         }
       }
 
@@ -118,9 +131,22 @@ export async function GET() {
       .maybeSingle()
 
     if (profile) {
+      if (profile.is_active === false) {
+        return NextResponse.json({ error: 'Akkaunt faolsizlantirilgan' }, { status: 403 })
+      }
       console.log('✅ Profile found by auth_id:', profile.full_name)
       const syncedProfile = await syncPendingUzum(profile)
-      return NextResponse.json({ profile: syncedProfile })
+      const role = syncedProfile.locale_settings?.role || (syncedProfile.is_admin ? 'admin' : 'owner')
+      const store_owner_id = syncedProfile.locale_settings?.store_owner_id || syncedProfile.id
+      const permissions = syncedProfile.locale_settings?.permissions || ['*']
+      return NextResponse.json({
+        profile: {
+          ...syncedProfile,
+          role,
+          store_owner_id,
+          permissions,
+        }
+      })
     }
 
     console.log('⚠️ Profile not found by auth_id, trying phone...')
@@ -137,9 +163,22 @@ export async function GET() {
         .maybeSingle()
 
       if (phoneProfile) {
+        if (phoneProfile.is_active === false) {
+          return NextResponse.json({ error: 'Akkaunt faolsizlantirilgan' }, { status: 403 })
+        }
         console.log('✅ Phone profile found:', phoneProfile.full_name)
         const syncedProfile = await syncPendingUzum(phoneProfile)
-        return NextResponse.json({ profile: syncedProfile })
+        const role = syncedProfile.locale_settings?.role || (syncedProfile.is_admin ? 'admin' : 'owner')
+        const store_owner_id = syncedProfile.locale_settings?.store_owner_id || syncedProfile.id
+        const permissions = syncedProfile.locale_settings?.permissions || ['*']
+        return NextResponse.json({
+          profile: {
+            ...syncedProfile,
+            role,
+            store_owner_id,
+            permissions,
+          }
+        })
       }
     }
 

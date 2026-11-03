@@ -50,18 +50,18 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 
 ### 👥 Ko'p foydalanuvchilik rejim (Multi-user / Cashiers)
 
-- [ ] Katta do'konlar uchun: Sotuvchi/Kassir akkauntlarini qo'shish imkoniyati.
-- [ ] Kassir faqat yangi qarz kiritishi va qabul qilishi mumkin, lekin tahlillarni o'chira olmaydi.
+- [x] Katta do'konlar uchun: Sotuvchi/Kassir akkauntlarini qo'shish imkoniyati: Do'kon egasi profilida (`/profile`) "Do'kon xodimlari va Kassirlar" boshqaruv markazi (`CashiersManagement`), kassir biriktirish modali (ism, telefon, login, parol, ruxsatlar), akkauntni faolsizlantirish/yoqish va o'chirish imkoniyati, hamda login oynasida alohida "Kassir 👥 (Telefon/Login + Parol)" tezkor kirish tizimi joriy qilindi.
+- [x] Kassir huquqlarini cheklash: Kassir faqat do'kon qarzlari bilan ishlaydi, yangi qarz kiritishi va to'lov qabul qilishi mumkin; lekin qarz yozuvlarini butunlay o'chirish (DELETE ruxsati serverda qat'iy 403 bilan bloklangan - faqat do'kon egasi o'chira oladi), do'kon obunasi va tariflarini o'zgartirish cheklangan.
 
 ### 📊 Eksport va Buxgalteriya integratsiyasi
 
-- [ ] Qarzlar ro'yxatini Excel (.xlsx) va chiroyli PDF chek formatida yuklab olish.
+- [x] Qarzlar ro'yxatini Excel (.xlsx) va chiroyli PDF hisobot/chek formatida yuklab olish: Dashboard va Qarzlar ro'yxatida filtrga moslashuvchi tezkor Excel/PDF eksport tugmalari hamda har bir qarz uchun A5 rasmiy kvitansiya generatsiyasi joriy qilindi.
 - [ ] 1C yoki boshqa savdo tizimlari bilan API orqali sinxronizatsiya.
 
 ### 🔔 Aqlli Bildirishnomalar (Smart Reminders)
 
-- [ ] Qarz to'lov muddati tugashiga 3 kun qolganda avtomatik SMS yuborish (avtopilot rejim).
-- [ ] Qarz to'langanda mijozga "Rahmat, to'lovingiz qabul qilindi" deb xushmuomala tasdiqnoma SMS yuborish.
+- [x] Qarz to'lov muddati tugashiga 3 kun qolganda avtomatik SMS yuborish (avtopilot rejim): Do'kon egasi uchun yagona Avto Eslatma boshqaruv modali (`AutoRemindersModal`) yaratildi (muddatiga 3 kun qolgan va kechikkan qarzdorlarni avtomatik saralash, 24 soatlik anti-spam filtri, jonli xabar tahriri, 1-klikda ommaviy yuborish) hamda `/api/cron/reminders` orqali to'liq avtomatik serverless cron avtopilot ta'minlandi.
+- [x] Qarz to'langanda mijozga "Rahmat, to'lovingiz qabul qilindi" deb xushmuomala tasdiqnoma SMS yuborish: `AddPaymentModal`da SMS tasdiqnoma yuborish tanlovi qo'shildi, `/api/payments` endpointida xaridordan to'lov qabul qilinishi bilanoq avtomatik xushmuomala chek SMS xabari yuborilishi va kredit sarfi xavfsiz hisoblanishi joriy qilindi.
 
 ---
 

@@ -19,11 +19,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    const storeOwnerId = profile.store_owner_id || profile.id
+
     // Get SMS credits
     const { data: credits } = await adminSupabase
       .from('sms_credits')
       .select('credits, used_credits')
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
 
     const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
     const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
     const { data: purchases } = await adminSupabase
       .from('sms_credit_purchases')
       .select('credits, amount, created_at')
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .order('created_at', { ascending: false })
       .limit(5)
 
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
     const { data: usage } = await adminSupabase
       .from('sms_usage_log')
       .select('recipient_phone, created_at')
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .order('created_at', { ascending: false })
       .limit(10)
 

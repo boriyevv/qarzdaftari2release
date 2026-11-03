@@ -57,6 +57,46 @@ export function LoginPageContent() {
 		otp: '',
 	})
 
+	// Cashier login form
+	const [cashierForm, setCashierForm] = useState({
+		identifier: '',
+		password: '',
+	})
+
+	const handleCashierLogin = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setLoading(true)
+		setError('')
+		setSuccess('')
+
+		try {
+			const res = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					auth_method: 'cashier',
+					identifier: cashierForm.identifier,
+					password: cashierForm.password,
+				}),
+			})
+
+			const data = await res.json()
+			if (!res.ok) {
+				setError(data.error || 'Kassir kirishida xatolik')
+				return
+			}
+
+			setSuccess("Muvaffaqiyatli! Kassa oynasiga yo'naltirilmoqda...")
+			setTimeout(() => {
+				window.location.href = '/dashboard'
+			}, 300)
+		} catch (err) {
+			setError('Tarmoq xatosi')
+		} finally {
+			setLoading(false)
+		}
+	}
+
 	// Check for reset password success message
 	useState(() => {
 		const message = searchParams.get('message')
@@ -209,9 +249,10 @@ export function LoginPageContent() {
 				</CardHeader>
 				<CardContent>
 					<Tabs defaultValue='email' className='w-full'>
-						<TabsList className='grid w-full grid-cols-2'>
+						<TabsList className='grid w-full grid-cols-3'>
 							<TabsTrigger value='email'>Email</TabsTrigger>
 							<TabsTrigger value='phone'>Telefon ⚡</TabsTrigger>
+							<TabsTrigger value='cashier'>Kassir 👥</TabsTrigger>
 						</TabsList>
 
 						{/* Alerts */}
@@ -370,6 +411,52 @@ export function LoginPageContent() {
 									</div>
 								</div>
 							)}
+						</TabsContent>
+
+						{/* Cashier Login Tab */}
+						<TabsContent value='cashier' className='mt-4'>
+							<form onSubmit={handleCashierLogin} className='space-y-4'>
+								<div className='p-3 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-100 dark:border-purple-900/50 text-xs text-purple-800 dark:text-purple-300'>
+									Do&apos;kon egasi tomonidan berilgan telefon raqami yoki login hamda parolni kiriting.
+								</div>
+
+								<div className='space-y-2'>
+									<Label htmlFor='cashier-identifier'>Telefon yoki Login</Label>
+									<Input
+										id='cashier-identifier'
+										placeholder='+998901234567 yoki ali_kassir'
+										required
+										value={cashierForm.identifier}
+										onChange={e =>
+											setCashierForm({ ...cashierForm, identifier: e.target.value })
+										}
+										disabled={loading}
+									/>
+								</div>
+
+								<div className='space-y-2'>
+									<Label htmlFor='cashier-password'>Kassir Paroli</Label>
+									<Input
+										id='cashier-password'
+										type='password'
+										placeholder='Parolingizni kiriting'
+										required
+										value={cashierForm.password}
+										onChange={e =>
+											setCashierForm({ ...cashierForm, password: e.target.value })
+										}
+										disabled={loading}
+									/>
+								</div>
+
+								<Button
+									type='submit'
+									className='w-full bg-purple-600 hover:bg-purple-700 text-white'
+									disabled={loading || !cashierForm.identifier || !cashierForm.password}
+								>
+									{loading ? 'Tekshirilmoqda...' : 'Kassir sifatida kirish'}
+								</Button>
+							</form>
 						</TabsContent>
 					</Tabs>
 

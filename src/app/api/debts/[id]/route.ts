@@ -1,11 +1,12 @@
 // src/app/api/debts/[id]/route.ts
 // GET - Get single debt
 // PATCH - Update debt
-// DELETE - Delete debt
+// DELETE - Delete debt (restricted to Store Owner)
 
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { getCurrentUser } from '@/lib/auth/middleware'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -16,24 +17,15 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single()
+    const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
 
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
-
-    const { data: debt, error } = await supabase
+    const { data: debt, error } = await adminSupabase
       .from('debts')
       .select(`
         *,
@@ -41,7 +33,7 @@ export async function GET(
         payments:payments(*)
       `)
       .eq('id', params.id)
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .is('deleted_at', null)
       .single()
 
@@ -72,10 +64,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -89,22 +79,15 @@ export async function PATCH(
       )
     }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
+    const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
 
     // Check ownership
-    const { data: existing } = await supabase
+    const { data: existing } = await adminSupabase
       .from('debts')
       .select('*')
       .eq('id', params.id)
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .single()
 
     if (!existing) {
@@ -112,7 +95,7 @@ export async function PATCH(
     }
 
     // Update debt
-    const { data: debt, error } = await supabase
+    const { data: debt, error } = await adminSupabase
       .from('debts')
       .update(result.data)
       .eq('id', params.id)
@@ -131,35 +114,34 @@ export async function PATCH(
   }
 }
 
-// DELETE - Soft delete debt
+// DELETE - Soft delete debt (Only store owner / admin allowed)
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const profile = await getCurrentUser()
+    if (!profile) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    // CASHIER PERMISSION CHECK: Cashiers cannot delete debts
+    if (profile.role === 'cashier') {
+      return NextResponse.json(
+        { error: 'Kassir qarzni o\'chirish huquqiga ega emas. Faqat do\'kon egasi o\'chira oladi.' },
+        { status: 403 }
+      )
     }
 
+    const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
+
     // Check ownership
-    const { data: existing } = await supabase
+    const { data: existing } = await adminSupabase
       .from('debts')
       .select('*')
       .eq('id', params.id)
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .single()
 
     if (!existing) {
@@ -167,7 +149,7 @@ export async function DELETE(
     }
 
     // Soft delete
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from('debts')
       .update({
         deleted_at: new Date().toISOString(),

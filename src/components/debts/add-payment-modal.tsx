@@ -17,10 +17,12 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { formatCurrency } from '@/lib/utils/currency'
 import { playSuccessSound } from '@/lib/sounds'
+import { MessageSquare, CheckCircle2 } from 'lucide-react'
 
 interface Debt {
   id: string
   debtor_name: string
+  debtor_phone?: string
   amount: number
   paid_amount: number
 }
@@ -35,6 +37,7 @@ interface AddPaymentModalProps {
 export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaymentModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [sendSMS, setSendSMS] = useState(true)
   const [formData, setFormData] = useState({
     amount: '',
     payment_date: new Date().toISOString().split('T')[0],
@@ -65,6 +68,7 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
           amount,
           payment_date: formData.payment_date,
           note: formData.note || undefined,
+          send_confirmation_sms: sendSMS && !!debt.debtor_phone,
         }),
       })
 
@@ -169,13 +173,34 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
             <Textarea
               id="note"
               placeholder="Qo'shimcha ma'lumot..."
-              rows={3}
+              rows={2}
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
               disabled={loading}
               className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-900 dark:text-slate-100"
             />
           </div>
+
+          {/* Automatic SMS Confirmation Toggle */}
+          {debt.debtor_phone && (
+            <label className="flex items-center gap-2.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/50 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800 transition-colors">
+              <input
+                type="checkbox"
+                checked={sendSMS}
+                onChange={(e) => setSendSMS(e.target.checked)}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <div className="min-w-0 flex-1">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  Mijozga SMS tasdiqnoma yuborish
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block truncate">
+                  &quot;To&apos;lovingiz qabul qilindi. Qoldiq: ...&quot; xushmuomala xabari
+                </span>
+              </div>
+            </label>
+          )}
 
           <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
             <Button

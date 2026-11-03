@@ -20,14 +20,15 @@ export async function GET() {
     }
 
     const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
 
-    console.log('📁 Fetching folders for user:', profile.id)
+    console.log('📁 Fetching folders for user:', storeOwnerId)
 
     // Get folders
     const { data: folders, error: foldersError } = await adminSupabase
       .from('folders')
       .select('*')
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .order('order_index')
 
     if (foldersError) {
@@ -82,12 +83,13 @@ export async function POST(request: Request) {
     }
 
     const adminSupabase = createAdminClient()
+    const storeOwnerId = profile.store_owner_id || profile.id
 
     // Check folder limit based on plan
     const { count: folderCount } = await adminSupabase
       .from('folders')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
 
     const limits: Record<string, number> = {
       FREE: 2,
@@ -109,7 +111,7 @@ export async function POST(request: Request) {
     const { data: maxFolder } = await adminSupabase
       .from('folders')
       .select('order_index')
-      .eq('user_id', profile.id)
+      .eq('user_id', storeOwnerId)
       .order('order_index', { ascending: false })
       .limit(1)
       .single()
@@ -120,7 +122,7 @@ export async function POST(request: Request) {
     const { data: folder, error: createError } = await adminSupabase
       .from('folders')
       .insert({
-        user_id: profile.id,
+        user_id: storeOwnerId,
         name: result.data.name,
         color: result.data.color,
         order_index: nextOrder,

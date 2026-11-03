@@ -5,6 +5,24 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { hasPermission } from './permissions'
 
+function formatUserProfile(profile: any) {
+  if (!profile) return null
+  if (profile.is_active === false) {
+    console.warn(`User ${profile.id} is inactive / disabled`)
+    return null
+  }
+  const role = profile.locale_settings?.role || (profile.is_admin ? 'admin' : 'owner')
+  const store_owner_id = profile.locale_settings?.store_owner_id || profile.id
+  const permissions = profile.locale_settings?.permissions || ['*']
+
+  return {
+    ...profile,
+    role,
+    store_owner_id,
+    permissions,
+  }
+}
+
 export async function getCurrentUser() {
   try {
     const adminSupabase = createAdminClient()
@@ -22,7 +40,7 @@ export async function getCurrentUser() {
           .eq('auth_id', user.id)
           .maybeSingle()
 
-        if (profile) return profile
+        if (profile) return formatUserProfile(profile)
 
         // Or by phone if auth user has phone
         if (user.phone) {
@@ -32,7 +50,7 @@ export async function getCurrentUser() {
             .eq('phone', user.phone)
             .maybeSingle()
 
-          if (phoneProfile) return phoneProfile
+          if (phoneProfile) return formatUserProfile(phoneProfile)
         }
       }
     } catch (authErr) {
@@ -50,7 +68,7 @@ export async function getCurrentUser() {
         .eq('id', phoneUserId)
         .maybeSingle()
 
-      if (profile) return profile
+      if (profile) return formatUserProfile(profile)
     }
 
     return null
