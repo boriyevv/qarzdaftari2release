@@ -31,6 +31,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { triggerPwaInstallPrompt } from '@/components/pwa/pwa-install-banner'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 interface NavItem {
   label: string
@@ -195,13 +196,13 @@ export function AppShell({
                 text-sm font-medium rounded-xl transition-all duration-200
                 ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/70 text-blue-600 shadow-2xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/70 text-blue-600 dark:from-blue-950/60 dark:to-indigo-950/40 dark:text-blue-400 shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
                 }
               `}
             >
               {isActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-blue-600" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-blue-600 dark:bg-blue-500" />
               )}
               <div className={`flex items-center ${compact ? 'justify-center' : 'gap-3 min-w-0'}`}>
                 <div
@@ -210,7 +211,7 @@ export function AppShell({
                     ${
                       isActive
                         ? 'bg-blue-600 text-white shadow-xs'
-                        : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-900'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-slate-900 dark:group-hover:text-slate-100'
                     }
                   `}
                 >
@@ -260,8 +261,8 @@ export function AppShell({
         <aside
           className={`
             hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-30
-            border-r border-slate-200/80 bg-white/95 backdrop-blur-xl
-            transition-all duration-300 ease-in-out shadow-[1px_0_20px_rgba(0,0,0,0.02)]
+            border-r border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl
+            transition-all duration-300 ease-in-out shadow-[1px_0_20px_rgba(0,0,0,0.02)] dark:shadow-none
             ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
           `}
         >
@@ -279,10 +280,10 @@ export function AppShell({
                   </div>
                   {!isCollapsed && (
                     <div className="min-w-0">
-                      <span className="font-bold text-lg text-slate-900 tracking-tight leading-none block truncate">
+                      <span className="font-bold text-lg text-slate-900 dark:text-slate-100 tracking-tight leading-none block truncate">
                         Qarz Daftari
                       </span>
-                      <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1 mt-0.5">
+                      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         Aqlli boshqaruv
                       </span>
@@ -294,7 +295,7 @@ export function AppShell({
                 {!isCollapsed && (
                   <button
                     onClick={handleToggleCollapse}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     title="Menyuni yig'ish"
                     aria-label="Menyuni yig'ish"
                   >
@@ -308,7 +309,7 @@ export function AppShell({
                 <div className="flex justify-center mb-4">
                   <button
                     onClick={handleToggleCollapse}
-                    className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     title="Menyuni kengaytirish"
                     aria-label="Menyuni kengaytirish"
                   >
@@ -322,20 +323,21 @@ export function AppShell({
             </div>
 
             {/* Bottom User Profile & Status */}
-            <div className={`px-3 mt-6 pt-4 border-t border-slate-100 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+            <div className={`px-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
               {user ? (
                 isCollapsed ? (
                   <div className="flex flex-col items-center gap-2">
                     <div
-                      className="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs"
+                      className="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 dark:from-slate-700 dark:to-slate-800 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs"
                       title={user.store_name || user.full_name || 'Foydalanuvchi'}
                     >
                       {user.store_name?.[0] || user.full_name?.[0] || 'U'}
                     </div>
+                    <ThemeToggle className="w-8 h-8" align="start" />
                     <button
                       type="button"
                       onClick={handleStartTour}
-                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
                       title="Tizim qo'llanmasi (Tur)"
                       aria-label="Tizim qo'llanmasi"
                     >
@@ -344,7 +346,7 @@ export function AppShell({
                     <button
                       type="button"
                       onClick={triggerPwaInstallPrompt}
-                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
                       title="Ilovani o'rnatish"
                       aria-label="Ilovani o'rnatish"
                     >
@@ -352,24 +354,24 @@ export function AppShell({
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                       title="Hisobdan chiqish"
                     >
                       <LogOut className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <div className="p-3 bg-gradient-to-b from-slate-50 to-slate-100/60 rounded-2xl border border-slate-200/70 space-y-2.5">
+                  <div className="p-3 bg-gradient-to-b from-slate-50 to-slate-100/60 dark:from-slate-800/80 dark:to-slate-900/60 rounded-2xl border border-slate-200/70 dark:border-slate-800 space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 text-white flex items-center justify-center font-bold text-xs uppercase shadow-xs flex-shrink-0">
                           {user.store_name?.[0] || user.full_name?.[0] || 'U'}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                          <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate leading-tight">
                             {user.store_name || user.full_name}
                           </p>
-                          <p className="text-[11px] text-slate-500 truncate leading-tight mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
                             {user.full_name}
                           </p>
                         </div>
@@ -381,7 +383,7 @@ export function AppShell({
                             ? 'bg-amber-500 hover:bg-amber-600 text-white'
                             : currentPlan === 'PLUS'
                             ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                            : 'bg-slate-200 text-slate-700'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                         }`}
                       >
                         {currentPlan}
@@ -405,9 +407,9 @@ export function AppShell({
                     <button
                       type="button"
                       onClick={triggerPwaInstallPrompt}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all border border-slate-200/80 bg-white shadow-2xs active:scale-95"
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/60 shadow-2xs active:scale-95"
                     >
-                      <Download className="w-3.5 h-3.5 text-blue-600" />
+                      <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                       <span>Ilovani o&apos;rnatish</span>
                     </button>
 
@@ -415,15 +417,15 @@ export function AppShell({
                     <button
                       type="button"
                       onClick={handleStartTour}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50/80 rounded-xl transition-all border border-blue-200/60 bg-white shadow-2xs active:scale-95"
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50/80 dark:hover:bg-slate-800 rounded-xl transition-all border border-blue-200/60 dark:border-blue-900/50 bg-white dark:bg-slate-800/60 shadow-2xs active:scale-95"
                     >
-                      <Compass className="w-3.5 h-3.5 text-blue-600" />
+                      <Compass className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                       <span>Tizim qo&apos;llanmasi</span>
                     </button>
 
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50/60 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Hisobdan chiqish</span>
@@ -434,7 +436,7 @@ export function AppShell({
                 <div className="text-center py-2">
                   <Link
                     href="/login"
-                    className="text-xs font-semibold text-blue-600 hover:underline"
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Kirish
                   </Link>
@@ -454,7 +456,7 @@ export function AppShell({
           `}
         >
           {/* Unified Sticky Header */}
-          <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+          <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-2xs">
             <div className="px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
               {/* Left Side: Mobile Avatar / Back button + Title */}
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -462,10 +464,10 @@ export function AppShell({
                 {showBack ? (
                   <button
                     onClick={onBack ? onBack : () => router.back()}
-                    className="p-1.5 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                    className="p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs font-semibold"
                     title="Orqaga"
                   >
-                    <ArrowLeft className="w-4 h-4 text-slate-700" />
+                    <ArrowLeft className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                     <span className="hidden sm:inline">Orqaga</span>
                   </button>
                 ) : (
@@ -482,23 +484,23 @@ export function AppShell({
                 {/* Breadcrumbs or Page Title */}
                 <div className="min-w-0">
                   {breadcrumbs && breadcrumbs.length > 0 ? (
-                    <nav className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <nav className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
                       {breadcrumbs.map((crumb, idx) => {
                         const isLast = idx === breadcrumbs.length - 1
                         return (
                           <div key={idx} className="flex items-center gap-1.5 min-w-0">
-                            {idx > 0 && <span className="text-slate-300">/</span>}
+                            {idx > 0 && <span className="text-slate-300 dark:text-slate-600">/</span>}
                             {crumb.href && !isLast ? (
                               <Link
                                 href={crumb.href}
-                                className="hover:text-blue-600 transition-colors truncate max-w-[120px] sm:max-w-[200px]"
+                                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-[120px] sm:max-w-[200px]"
                               >
                                 {crumb.label}
                               </Link>
                             ) : (
                               <span
                                 className={`truncate max-w-[150px] sm:max-w-[250px] ${
-                                  isLast ? 'text-slate-900 font-bold' : ''
+                                  isLast ? 'text-slate-900 dark:text-slate-100 font-bold' : ''
                                 }`}
                               >
                                 {crumb.label}
@@ -510,11 +512,11 @@ export function AppShell({
                     </nav>
                   ) : title ? (
                     <div className="min-w-0">
-                      <h1 className="text-base sm:text-xl font-bold text-slate-900 truncate leading-tight">
+                      <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate leading-tight">
                         {title}
                       </h1>
                       {subtitle && (
-                        <p className="text-[11px] sm:text-xs text-slate-500 truncate leading-none mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-none mt-0.5">
                           {subtitle}
                         </p>
                       )}
@@ -523,12 +525,14 @@ export function AppShell({
                 </div>
               </div>
 
-              {/* Right Side: Actions + Add Debt Button */}
-              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Right Side: Actions + ThemeToggle + PWA + Add Debt Button */}
+              <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+                <ThemeToggle />
+
                 <button
                   type="button"
                   onClick={triggerPwaInstallPrompt}
-                  className="lg:hidden p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors"
+                  className="lg:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
                   title="Ilovani o'rnatish (PWA)"
                   aria-label="Ilovani o'rnatish"
                 >
@@ -550,12 +554,12 @@ export function AppShell({
                 )}
 
                 {user?.store_name && (
-                  <div className="hidden md:flex items-center gap-2 pl-2 border-l border-slate-200">
+                  <div className="hidden md:flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
                     <div className="text-right">
-                      <span className="text-xs font-bold text-slate-900 block truncate max-w-[140px]">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block truncate max-w-[140px]">
                         {user.store_name}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                         {currentPlan} tarif
                       </span>
                     </div>
@@ -574,7 +578,7 @@ export function AppShell({
         {/* =========================================================
             MOBILE BOTTOM NAVIGATION BAR
             ========================================================= */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 z-40 shadow-lg">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 z-40 shadow-lg">
           <div className="grid grid-cols-5 gap-1 py-1.5 px-2 max-w-md mx-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href
@@ -588,8 +592,8 @@ export function AppShell({
                     flex flex-col items-center justify-center py-1 px-1 rounded-xl text-[10px] font-semibold transition-colors
                     ${
                       isActive
-                        ? 'text-blue-600 bg-blue-50/70 font-bold'
-                        : 'text-slate-500 hover:text-slate-900'
+                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/40 font-bold'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                     }
                   `}
                 >

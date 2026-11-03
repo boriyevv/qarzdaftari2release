@@ -176,16 +176,16 @@ export default function PricingPage() {
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               Tariflar va Rejalar
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-[2.65rem] font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-[2.65rem] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
               Biznesingiz uchun to&apos;g&apos;ri tarifni tanlang
             </h1>
-            <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
               Shaffof narxlar, yashirin to&apos;lovlarsiz. Uzum Bank, Click va Payme orqali 100% xavfsiz to&apos;lang.
             </p>
 
             {/* Billing Cycle Pill Toggle */}
             <div className="pt-3 flex justify-center">
-              <div className="inline-flex items-center bg-slate-200/80 p-1 rounded-2xl shadow-inner border border-slate-200">
+              <div className="inline-flex items-center bg-slate-200/80 dark:bg-slate-800 p-1 rounded-2xl shadow-inner border border-slate-200 dark:border-slate-700">
                 {CYCLE_OPTIONS.map((opt) => {
                   const isActive = billingCycle === opt.value
                   return (
@@ -195,8 +195,8 @@ export default function PricingPage() {
                       onClick={() => setBillingCycle(opt.value)}
                       className={`relative px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-1.5 ${
                         isActive
-                          ? 'bg-white text-slate-900 shadow-md border border-slate-200/60'
-                          : 'text-slate-600 hover:text-slate-900'
+                          ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-md border border-slate-200/60 dark:border-slate-800'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                       }`}
                     >
                       <span>{opt.label}</span>
@@ -277,7 +277,7 @@ export default function PricingPage() {
               const isPro = plan.name === 'PRO'
 
               // Card styling states
-              let cardBorderClass = 'border-slate-200/90 shadow-sm bg-white hover:border-slate-300 hover:shadow-lg'
+              let cardBorderClass = 'border-slate-200/90 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg'
               let cardHeaderBg = 'bg-slate-50/70 border-b border-slate-100'
               let iconBg = 'bg-slate-100 text-slate-700'
 

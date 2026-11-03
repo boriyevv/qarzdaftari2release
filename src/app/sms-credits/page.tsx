@@ -182,14 +182,14 @@ export default function SMSCreditsPage() {
 
 				{/* Packages */}
 				<div>
-					<h2 className='text-lg font-bold text-slate-900 mb-4'>
+					<h2 className='text-lg font-bold text-slate-900 dark:text-slate-100 mb-4'>
 						SMS Paketlar
 					</h2>
 					<div className='grid md:grid-cols-3 gap-4'>
 						{SMS_PACKAGES.map(pkg => (
 							<Card
 								key={pkg.id}
-								className={`relative rounded-2xl border-slate-200/90 shadow-2xs hover:shadow-md transition-all ${
+								className={`relative rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs hover:shadow-md transition-all ${
 									pkg.popular ? 'border-blue-500 border-2' : ''
 								}`}
 							>
@@ -202,11 +202,11 @@ export default function SMSCreditsPage() {
 								)}
 
 								<CardHeader className='pb-3'>
-									<CardTitle className='text-xl font-bold text-slate-900'>
+									<CardTitle className='text-xl font-bold text-slate-900 dark:text-slate-100'>
 										{pkg.name}
 									</CardTitle>
 									<CardDescription className='pt-1'>
-										<span className='text-2xl font-black text-slate-900'>
+										<span className='text-2xl font-black text-slate-900 dark:text-slate-100'>
 											{formatPrice(pkg.price)}
 										</span>
 									</CardDescription>
@@ -215,13 +215,13 @@ export default function SMSCreditsPage() {
 								<CardContent className='space-y-2.5 pb-4'>
 									<div className='flex items-center gap-2'>
 										<Check className='w-4 h-4 text-emerald-600' />
-										<span className='text-xs sm:text-sm font-semibold text-slate-800'>
+										<span className='text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200'>
 											{pkg.credits} ta SMS
 										</span>
 									</div>
 									<div className='flex items-center gap-2'>
 										<Check className='w-4 h-4 text-emerald-600' />
-										<span className='text-xs sm:text-sm text-slate-600'>
+										<span className='text-xs sm:text-sm text-slate-600 dark:text-slate-400'>
 											{formatPrice(pkg.pricePerSMS)} / SMS
 										</span>
 									</div>
@@ -285,12 +285,12 @@ export default function SMSCreditsPage() {
 
 			{/* Payment Provider Selection Modal */}
 			<Dialog open={showProviderModal} onOpenChange={setShowProviderModal}>
-				<DialogContent className='sm:max-w-md rounded-3xl p-6 border border-slate-200/80 shadow-2xl bg-white'>
+				<DialogContent className='sm:max-w-md rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900'>
 					<DialogHeader className='space-y-1 pb-1'>
-						<DialogTitle className='text-xl font-black text-slate-900 tracking-tight'>
+						<DialogTitle className='text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight'>
 							To&apos;lov tizimini tanlang
 						</DialogTitle>
-						<DialogDescription className='text-xs text-slate-500'>
+						<DialogDescription className='text-xs text-slate-500 dark:text-slate-400'>
 							SMS kredit sotib olish uchun to&apos;lov tizimini tanlang
 						</DialogDescription>
 					</DialogHeader>

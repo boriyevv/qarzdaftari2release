@@ -41,6 +41,7 @@ import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
 import { formatCurrency } from '@/lib/utils/currency'
 import { exportDebtorStatementPDF, generateDebtorTelegramText } from '@/lib/export/debtor-statement'
+import { playSuccessSound } from '@/lib/sounds'
 import Link from 'next/link'
 
 interface Debt {
@@ -194,6 +195,7 @@ export default function DebtorProfilePage() {
         }
       }
 
+      playSuccessSound()
       setPaymentSuccess(true)
       await fetchDebtorData()
       setTimeout(() => {
@@ -366,21 +368,21 @@ export default function DebtorProfilePage() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* 1. Qarzdor Asosiy Profili va 4 ta Tezkor Amal */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
             <div>
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                   {data.name}
                 </h1>
                 <Badge
                   variant="outline"
                   className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                     data.totalRemaining === 0
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                       : hasOverdueDebt
-                      ? 'bg-rose-50 text-rose-700 border-rose-200'
-                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                      : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                   }`}
                 >
                   {data.totalRemaining === 0
@@ -391,8 +393,8 @@ export default function DebtorProfilePage() {
                 </Badge>
               </div>
 
-              <div className="flex items-center gap-4 text-xs sm:text-sm text-slate-500 mt-2 flex-wrap">
-                <div className="flex items-center gap-1.5 font-medium text-slate-700">
+              <div className="flex items-center gap-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 flex-wrap">
+                <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
                   <Phone className="w-4 h-4 text-blue-600" />
                   <a href={`tel:${data.phone}`} className="hover:underline">
                     {data.phone || 'Telefon raqam yo\'q'}
@@ -401,7 +403,7 @@ export default function DebtorProfilePage() {
                 <span>•</span>
                 <span>{data.debtCount} ta umumiy yozuv</span>
                 <span>•</span>
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
                   {data.debts.filter((d) => d.amount - d.paid_amount > 0).length} ta ochiq qarz
                 </span>
               </div>
@@ -424,7 +426,7 @@ export default function DebtorProfilePage() {
                 variant="outline"
                 onClick={handleOpenSMS}
                 disabled={data.totalRemaining <= 0}
-                className="border-slate-200 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white text-slate-700 shadow-2xs"
+                className="border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 shadow-2xs"
               >
                 <Send className="w-4 h-4 mr-1.5 text-blue-600" />
                 SMS Eslatma
@@ -435,7 +437,7 @@ export default function DebtorProfilePage() {
                 <a href={`tel:${data.phone}`}>
                   <Button
                     variant="outline"
-                    className="border-slate-200 hover:border-emerald-300 hover:text-emerald-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white text-slate-700 shadow-2xs"
+                    className="border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:text-emerald-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 shadow-2xs"
                   >
                     <Phone className="w-4 h-4 mr-1.5 text-emerald-600" />
                     Qo&apos;ng&apos;iroq
@@ -447,7 +449,7 @@ export default function DebtorProfilePage() {
               <Button
                 variant="outline"
                 onClick={() => setStatementModalOpen(true)}
-                className="border-slate-200 hover:border-indigo-300 hover:text-indigo-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white text-slate-700 shadow-2xs"
+                className="border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 shadow-2xs"
               >
                 <FileText className="w-4 h-4 mr-1.5 text-indigo-600" />
                 Akt-sverka

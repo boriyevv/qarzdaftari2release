@@ -67,9 +67,9 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 
 ## 🎨 3. UI/UX Takomillashtirishlari
 
-- [ ] Dark / Light mode to'liq almashinuvchi tugmasi.
+- [x] Dark / Light mode: `next-themes` orqali SSR miltillashsiz Light / Dark / System rejimlari, Topbar va Profil sozlamalaridagi ThemeToggle, hamda Slate Premium Dark to'liq ranglar uyg'unligi joriy qilindi.
 - [x] Mobil PWA (Progressive Web App): Manifest (standalone, theme-color, icons), Service Worker, offline fallback (/offline va jonli OfflineIndicator), o'rnatish bannerlari (floating prompt, iOS Safari qo'llanma modali) hamda Sidebar va mobil Topbar'da o'rnatish tugmalari to'liq joriy qilindi.
-- [ ] Mikro-tovushlar: To'lov qabul qilinganda yoqimli muvaffaqiyat ovozi.
+- [x] Mikro-tovushlar: Web Audio API orqali sintez qilingan yengil va zamonaviy kristallik chime ovozlari (to'lov qabul qilinganda, yangi qarz kiritilganda), sozlamalarda sinov va o'chirish/yoqish imkoni.
 
 ---
 

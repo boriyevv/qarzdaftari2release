@@ -29,12 +29,12 @@ export function DashboardStats({
       subValue: 'Aktiv qarzdorlar soni',
       icon: Users,
       badge: 'Faol yozuvlar',
-      badgeColor: 'bg-blue-100/80 text-blue-700 border-blue-200/60',
+      badgeColor: 'bg-blue-100/80 text-blue-700 border-blue-200/60 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-800',
       iconBg: 'bg-blue-600 text-white shadow-md shadow-blue-500/25',
-      ambientGlow: 'bg-blue-500/15',
-      watermarkColor: 'text-blue-600/10',
-      cardBg: 'from-blue-50/60 via-white to-blue-50/30',
-      borderColor: 'border-blue-200/80 hover:border-blue-300',
+      ambientGlow: 'bg-blue-500/15 dark:bg-blue-500/10',
+      watermarkColor: 'text-blue-600/10 dark:text-blue-400/5',
+      cardBg: 'from-blue-50/60 via-white to-blue-50/30 dark:from-blue-950/40 dark:via-slate-900 dark:to-blue-950/20',
+      borderColor: 'border-blue-200/80 hover:border-blue-300 dark:border-blue-900/50 dark:hover:border-blue-800',
     },
     {
       title: 'Jami Summa',
@@ -45,12 +45,12 @@ export function DashboardStats({
           : `${totalPaid > 0 ? formatCurrencyShort(totalPaid) + ' undirildi' : "Hisoblangan to'liq summa"}`,
       icon: Wallet,
       badge: `${collectionRate}% undirildi`,
-      badgeColor: 'bg-emerald-100/80 text-emerald-700 border-emerald-200/60',
+      badgeColor: 'bg-emerald-100/80 text-emerald-700 border-emerald-200/60 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800',
       iconBg: 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25',
-      ambientGlow: 'bg-emerald-500/15',
-      watermarkColor: 'text-emerald-600/10',
-      cardBg: 'from-emerald-50/60 via-white to-emerald-50/30',
-      borderColor: 'border-emerald-200/80 hover:border-emerald-300',
+      ambientGlow: 'bg-emerald-500/15 dark:bg-emerald-500/10',
+      watermarkColor: 'text-emerald-600/10 dark:text-emerald-400/5',
+      cardBg: 'from-emerald-50/60 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-slate-900 dark:to-emerald-950/20',
+      borderColor: 'border-emerald-200/80 hover:border-emerald-300 dark:border-emerald-900/50 dark:hover:border-emerald-800',
     },
     {
       title: 'Qoldiq Qarz',
@@ -64,12 +64,12 @@ export function DashboardStats({
           : 'Mijozlardan olinishi kutilmoqda',
       icon: ArrowDownRight,
       badge: 'Kutilayotgan',
-      badgeColor: 'bg-amber-100/80 text-amber-700 border-amber-200/60',
+      badgeColor: 'bg-amber-100/80 text-amber-700 border-amber-200/60 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800',
       iconBg: 'bg-amber-600 text-white shadow-md shadow-amber-500/25',
-      ambientGlow: 'bg-amber-500/15',
-      watermarkColor: 'text-amber-600/10',
-      cardBg: 'from-amber-50/60 via-white to-amber-50/30',
-      borderColor: 'border-amber-200/80 hover:border-amber-300',
+      ambientGlow: 'bg-amber-500/15 dark:bg-amber-500/10',
+      watermarkColor: 'text-amber-600/10 dark:text-amber-400/5',
+      cardBg: 'from-amber-50/60 via-white to-amber-50/30 dark:from-amber-950/40 dark:via-slate-900 dark:to-amber-950/20',
+      borderColor: 'border-amber-200/80 hover:border-amber-300 dark:border-amber-900/50 dark:hover:border-amber-800',
     },
     {
       title: "Muddati O'tgan",
@@ -79,22 +79,22 @@ export function DashboardStats({
       badge: overdueCount > 0 ? 'Diqqat talab' : 'Hammasi joyida',
       badgeColor:
         overdueCount > 0
-          ? 'bg-rose-100/90 text-rose-700 border-rose-200/60'
-          : 'bg-slate-100 text-slate-600 border-slate-200',
+          ? 'bg-rose-100/90 text-rose-700 border-rose-200/60 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800'
+          : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
       iconBg:
         overdueCount > 0
           ? 'bg-rose-600 text-white shadow-md shadow-rose-500/25'
           : 'bg-slate-700 text-white shadow-xs',
-      ambientGlow: overdueCount > 0 ? 'bg-rose-500/15' : 'bg-slate-500/10',
-      watermarkColor: overdueCount > 0 ? 'text-rose-600/10' : 'text-slate-600/10',
+      ambientGlow: overdueCount > 0 ? 'bg-rose-500/15 dark:bg-rose-500/10' : 'bg-slate-500/10 dark:bg-slate-500/5',
+      watermarkColor: overdueCount > 0 ? 'text-rose-600/10 dark:text-rose-400/5' : 'text-slate-600/10 dark:text-slate-400/5',
       cardBg:
         overdueCount > 0
-          ? 'from-rose-50/60 via-white to-rose-50/30'
-          : 'from-slate-50/60 via-white to-slate-50/30',
+          ? 'from-rose-50/60 via-white to-rose-50/30 dark:from-rose-950/40 dark:via-slate-900 dark:to-rose-950/20'
+          : 'from-slate-50/60 via-white to-slate-50/30 dark:from-slate-800/40 dark:via-slate-900 dark:to-slate-800/20',
       borderColor:
         overdueCount > 0
-          ? 'border-rose-200/80 hover:border-rose-300'
-          : 'border-slate-200/80 hover:border-slate-300',
+          ? 'border-rose-200/80 hover:border-rose-300 dark:border-rose-900/50 dark:hover:border-rose-800'
+          : 'border-slate-200/80 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700',
     },
   ]
 
@@ -124,7 +124,7 @@ export function DashboardStats({
             {/* 3. Foreground Content */}
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   {stat.title}
                 </span>
                 <div
@@ -135,11 +135,11 @@ export function DashboardStats({
               </div>
 
               <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                   {stat.value}
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                  <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
                     {stat.subValue}
                   </p>
                   <span

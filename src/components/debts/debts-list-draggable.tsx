@@ -140,7 +140,7 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
     return {
       status: 'none',
       text: "To'langan",
-      pillClasses: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+      pillClasses: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/80',
       badgeDot: 'bg-emerald-500',
     }
   }
@@ -149,7 +149,7 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
     return {
       status: 'none',
       text: 'Muddatsiz',
-      pillClasses: 'bg-slate-100 text-slate-500 border-slate-200/60',
+      pillClasses: 'bg-slate-100 text-slate-500 border-slate-200/60 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
       badgeDot: 'bg-slate-400',
     }
   }
@@ -167,7 +167,7 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
     return {
       status: 'overdue',
       text: `${daysOver} kun kechikdi`,
-      pillClasses: 'bg-rose-50 text-rose-700 border-rose-200/90 font-bold animate-pulse',
+      pillClasses: 'bg-rose-50 text-rose-700 border-rose-200/90 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/80 font-bold animate-pulse',
       badgeDot: 'bg-rose-500',
     }
   }
@@ -176,7 +176,7 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
     return {
       status: 'today',
       text: 'Bugun to\'lash kerak',
-      pillClasses: 'bg-amber-50 text-amber-800 border-amber-300 font-bold',
+      pillClasses: 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/80 font-bold',
       badgeDot: 'bg-amber-500 animate-ping',
     }
   }
@@ -185,7 +185,7 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
     return {
       status: 'soon',
       text: `${diffDays} kundan keyin`,
-      pillClasses: 'bg-amber-50/80 text-amber-700 border-amber-200',
+      pillClasses: 'bg-amber-50/80 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/80',
       badgeDot: 'bg-amber-400',
     }
   }
@@ -193,7 +193,7 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
   return {
     status: 'future',
     text: dueDate.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' }),
-    pillClasses: 'bg-slate-50 text-slate-600 border-slate-200',
+    pillClasses: 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
     badgeDot: 'bg-slate-400',
   }
 }
@@ -443,8 +443,8 @@ function SortableDebtRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`group border-b border-slate-100 hover:bg-slate-50/80 transition-colors ${
-        isDragging ? 'bg-blue-50/50 shadow-md ring-1 ring-blue-300' : ''
+      className={`group border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-850/60 transition-colors ${
+        isDragging ? 'bg-blue-50/50 dark:bg-blue-950/40 shadow-md ring-1 ring-blue-300 dark:ring-blue-800' : ''
       }`}
     >
       {/* 1. Drag Handle + Debtor Profile */}
@@ -455,7 +455,7 @@ function SortableDebtRow({
             type="button"
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1.5 text-slate-300 hover:text-slate-600 rounded-lg hover:bg-slate-200/60 transition-colors touch-none focus:outline-none"
+            className="cursor-grab active:cursor-grabbing p-1.5 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors touch-none focus:outline-none"
             title="Surish uchun torting"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
@@ -478,7 +478,7 @@ function SortableDebtRow({
             <div className="flex items-center gap-1.5">
               <span
                 onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
-                className="font-bold text-slate-900 text-sm hover:text-blue-600 cursor-pointer transition-colors truncate max-w-[200px]"
+                className="font-bold text-slate-900 dark:text-slate-100 text-sm hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors truncate max-w-[200px]"
                 title={debt.debtor_name}
               >
                 {debt.debtor_name}
@@ -486,30 +486,30 @@ function SortableDebtRow({
 
               {debt.folder && (
                 <span
-                  className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-slate-200/80 bg-white"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800"
                   title={`Papka: ${debt.folder.name}`}
                 >
                   <span
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ backgroundColor: debt.folder.color }}
                   />
-                  <span className="text-slate-600 truncate max-w-[80px]">
+                  <span className="text-slate-600 dark:text-slate-300 truncate max-w-[80px]">
                     {debt.folder.name}
                   </span>
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5 font-mono">
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-mono">
               <span>{formatPhoneDisplay(debt.debtor_phone)}</span>
               <button
                 type="button"
                 onClick={handleCopyPhone}
-                className="hover:text-slate-700 transition-colors"
+                className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                 title="Raqamdan nusxa olish"
               >
                 {copied ? (
-                  <Check className="w-3 h-3 text-emerald-600" />
+                  <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 ) : (
                   <Copy className="w-3 h-3" />
                 )}
@@ -523,14 +523,14 @@ function SortableDebtRow({
       <td className="py-3.5 px-3 min-w-[170px]">
         <div className="space-y-1.5">
           <div className="flex items-baseline justify-between text-xs">
-            <span className="text-slate-400 font-medium text-[11px]">Jami:</span>
-            <span className="font-bold text-slate-700 font-mono">
+            <span className="text-slate-400 dark:text-slate-500 font-medium text-[11px]">Jami:</span>
+            <span className="font-bold text-slate-700 dark:text-slate-300 font-mono">
               {formatCurrency(debt.amount)}
             </span>
           </div>
 
           {/* Micro Progress Bar */}
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 isFullyPaid ? 'bg-emerald-500' : 'bg-blue-600'
@@ -539,10 +539,10 @@ function SortableDebtRow({
             />
           </div>
 
-          <div className="flex items-center justify-between text-[10px] text-slate-400">
+          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
             <span>{paidPercent}% to&apos;landi</span>
             {debt.paid_amount > 0 && (
-              <span className="text-emerald-700 font-semibold font-mono">
+              <span className="text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
                 {formatCurrencyShort(debt.paid_amount)}
               </span>
             )}
@@ -553,16 +553,16 @@ function SortableDebtRow({
       {/* 3. Remaining Balance */}
       <td className="py-3.5 px-3 whitespace-nowrap">
         {isFullyPaid ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80">
             <CheckCircle2 className="w-3.5 h-3.5" />
             To&apos;langan
           </span>
         ) : (
           <div className="space-y-0.5">
-            <div className="font-black text-sm text-slate-900 font-mono tracking-tight text-orange-600">
+            <div className="font-black text-sm text-slate-900 dark:text-slate-100 font-mono tracking-tight text-orange-600 dark:text-orange-400">
               {formatCurrency(remaining)}
             </div>
-            <div className="text-[10px] font-medium text-slate-400">Qoldiq qarz</div>
+            <div className="text-[10px] font-medium text-slate-400 dark:text-slate-500">Qoldiq qarz</div>
           </div>
         )}
       </td>
@@ -586,7 +586,7 @@ function SortableDebtRow({
               type="button"
               size="sm"
               onClick={() => onAction('payment', debt)}
-              className="h-8 px-2.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200/90 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-105"
+              className="h-8 px-2.5 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white border border-emerald-200/90 dark:border-emerald-800/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-105"
               title="To'lov qabul qilish"
             >
               <Plus className="w-3.5 h-3.5 mr-1" />
@@ -601,7 +601,7 @@ function SortableDebtRow({
               size="sm"
               variant="outline"
               onClick={() => onAction('sms-auto', debt)}
-              className="h-8 px-2.5 bg-blue-50/80 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200/80 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-105"
+              className="h-8 px-2.5 bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white border border-blue-200/80 dark:border-blue-900/60 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-105"
               title="SMS eslatma jo'natish"
             >
               <MessageSquare className="w-3.5 h-3.5 mr-1" />
@@ -612,10 +612,10 @@ function SortableDebtRow({
           {/* Quick Call Link */}
           <a
             href={`tel:${debt.debtor_phone}`}
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-all hover:scale-105"
+            className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all hover:scale-105"
             title="Qarzdorga qo'ng'iroq qilish"
           >
-            <Phone className="w-3.5 h-3.5 text-slate-600" />
+            <Phone className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
           </a>
 
           {/* Dropdown Menu for More Actions */}
@@ -701,7 +701,7 @@ function SortableDebtCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 space-y-3.5 transition-all ${
+      className={`relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-4 space-y-3.5 transition-all ${
         isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''
       }`}
     >
@@ -732,7 +732,7 @@ function SortableDebtCard({
 
           <div className="min-w-0">
             <div
-              className="font-bold text-slate-900 text-sm truncate hover:text-blue-600 cursor-pointer"
+              className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
               onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
             >
               {debt.debtor_name}
@@ -753,7 +753,7 @@ function SortableDebtCard({
       </div>
 
       {/* Financials & Progress Bar */}
-      <div className="p-3 bg-slate-50/80 rounded-xl space-y-2 border border-slate-100">
+      <div className="p-3 bg-slate-50/80 dark:bg-slate-850/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
         <div className="flex items-baseline justify-between">
           <span className="text-[11px] font-medium text-slate-500">Qoldiq summa:</span>
           <span
@@ -782,7 +782,7 @@ function SortableDebtCard({
       <div className="grid grid-cols-4 gap-1.5 pt-1">
         <a
           href={`tel:${debt.debtor_phone}`}
-          className="h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center gap-1 text-xs font-bold transition-all"
+          className="h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1 text-xs font-bold transition-all"
         >
           <Phone className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Tel</span>
@@ -793,7 +793,7 @@ function SortableDebtCard({
           size="sm"
           variant="outline"
           onClick={() => onAction('sms-auto', debt)}
-          className="h-9 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border-blue-200 font-bold text-xs"
+          className="h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white border-blue-200 dark:border-blue-900/60 font-bold text-xs"
         >
           <MessageSquare className="w-3.5 h-3.5 mr-1" />
           SMS
@@ -988,7 +988,7 @@ export function DebtsListDraggable({
               placeholder="Qarzdor ismi yoki telefoni bo'yicha qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white"
+              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-850 text-slate-900 dark:text-slate-100"
             />
             {search && (
               <button
@@ -1010,7 +1010,7 @@ export function DebtsListDraggable({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 text-xs font-semibold text-slate-700 bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-850 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
               <option value="date-desc">Eng yangi qo&apos;shilganlar</option>
               <option value="remaining-desc">Qoldiq: Kattadan kichikka</option>
@@ -1030,14 +1030,14 @@ export function DebtsListDraggable({
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'all'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70'
+                  ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-xs'
+                  : 'bg-slate-100/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700'
               }`}
             >
               <span>Barchasi</span>
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  statusFilter === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-700'
+                  statusFilter === 'all' ? 'bg-slate-800 dark:bg-slate-700 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {counts.all}
@@ -1051,7 +1051,7 @@ export function DebtsListDraggable({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'active'
                   ? 'bg-orange-600 text-white shadow-xs'
-                  : 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200/60'
+                  : 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-950/60 border border-orange-200/60 dark:border-orange-900/50'
               }`}
             >
               <span>Qarzdorlar</span>
@@ -1059,7 +1059,7 @@ export function DebtsListDraggable({
                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                   statusFilter === 'active'
                     ? 'bg-orange-700 text-white'
-                    : 'bg-orange-200 text-orange-800'
+                    : 'bg-orange-200 dark:bg-orange-900/60 text-orange-800 dark:text-orange-200'
                 }`}
               >
                 {counts.active}
@@ -1073,14 +1073,14 @@ export function DebtsListDraggable({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'overdue'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-950/60 border border-rose-200/60 dark:border-rose-900/50'
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
               <span>Muddati o&apos;tgan</span>
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  statusFilter === 'overdue' ? 'bg-rose-700 text-white' : 'bg-rose-200 text-rose-800'
+                  statusFilter === 'overdue' ? 'bg-rose-700 text-white' : 'bg-rose-200 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200'
                 }`}
               >
                 {counts.overdue}
@@ -1094,7 +1094,7 @@ export function DebtsListDraggable({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'paid'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-900/50'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1103,7 +1103,7 @@ export function DebtsListDraggable({
                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                   statusFilter === 'paid'
                     ? 'bg-emerald-700 text-white'
-                    : 'bg-emerald-200 text-emerald-800'
+                    : 'bg-emerald-200 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200'
                 }`}
               >
                 {counts.paid}
@@ -1130,12 +1130,12 @@ export function DebtsListDraggable({
 
       {/* ─── EMPTY STATES ────────────────────────────────────────────── */}
       {displayedDebts.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-slate-50/60 rounded-3xl border border-dashed border-slate-200 space-y-3">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-slate-400">
+        <div className="text-center py-16 px-4 bg-slate-50/60 dark:bg-slate-850/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-center text-slate-400">
             {search ? <Search className="w-7 h-7" /> : <Sparkles className="w-7 h-7 text-blue-500" />}
           </div>
           <div className="space-y-1">
-            <h4 className="text-base font-extrabold text-slate-900">
+            <h4 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
               {search
                 ? "Qidiruvingiz bo'yicha qarz topilmadi"
                 : statusFilter === 'overdue'
@@ -1144,7 +1144,7 @@ export function DebtsListDraggable({
                 ? "To'langan qarzlar ro'yxati bo'sh"
                 : "Hozircha qarzlar mavjud emas"}
             </h4>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
               {search
                 ? `"${search}" so'rovi bo'yicha hech qanday qarzdor topilmadi. Qidiruvni tozalab ko'ring.`
                 : statusFilter === 'overdue'
@@ -1158,7 +1158,7 @@ export function DebtsListDraggable({
               variant="outline"
               size="sm"
               onClick={() => setSearch('')}
-              className="rounded-xl text-xs font-bold"
+              className="rounded-xl text-xs font-bold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
             >
               Qidiruvni tozalash
             </Button>
@@ -1179,7 +1179,7 @@ export function DebtsListDraggable({
       ) : (
         <>
           {/* ─── DESKTOP TABLE VIEW (Modern Enterprise Layout) ───────── */}
-          <div className="hidden lg:block rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
+          <div className="hidden lg:block rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <DndContext
                 sensors={sensors}
@@ -1187,7 +1187,7 @@ export function DebtsListDraggable({
                 onDragEnd={handleDragEnd}
               >
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50/90 border-b border-slate-200/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                  <thead className="bg-slate-50/90 dark:bg-slate-850/90 border-b border-slate-200/80 dark:border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3 pl-4 pr-3">Qarzdor</th>
                       <th className="py-3 px-3">Summa va Foiz</th>
@@ -1196,7 +1196,7 @@ export function DebtsListDraggable({
                       <th className="py-3 pl-3 pr-4 text-right">Tezkor amallar</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     <SortableContext
                       items={displayedDebts.map((d) => d.id)}
                       strategy={verticalListSortingStrategy}

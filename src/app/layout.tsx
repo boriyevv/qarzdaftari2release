@@ -5,6 +5,7 @@ import './globals.css'
 import { UserProvider } from '@/lib/contexts/user-context'
 import { OfflineIndicator } from '@/components/pwa/offline-indicator'
 import { PwaInstallBanner } from '@/components/pwa/pwa-install-banner'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -84,12 +85,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="uz" className="scroll-smooth" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <UserProvider>
-          <OfflineIndicator />
-          {children}
-          <PwaInstallBanner />
-        </UserProvider>
+      <body className={`${inter.className} bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen`} suppressHydrationWarning>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <UserProvider>
+            <OfflineIndicator />
+            {children}
+            <PwaInstallBanner />
+          </UserProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

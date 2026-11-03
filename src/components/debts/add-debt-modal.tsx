@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { MessageSquare, AlertCircle, ExternalLink } from 'lucide-react'
+import { playPingSound } from '@/lib/sounds'
 
 import {
   Dialog,
@@ -136,6 +137,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
         }
       }
 
+      playPingSound()
       alert(smsSent ? "✅ Qarz qo'shildi va SMS yuborildi!" : "✅ Qarz muvaffaqiyatli qo'shildi!")
       onSuccess()
       onOpenChange(false)
