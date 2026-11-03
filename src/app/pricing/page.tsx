@@ -35,6 +35,7 @@ import {
 import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
 import { ClickOnSiteModal } from '@/components/payments/click-on-site-modal'
+import { PaymeOnSiteModal } from '@/components/payments/payme-on-site-modal'
 import { UzumPaymentModal } from '@/components/payments/uzum-payment-modal'
 import {
   PaymentMethodsRow,
@@ -76,6 +77,7 @@ export default function PricingPage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [showProviderModal, setShowProviderModal] = useState(false)
   const [showClickOnSiteModal, setShowClickOnSiteModal] = useState(false)
+  const [showPaymeModal, setShowPaymeModal] = useState(false)
   const [clickInitialTab, setClickInitialTab] = useState<'card' | 'invoice'>('card')
   const [showUzumModal, setShowUzumModal] = useState(false)
   const [uzumPaymentUrl, setUzumPaymentUrl] = useState<string | null>(null)
@@ -109,6 +111,13 @@ export default function PricingPage() {
       setClickInitialTab(provider === 'click_card' ? 'card' : 'invoice')
       setShowProviderModal(false)
       setShowClickOnSiteModal(true)
+      return
+    }
+
+    // Open on-site Payme payment modal directly in the website
+    if (provider === 'payme') {
+      setShowProviderModal(false)
+      setShowPaymeModal(true)
       return
     }
 
@@ -701,6 +710,31 @@ export default function PricingPage() {
           type="subscription"
           initialTab={clickInitialTab}
           defaultPhone={user?.phone}
+          onBack={() => {
+            setShowClickOnSiteModal(false)
+            setShowProviderModal(true)
+          }}
+          onSuccess={() => {
+            refreshUser?.()
+            window.location.href = '/dashboard?payment=success'
+          }}
+        />
+      )}
+
+      {/* On-Site Payme Payment Modal */}
+      {selectedPlan && (
+        <PaymeOnSiteModal
+          open={showPaymeModal}
+          onOpenChange={setShowPaymeModal}
+          amount={getPlanPrice(selectedPlan as any, billingCycle as any)}
+          planType={selectedPlan as any}
+          billingCycle={billingCycle}
+          type="subscription"
+          defaultPhone={user?.phone}
+          onBack={() => {
+            setShowPaymeModal(false)
+            setShowProviderModal(true)
+          }}
           onSuccess={() => {
             refreshUser?.()
             window.location.href = '/dashboard?payment=success'
@@ -716,6 +750,10 @@ export default function PricingPage() {
           paymentUrl={uzumPaymentUrl}
           amount={getPlanPrice(selectedPlan as any, billingCycle as any)}
           planTitle={`${selectedPlan} rejasi (${billingCycle === 'annual' ? 'Yillik' : billingCycle === 'semi_annual' ? '6 oylik' : 'Oylik'})`}
+          onBack={() => {
+            setShowUzumModal(false)
+            setShowProviderModal(true)
+          }}
           onSuccess={() => {
             refreshUser?.()
             window.location.href = '/dashboard?payment=success'

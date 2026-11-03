@@ -3,6 +3,7 @@
 
 import { AppShell } from '@/components/layout/app-shell'
 import { ClickOnSiteModal } from '@/components/payments/click-on-site-modal'
+import { PaymeOnSiteModal } from '@/components/payments/payme-on-site-modal'
 import {
 	ClickLogo,
 	PaymeLogo,
@@ -54,6 +55,7 @@ export default function SMSCreditsPage() {
 	const [selectedPackage, setSelectedPackage] = useState<string | null>(null)
 	const [showProviderModal, setShowProviderModal] = useState(false)
 	const [showClickOnSiteModal, setShowClickOnSiteModal] = useState(false)
+	const [showPaymeModal, setShowPaymeModal] = useState(false)
 	const [clickInitialTab, setClickInitialTab] = useState<'card' | 'invoice'>(
 		'card',
 	)
@@ -92,6 +94,12 @@ export default function SMSCreditsPage() {
 			setClickInitialTab(provider === 'click_card' ? 'card' : 'invoice')
 			setShowProviderModal(false)
 			setShowClickOnSiteModal(true)
+			return
+		}
+
+		if (provider === 'payme') {
+			setShowProviderModal(false)
+			setShowPaymeModal(true)
 			return
 		}
 
@@ -390,9 +398,39 @@ export default function SMSCreditsPage() {
 							packageId={pkg.id}
 							initialTab={clickInitialTab}
 							defaultPhone={user?.phone}
+							onBack={() => {
+								setShowClickOnSiteModal(false)
+								setShowProviderModal(true)
+							}}
 							onSuccess={() => {
 								fetchCredits()
 								setShowClickOnSiteModal(false)
+							}}
+						/>
+					)
+				})()}
+
+			{/* On-Site Payme Payment Modal */}
+			{selectedPackage &&
+				(() => {
+					const pkg = SMS_PACKAGES.find(p => p.id === selectedPackage)
+					if (!pkg) return null
+					return (
+						<PaymeOnSiteModal
+							open={showPaymeModal}
+							onOpenChange={setShowPaymeModal}
+							amount={pkg.price}
+							type='sms'
+							credits={pkg.credits}
+							packageId={pkg.id}
+							defaultPhone={user?.phone}
+							onBack={() => {
+								setShowPaymeModal(false)
+								setShowProviderModal(true)
+							}}
+							onSuccess={() => {
+								fetchCredits()
+								setShowPaymeModal(false)
 							}}
 						/>
 					)
@@ -410,6 +448,10 @@ export default function SMSCreditsPage() {
 							paymentUrl={uzumPaymentUrl}
 							amount={pkg.price}
 							planTitle={`${pkg.credits} ta SMS paketi`}
+							onBack={() => {
+								setShowUzumModal(false)
+								setShowProviderModal(true)
+							}}
 							onSuccess={() => {
 								fetchCredits()
 								setShowUzumModal(false)

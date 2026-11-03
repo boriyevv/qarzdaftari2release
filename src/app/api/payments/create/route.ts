@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Uzum strictly requires https:// return URLs.
     // Use UZUM_RETURN_BASE_URL (your production domain) when testing locally.
     const uzumBaseUrl = process.env.UZUM_RETURN_BASE_URL || 'https://debtbook.uz'
-    const uzumReturnUrl = `${uzumBaseUrl}/dashboard?payment=success`
+    const uzumReturnUrl = `${uzumBaseUrl}/payment/uzum-callback?status=success`
 
     // Generate payment URL based on provider
     let paymentUrl: string

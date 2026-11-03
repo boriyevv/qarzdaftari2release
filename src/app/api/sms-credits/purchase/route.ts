@@ -64,16 +64,19 @@ export async function POST(request: NextRequest) {
         })
         break
 
-      case 'uzum':
+      case 'uzum': {
+        const uzumBaseUrl = process.env.UZUM_RETURN_BASE_URL || 'https://debtbook.uz'
+        const uzumReturnUrl = `${uzumBaseUrl}/payment/uzum-callback?status=success`
         paymentUrl = await uzumPayment.generatePaymentUrl({
           amount,
           userId: profile.id,
           planType: 'sms',
           transactionId,
-          returnUrl,
+          returnUrl: uzumReturnUrl,
           supabase: adminSupabase,
         })
         break
+      }
 
       default:
         return NextResponse.json(

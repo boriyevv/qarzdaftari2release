@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     const adminSupabase = createAdminClient()
 
     // Resilient profile inserter that complies with database users_plan_type_check constraint
-    async function insertUserProfile(profilePayload: Record<string, any>) {
+    const insertUserProfile = async (profilePayload: Record<string, any>) => {
       // 1. Try with 'free' (lowercase)
       let res = await adminSupabase
         .from('users')

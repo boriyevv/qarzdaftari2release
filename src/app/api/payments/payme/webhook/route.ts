@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { paymePayment } from '@/lib/payments/payme'
 import { parsePaymentOrder, processSuccessfulPayment } from '@/lib/payments/common'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🔔 Payme webhook:', method, params)
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     let result: any
 
@@ -47,15 +47,27 @@ export async function POST(request: NextRequest) {
       case 'PerformTransaction':
         result = await paymePayment.performTransaction(params, supabase)
         if (result.result?.state === 2) {
-          const { user_id, plan_type } = params.account ?? {}
-          const parsed = parsePaymentOrder(plan_type, user_id)
+          // Payme PerformTransaction payload only has `id`.
+          // Retrieve the account info saved during CreateTransaction from payment_transactions:
+          const { data: tx } = await supabase
+            .from('payment_transactions')
+            .select('*')
+            .eq('external_id', params.id)
+            .maybeSingle()
+
+          const account = tx?.external_data?.account ?? params.account ?? {}
+          const userId = tx?.user_id ?? account.user_id
+          const planType = account.plan_type
+          const parsed = parsePaymentOrder(planType, userId)
+
           if (parsed) {
             await processSuccessfulPayment(supabase, {
               provider: 'payme',
               order: parsed,
-              amount: (params.amount || 0) / 100,
+              amount: tx?.amount ?? (params.amount || 0) / 100,
               externalId: params.id,
-              externalData: params,
+              externalData: tx?.external_data ?? params,
+              transactionRecordId: tx?.id,
             })
           }
         }
@@ -89,7 +101,6 @@ export async function POST(request: NextRequest) {
 
     // Payme RPC formatida javob — id ni qaytarish shart
     return NextResponse.json({ ...result, id })
-
   } catch (error) {
     console.error('❌ Payme webhook error:', error)
     return NextResponse.json({

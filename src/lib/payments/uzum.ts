@@ -265,7 +265,9 @@ export class UzumPayment {
       }
     }
 
-    const failureUrl = returnUrl.includes('?')
+    const failureUrl = returnUrl.includes('/payment/uzum-callback')
+      ? returnUrl.replace('status=success', 'status=cancel')
+      : returnUrl.includes('?')
       ? `${returnUrl}&payment=failed`
       : `${returnUrl}?payment=failed`
 

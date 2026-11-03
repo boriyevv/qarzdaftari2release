@@ -126,15 +126,44 @@ export default function DashboardPage() {
         {/* Debts List */}
         <div
           id="tour-debts-list"
-          className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-4 sm:p-6 min-h-[300px]"
+          className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-4 sm:p-6 min-h-[300px]"
         >
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-blue-600"></div>
-              <p className="text-slate-500 text-xs mt-3">Qarzlar yuklanmoqda...</p>
+            <div className="space-y-3 py-2">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="h-9 w-64 bg-slate-100 rounded-2xl animate-pulse" />
+                <div className="h-9 w-32 bg-slate-100 rounded-2xl animate-pulse" />
+              </div>
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 bg-slate-50/50 animate-pulse"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-slate-200" />
+                    <div className="space-y-1.5">
+                      <div className="h-3.5 w-32 bg-slate-200 rounded-full" />
+                      <div className="h-2.5 w-24 bg-slate-200/70 rounded-full" />
+                    </div>
+                  </div>
+                  <div className="hidden sm:block w-36 space-y-1.5">
+                    <div className="h-3 bg-slate-200 rounded-full" />
+                    <div className="h-2 bg-slate-200/70 rounded-full" />
+                  </div>
+                  <div className="h-6 w-24 bg-slate-200 rounded-xl" />
+                  <div className="flex gap-1.5">
+                    <div className="h-8 w-16 bg-slate-200 rounded-xl" />
+                    <div className="h-8 w-8 bg-slate-200 rounded-xl" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <DebtsListDraggable debts={debts} onUpdate={fetchDebts} />
+            <DebtsListDraggable
+              debts={debts}
+              onUpdate={fetchDebts}
+              onAddNewDebt={() => setIsAddDebtOpen(true)}
+            />
           )}
         </div>
       </div>

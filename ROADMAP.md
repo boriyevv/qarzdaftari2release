@@ -68,7 +68,7 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 ## 🎨 3. UI/UX Takomillashtirishlari
 
 - [ ] Dark / Light mode to'liq almashinuvchi tugmasi.
-- [ ] Mobil PWA (Progressive Web App): Telefon ekraniga ilova kabi o'rnatib olish imkoni.
+- [x] Mobil PWA (Progressive Web App): Manifest (standalone, theme-color, icons), Service Worker, offline fallback (/offline va jonli OfflineIndicator), o'rnatish bannerlari (floating prompt, iOS Safari qo'llanma modali) hamda Sidebar va mobil Topbar'da o'rnatish tugmalari to'liq joriy qilindi.
 - [ ] Mikro-tovushlar: To'lov qabul qilinganda yoqimli muvaffaqiyat ovozi.
 
 ---
@@ -78,6 +78,6 @@ _Eslatma: Har qanday yangi g'oyani ushbu faylga qo'shib borishingiz mumkin. Anti
 ## MY NOTES
 
 - [x] **(1) Check the navigation from dashboard to others**: Yagona `AppShell` tizimi yaratildi, layout sakrashlari bartaraf etildi, breadcrumbs va barqaror navigatsiya barcha sahifalarga bog'landi. ----- (4)
-- [ ] **(2) Work on other payment provider, such as Payme and Click**
-- [ ] **(3) AGAIN the UI design still kinda lacks**
+- [x] **(2) Work on other payment provider, such as Payme and Click**: Payme Subscribe API (`cards.create`, `cards.verify`, `receipts.create`, `receipts.pay`) va On-site `PaymeOnSiteModal` ishlab chiqildi. Payme webhookidagi muhim xatolik (`createAdminClient`, `PerformTransaction` account/order resolution) bartaraf etildi. Click Shop API va On-site Card/Invoice tizimi to'liq testlandi va yagona sinov skripti (`npm run test:payments`) yaratildi. ----- (2)
+- [x] **(3) AGAIN the UI design still kinda lacks**: Dashboard va Qarzlar ro'yxati (DebtsListDraggable) tubdan zamonaviy CRM uslubida qayta yaratildi: jonli qidiruv, 4 ta status filtri chiplari (Barchasi, Qarzdorlar, Muddati o'tgan, To'langan), saralash, bosh harfli gradient avatarlar, to'lov progress-bari, aqlli muddat nishonlari (pulsatsiyali kechikish ko'rsatkichi) va to'g'ridan-to'g'ri qatorda ko'rinadigan "+ To'lov", "SMS", "Qo'ng'iroq" tezkor tugmalari qo'shildi. Shimmer skeleton yuklanish holatlari integratsiya qilindi. ----- (3)
 - [x] **(4) Work immediately on sidebar on all the routes**: Barcha marshrutlarda (`/dashboard`, `/analytics`, `/sms-credits`, `/pricing`, `/profile`, `/debtor/[phone]`) zamonaviy Collapsible Sidebar va mobil Drawer integratsiya qilindi. Dashboarddagi 288px'lik og'ir ikkinchi sidebar zamonaviy gorizontal `FolderFilterBar` chiplari bilan almashtirildi. ----- (1)

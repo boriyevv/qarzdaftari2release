@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, Loader2, ExternalLink, ShieldCheck, X } from 'lucide-react'
+import { CheckCircle2, Loader2, ExternalLink, ShieldCheck, X, ArrowLeft } from 'lucide-react'
 import { UzumBankLogo } from './payment-logos'
 import { formatPrice } from '@/lib/constants/plans'
 
@@ -16,6 +16,7 @@ interface UzumPaymentModalProps {
   amount: number
   planTitle?: string
   onSuccess?: () => void
+  onBack?: () => void
 }
 
 export function UzumPaymentModal({
@@ -25,6 +26,7 @@ export function UzumPaymentModal({
   amount,
   planTitle = 'Obuna to\'lovi',
   onSuccess,
+  onBack,
 }: UzumPaymentModalProps) {
   const [loading, setLoading] = useState(true)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -39,31 +41,48 @@ export function UzumPaymentModal({
     }
   }, [open])
 
-  // Listen to Uzum Checkout window.postMessage events:
-  // Payload: { status: 'SUCCESS' | 'CANCEL' | 'ERROR', action: 'close', payment_id?: string, errorCode?: number }
+  // Listen to Uzum Checkout postMessage events and our custom /payment/uzum-callback
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      const origin = event.origin || ''
-      const isUzumOrigin =
-        origin.includes('uzumbank.uz') ||
-        origin.includes('uzumcheckout.uz') ||
-        origin.includes('checkout.uzum.uz')
-
-      if (!isUzumOrigin && typeof event.data !== 'object') return
-
       const data = event.data
-      if (!data) return
+      if (!data || typeof data !== 'object') return
 
-      console.log('🔔 [Uzum Checkout postMessage]:', data)
+      console.log('🔔 [Uzum Modal postMessage]:', data)
 
+      // 1. Message from our own /payment/uzum-callback
+      if (data.source === 'uzum-callback') {
+        if (data.status === 'SUCCESS') {
+          setIsSuccess(true)
+          setTimeout(() => {
+            onSuccess?.()
+          }, 1500)
+        } else if (data.status === 'CANCEL' || data.action === 'close') {
+          if (onBack) {
+            onBack()
+          } else {
+            onOpenChange(false)
+          }
+        }
+        return
+      }
+
+      // 2. Direct message from Uzum Bank checkout
       if (data.action === 'close' || data.status) {
         if (data.status === 'SUCCESS' || data.errorCode === 0) {
           setIsSuccess(true)
           setTimeout(() => {
             onSuccess?.()
           }, 1500)
-        } else if (data.status === 'CANCEL' || data.status === 'ERROR' || data.action === 'close') {
-          onOpenChange(false)
+        } else if (
+          data.status === 'CANCEL' ||
+          data.status === 'ERROR' ||
+          data.action === 'close'
+        ) {
+          if (onBack) {
+            onBack()
+          } else {
+            onOpenChange(false)
+          }
         }
       }
     }
@@ -72,21 +91,36 @@ export function UzumPaymentModal({
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [onOpenChange, onSuccess])
+  }, [onOpenChange, onSuccess, onBack])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[460px] w-[95vw] h-[670px] max-h-[90vh] p-0 rounded-3xl border border-slate-200/80 shadow-2xl bg-white flex flex-col [&>button.absolute]:hidden !overflow-visible">
-        {/* Floating Close Button Above Modal Card - NEVER overlaps iframe elements */}
-        <button
-          type="button"
-          onClick={() => onOpenChange(false)}
-          className="absolute -top-11 right-1 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-semibold shadow-lg backdrop-blur-md border border-white/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          title="Yopish (Esc)"
-        >
-          <X className="w-3.5 h-3.5" />
-          <span>Yopish</span>
-        </button>
+        {/* Floating Top Bar (Back to options + Close button) */}
+        <div className="absolute -top-11 left-1 right-1 z-50 flex items-center justify-between">
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-semibold shadow-lg backdrop-blur-md border border-white/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Boshqa usul</span>
+            </button>
+          ) : (
+            <div />
+          )}
+
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-semibold shadow-lg backdrop-blur-md border border-white/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            title="Yopish (Esc)"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Yopish</span>
+          </button>
+        </div>
 
         {isSuccess ? (
           /* SUCCESS CELEBRATION VIEW */
@@ -99,14 +133,21 @@ export function UzumPaymentModal({
             </div>
 
             <div className="space-y-2 max-w-xs">
-              <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-200 font-semibold px-3 py-1 text-xs">
+              <Badge
+                variant="outline"
+                className="text-emerald-700 bg-emerald-50 border-emerald-200 font-semibold px-3 py-1 text-xs"
+              >
                 To&apos;lov tasdiqlandi
               </Badge>
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                 Muvaffaqiyatli to&apos;landi!
               </h3>
               <p className="text-xs text-slate-500">
-                Uzum Bank orqali <span className="font-semibold text-slate-800">{formatPrice(amount)}</span> miqdoridagi to&apos;lov muvaffaqiyatli amalga oshirildi.
+                Uzum Bank orqali{' '}
+                <span className="font-semibold text-slate-800">
+                  {formatPrice(amount)}
+                </span>{' '}
+                miqdoridagi to&apos;lov muvaffaqiyatli amalga oshirildi.
               </p>
             </div>
 
@@ -164,7 +205,7 @@ export function UzumPaymentModal({
               </div>
             )}
 
-            {/* Embedded Uzum Checkout Form - clean edge to edge */}
+            {/* Embedded Uzum Checkout Form */}
             {paymentUrl ? (
               <iframe
                 src={paymentUrl}
@@ -182,7 +223,7 @@ export function UzumPaymentModal({
               </div>
             )}
 
-            {/* Micro bottom bar for troubleshooting & cancel */}
+            {/* Micro bottom bar */}
             {paymentUrl && !loading && (
               <div className="h-10 px-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 flex-shrink-0">
                 <span className="flex items-center gap-1 text-slate-500 font-medium">
@@ -190,6 +231,15 @@ export function UzumPaymentModal({
                   Uzum Bank 100% himoyalangan
                 </span>
                 <div className="flex items-center gap-3">
+                  {onBack && (
+                    <button
+                      type="button"
+                      onClick={onBack}
+                      className="text-slate-600 hover:text-slate-900 font-semibold hover:underline"
+                    >
+                      Boshqa usul
+                    </button>
+                  )}
                   <a
                     href={paymentUrl}
                     target="_blank"
@@ -199,13 +249,6 @@ export function UzumPaymentModal({
                     Yangi oynada
                     <ExternalLink className="w-3 h-3" />
                   </a>
-                  <button
-                    type="button"
-                    onClick={() => onOpenChange(false)}
-                    className="text-slate-400 hover:text-slate-600 font-medium hover:underline"
-                  >
-                    Yopish
-                  </button>
                 </div>
               </div>
             )}

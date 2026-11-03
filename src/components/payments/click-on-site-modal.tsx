@@ -32,9 +32,10 @@ interface ClickOnSiteModalProps {
   type?: 'subscription' | 'sms'
   credits?: number
   packageId?: string
-  defaultPhone?: string
+  defaultPhone?: string | null
   initialTab?: 'card' | 'invoice'
   onSuccess?: () => void
+  onBack?: () => void
 }
 
 export function ClickOnSiteModal({
@@ -48,6 +49,7 @@ export function ClickOnSiteModal({
   defaultPhone,
   initialTab = 'card',
   onSuccess,
+  onBack,
 }: ClickOnSiteModalProps) {
   const [activeTab, setActiveTab] = useState<'card' | 'invoice'>(initialTab)
 
@@ -717,11 +719,21 @@ export function ClickOnSiteModal({
 
         {/* Micro Footer: Fallback link */}
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-          <span>Yoki Click portalida to&apos;lash:</span>
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="text-slate-600 hover:text-slate-900 font-bold hover:underline cursor-pointer"
+            >
+              ← Boshqa usul
+            </button>
+          ) : (
+            <span>Yoki Click portalida to&apos;lash:</span>
+          )}
           <button
             type="button"
             onClick={handleRedirectCheckout}
-            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:underline"
+            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:underline cursor-pointer"
           >
             Click Checkout ochish
             <ExternalLink className="w-3 h-3" />

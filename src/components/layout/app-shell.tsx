@@ -23,11 +23,14 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Compass,
+  Smartphone,
+  Download,
 } from 'lucide-react'
 import { useUser } from '@/lib/contexts/user-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
+import { triggerPwaInstallPrompt } from '@/components/pwa/pwa-install-banner'
 
 interface NavItem {
   label: string
@@ -339,6 +342,15 @@ export function AppShell({
                       <Compass className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
+                      onClick={triggerPwaInstallPrompt}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Ilovani o'rnatish"
+                      aria-label="Ilovani o'rnatish"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={handleLogout}
                       className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Hisobdan chiqish"
@@ -388,6 +400,16 @@ export function AppShell({
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     )}
+
+                    {/* PWA Install Button */}
+                    <button
+                      type="button"
+                      onClick={triggerPwaInstallPrompt}
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all border border-slate-200/80 bg-white shadow-2xs active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Ilovani o&apos;rnatish</span>
+                    </button>
 
                     {/* Tizim qo'llanmasi (Onboarding Walkthrough) Button */}
                     <button
@@ -503,6 +525,16 @@ export function AppShell({
 
               {/* Right Side: Actions + Add Debt Button */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={triggerPwaInstallPrompt}
+                  className="lg:hidden p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors"
+                  title="Ilovani o'rnatish (PWA)"
+                  aria-label="Ilovani o'rnatish"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+
                 {actions}
 
                 {showAddDebtButton && (

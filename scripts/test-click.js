@@ -7,10 +7,15 @@
  *   node scripts/test-click.js https://debtbook.uz
  */
 
+const path = require('path')
+try {
+  require('@next/env').loadEnvConfig(path.resolve(__dirname, '..'))
+} catch (e) {}
+
 const crypto = require('crypto')
 
 const SERVICE_ID = process.env.CLICK_SERVICE_ID || '104455'
-const SECRET_KEY = process.env.CLICK_SECRET_KEY || ''
+const SECRET_KEY = process.env.CLICK_SECRET_KEY || '9movgAQjKcSY29Q'
 const MERCHANT_ID = process.env.CLICK_MERCHANT_ID || '61732'
 
 const baseUrl = process.argv[2] || 'http://localhost:3000'
