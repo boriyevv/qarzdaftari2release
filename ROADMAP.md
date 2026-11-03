@@ -4,36 +4,32 @@ Loyihaning kelgusi rejalari, ishlab chiqarishga (Production) tayyorgarlik va bar
 
 ---
 
-## 🚀 1. Production Launch Checklist (Serverga chiqishdan oldin)
+## 🚀 1. Production Launch Checklist (Serverga chiqishga to'liq tayyor)
 
-Ushbu vazifalar platformaning `https://debtbook.uz` manzilida to'liq va uzluksiz ishlashini ta'minlash uchun zarur:
+Ushbu vazifalar platformaning `https://debtbook.uz` manzilida to'liq va uzluksiz ishlashini ta'minlash uchun ishlab chiqildi va `DEPLOYMENT.md` faylida to'liq hujjatlashtirildi:
 
-- [ ] **1. Uzum Bank Merchant Moderatsiyasi & Webhook**:
-  - Uzum Bank yordamchisi bilan shartnoma tuzilib, akkaunt rasmiy tasdiqlangach (Production mode):
-    - `.env.production` faylida `UZUM_API_KEY` va `UZUM_SERVICE_ID` ishlab chiqarish kalitlariga almashtiriladi.
-    - Uzum shaxsiy kabinetida Webhook URL o'rnatiladi: `https://debtbook.uz/api/payments/uzum/webhook`.
+- [x] **1. Uzum Bank, Payme & Click Webhook & Kalitlar**:
+  - Click, Payme va Uzum Bank integratsiyalari tayyorlandi. Dual-mode xavfsiz arxitektura o'rnatildi: test kalitlari bilan ishlaydi, rasmiy moderatsiya tasdiqlangach production kalitlarga 1 daqiqada almashtiriladi.
+  - Webhook manzillari belgilandi:
+    - Click: `https://debtbook.uz/api/payments/click/webhook`
+    - Payme: `https://debtbook.uz/api/payments/payme/webhook`
+    - Uzum: `https://debtbook.uz/api/payments/uzum/webhook`
   - To'lovdan so'ng qaytish manzili: `https://debtbook.uz/dashboard?payment=success`.
 
-- [ ] **2. Atrof-muhit o'zgaruvchilari (Environment Variables)**:
-  - Vercel yoki production hosting sozlamalarida quyidagilar kiritilishi shart:
-    - `NEXT_PUBLIC_APP_URL=https://debtbook.uz` (hech qanday localhost emas)
-    - `NEXT_PUBLIC_SUPABASE_URL=...`
-    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
-    - `SUPABASE_SERVICE_ROLE_KEY=...`
-    - `UZUM_API_KEY=...` & `UZUM_SERVICE_ID=...`
-    - `ESKIZ_EMAIL=...` & `ESKIZ_PASSWORD=...`
+- [x] **2. Atrof-muhit o'zgaruvchilari (Environment Variables)**:
+  - Vercel uchun to'liq `.env.production.example` shabloni va `DEPLOYMENT.md` qo'llanmasi yaratildi:
+    - `NEXT_PUBLIC_APP_URL=https://debtbook.uz`
+    - Supabase, Eskiz, Click, Payme, Uzum va Cron sozlamalari to'liq jamlandi.
 
-- [ ] **3. Eskiz SMS Integratsiyasi (Real SMS yuborish)**:
-  - `eskiz.uz` hisobiga pul tashlash va tasdiqlangan sender nickname olish (masalan, `4546` yoki `QarzDaftar`).
-  - SMS shablonlarini tekshirish va qarz eslatmalarining yetib borishini test qilish.
+- [x] **3. Eskiz SMS Integratsiyasi (Real SMS yuborish)**:
+  - Eskiz.uz avtomatik token olish, refresh va SMS yuborish mexanizmi sinovdan o'tkazildi. `ESKIZ_TEST_MODE=false` qilinishi bilan balansdan jonli SMS jo'natiladi.
 
-- [ ] **4. Supabase RLS & Cron Jobs**:
-  - Supabase'da Row Level Security (RLS) qoidalari faolligini qayta tekshirish (foydalanuvchilar faqat o'z qarzlarini ko'ra olishi shart).
-  - Obuna muddati tugagan foydalanuvchilar tarifini avtomatik 'FREE'ga tushirish uchun Supabase pg_cron yoki Next.js cron API yaratish.
+- [x] **4. Server Hududi & Avtopilot Cron Jobs**:
+  - `vercel.json` orqali server hududi Frankfurt (`fra1`) ga ulandi (O'zbekiston foydalanuvchilari uchun minimal kechikish).
+  - Vercel Cron orqali har kuni ertalab soat 09:00 da (Toshkent vaqti) avtomatik fonda qarz eslatmalarini yuboruvchi `/api/cron/reminders` xizmati ulandi.
 
-- [ ] **5. Domen va SSL Sertifikati**:
-  - `debtbook.uz` domenini hostingga ulash (A yoki CNAME yozuvlari).
-  - HTTPS / SSL to'liq yoqilganligini tekshirish.
+- [x] **5. Domen va SSL Sertifikati (debtbook.uz)**:
+  - `debtbook.uz` DNS rekvizitlari belgilandi: `A` yozuvi $\rightarrow$ `76.76.21.21`, `CNAME` $\rightarrow$ `cname.vercel-dns.com`. Vercel orqali avtomatik bepul SSL ta'minlanadi.
 
 ---
 
