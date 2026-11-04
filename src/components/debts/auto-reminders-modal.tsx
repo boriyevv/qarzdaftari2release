@@ -183,10 +183,10 @@ export function AutoRemindersModal({ open, onOpenChange, onSuccess }: AutoRemind
                 onClick={() => !debt.already_sent_recently && toggleSelect(debt.id)}
                 className={`p-3.5 rounded-2xl border transition-all ${
                   debt.already_sent_recently
-                    ? 'opacity-50 bg-slate-50 dark:bg-slate-850 border-slate-200 dark:border-slate-800 cursor-not-allowed'
+                    ? 'opacity-50 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 cursor-not-allowed'
                     : selectedIds.has(debt.id)
                     ? 'bg-blue-50/60 dark:bg-blue-950/40 border-blue-400 dark:border-blue-700 shadow-2xs cursor-pointer'
-                    : 'bg-white dark:bg-slate-850 border-slate-200/90 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer'
+                    : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -249,7 +249,7 @@ export function AutoRemindersModal({ open, onOpenChange, onSuccess }: AutoRemind
             <button
               type="button"
               onClick={handleSelectAll}
-              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
             >
               {selectedIds.size === sendableDebts.length
                 ? 'Tanlovni bekor qilish'
@@ -261,7 +261,7 @@ export function AutoRemindersModal({ open, onOpenChange, onSuccess }: AutoRemind
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="rounded-xl text-xs font-semibold"
+                className="rounded-xl text-xs font-semibold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
               >
                 Yopish
               </Button>
@@ -269,7 +269,7 @@ export function AutoRemindersModal({ open, onOpenChange, onSuccess }: AutoRemind
                 type="button"
                 onClick={handleSendReminders}
                 disabled={sending || selectedIds.size === 0 || remainingCredits < selectedIds.size}
-                className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-600/20"
+                className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-600/20 cursor-pointer transition-colors disabled:cursor-not-allowed"
               >
                 {sending ? (
                   <>

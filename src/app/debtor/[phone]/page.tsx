@@ -336,8 +336,8 @@ export default function DebtorProfilePage() {
         showBack={true}
       >
         <div className="min-h-[50vh] flex items-center justify-center p-4">
-          <div className="text-center bg-white p-8 rounded-3xl border border-slate-200 shadow-sm max-w-sm w-full">
-            <p className="text-slate-600 font-medium">Qarzdor ma&apos;lumotlari topilmadi</p>
+          <div className="text-center bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm max-w-sm w-full">
+            <p className="text-slate-600 dark:text-slate-400 font-medium">Qarzdor ma&apos;lumotlari topilmadi</p>
             <Button onClick={() => router.push('/dashboard')} className="mt-4 rounded-xl">
               Dashboardga qaytish
             </Button>
@@ -426,7 +426,7 @@ export default function DebtorProfilePage() {
                 variant="outline"
                 onClick={handleOpenSMS}
                 disabled={data.totalRemaining <= 0}
-                className="border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 shadow-2xs"
+                className="border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
               >
                 <Send className="w-4 h-4 mr-1.5 text-blue-600" />
                 SMS Eslatma
@@ -437,7 +437,7 @@ export default function DebtorProfilePage() {
                 <a href={`tel:${data.phone}`}>
                   <Button
                     variant="outline"
-                    className="border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:text-emerald-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 shadow-2xs"
+                    className="border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:text-emerald-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
                   >
                     <Phone className="w-4 h-4 mr-1.5 text-emerald-600" />
                     Qo&apos;ng&apos;iroq
@@ -449,7 +449,7 @@ export default function DebtorProfilePage() {
               <Button
                 variant="outline"
                 onClick={() => setStatementModalOpen(true)}
-                className="border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 shadow-2xs"
+                className="border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
               >
                 <FileText className="w-4 h-4 mr-1.5 text-indigo-600" />
                 Akt-sverka
@@ -461,13 +461,13 @@ export default function DebtorProfilePage() {
         {/* 2. Hashamatli Statistika Kartalari (Dashboard va Analitika uyg'unligida) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Jami Berilgan */}
-          <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 border border-blue-200/80 hover:border-blue-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-            <TrendingUp className="absolute -bottom-4 -right-4 w-28 h-28 text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110" />
+          <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 dark:from-blue-950/40 dark:via-slate-900 dark:to-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-800 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-500/15 dark:bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+            <TrendingUp className="absolute -bottom-4 -right-4 w-28 h-28 text-blue-600/10 dark:text-blue-400/5 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110" />
 
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Jami Berilgan Nasiya
                 </span>
                 <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-blue-600 text-white shadow-md shadow-blue-500/25">
@@ -476,12 +476,12 @@ export default function DebtorProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                   {formatCurrency(data.totalAmount)}
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                  <p className="text-xs text-slate-500 font-medium">Barcha kiritilgan qarzlar</p>
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 text-blue-700 border-blue-200/60">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Barcha kiritilgan qarzlar</p>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800">
                     {data.debtCount} ta yozuv
                   </span>
                 </div>
@@ -490,13 +490,13 @@ export default function DebtorProfilePage() {
           </div>
 
           {/* To'langan Summa */}
-          <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 border border-emerald-200/80 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-            <CheckCircle className="absolute -bottom-4 -right-4 w-28 h-28 text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110" />
+          <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-slate-900 dark:to-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-800 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-emerald-500/15 dark:bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+            <CheckCircle className="absolute -bottom-4 -right-4 w-28 h-28 text-emerald-600/10 dark:text-emerald-400/5 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110" />
 
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   To&apos;langan Summa
                 </span>
                 <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-emerald-600 text-white shadow-md shadow-emerald-500/25">
@@ -505,12 +505,12 @@ export default function DebtorProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                   {formatCurrency(data.totalPaid)}
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                  <p className="text-xs text-slate-500 font-medium">Qaytarilgan to&apos;lovlar</p>
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-100/80 text-emerald-700 border-emerald-200/60">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Qaytarilgan to&apos;lovlar</p>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-100/80 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800">
                     {collectionRate}% yopildi
                   </span>
                 </div>
@@ -522,24 +522,24 @@ export default function DebtorProfilePage() {
           <div
             className={`group relative overflow-hidden bg-gradient-to-br ${
               data.totalRemaining > 0
-                ? 'from-amber-50/60 via-white to-amber-50/30 border-amber-200/80 hover:border-amber-300'
-                : 'from-slate-50/60 via-white to-slate-50/30 border-slate-200/80 hover:border-slate-300'
+                ? 'from-amber-50/60 via-white to-amber-50/30 dark:from-amber-950/40 dark:via-slate-900 dark:to-amber-950/20 border-amber-200/80 dark:border-amber-900/50 hover:border-amber-300 dark:hover:border-amber-800'
+                : 'from-slate-50/60 via-white to-slate-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-900/70 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
             } border rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs`}
           >
             <div
               className={`absolute -bottom-8 -right-8 w-32 h-32 ${
-                data.totalRemaining > 0 ? 'bg-amber-500/15' : 'bg-slate-500/10'
+                data.totalRemaining > 0 ? 'bg-amber-500/15 dark:bg-amber-500/10' : 'bg-slate-500/10 dark:bg-slate-500/5'
               } rounded-full blur-2xl pointer-events-none`}
             />
             <Clock
               className={`absolute -bottom-4 -right-4 w-28 h-28 ${
-                data.totalRemaining > 0 ? 'text-amber-600/10' : 'text-slate-600/10'
+                data.totalRemaining > 0 ? 'text-amber-600/10 dark:text-amber-400/5' : 'text-slate-600/10 dark:text-slate-400/5'
               } -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110`}
             />
 
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Qolgan Qarz
                 </span>
                 <div
@@ -554,20 +554,20 @@ export default function DebtorProfilePage() {
               </div>
 
               <div className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                   {formatCurrency(data.totalRemaining)}
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                     {data.totalRemaining > 0 ? 'Mijozdan kutilmoqda' : 'Hisob to\'liq toza'}
                   </p>
                   <span
                     className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                       data.totalRemaining > 0
                         ? hasOverdueDebt
-                          ? 'bg-rose-100/90 text-rose-700 border-rose-200/60'
-                          : 'bg-amber-100/80 text-amber-700 border-amber-200/60'
-                        : 'bg-emerald-100/80 text-emerald-700 border-emerald-200/60'
+                          ? 'bg-rose-100/90 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200/60 dark:border-rose-800'
+                          : 'bg-amber-100/80 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200/60 dark:border-amber-800'
+                        : 'bg-emerald-100/80 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800'
                     }`}
                   >
                     {data.totalRemaining > 0 ? (hasOverdueDebt ? 'Kechikkan' : 'Kutilmoqda') : 'To\'langan'}
@@ -579,13 +579,13 @@ export default function DebtorProfilePage() {
         </div>
 
         {/* 3. Qarzlar Tarixi va Alohida Qarzlar bo'yicha To'lov */}
-        <Card className="border-slate-200/80 shadow-2xs rounded-3xl overflow-hidden bg-white">
-          <CardHeader className="bg-slate-50/70 border-b border-slate-100 pb-4 flex flex-row items-center justify-between">
+        <Card className="border-slate-200/80 dark:border-slate-800 shadow-2xs rounded-3xl overflow-hidden bg-white dark:bg-slate-900">
+          <CardHeader className="bg-slate-50/70 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-800 pb-4 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
                 Qarzlar tarixi
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
                 Ushbu qarzdor bo&apos;yicha kiritilgan barcha operatsiyalar ro&apos;yxati
               </CardDescription>
             </div>
@@ -604,23 +604,23 @@ export default function DebtorProfilePage() {
                 return (
                   <div
                     key={debt.id}
-                    className="border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3 hover:bg-slate-50/70 transition-all shadow-2xs"
+                    className="border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 rounded-2xl p-4 sm:p-5 space-y-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/80 transition-all shadow-2xs"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-slate-400" />
-                          <span className="text-xs sm:text-sm text-slate-700 font-semibold">
+                          <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-semibold">
                             Berilgan sana: {formatDate(debt.created_at)}
                           </span>
                         </div>
                         {debt.due_date && (
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
                             To&apos;lash muddati:{' '}
                             <span
                               className={`font-semibold ${
-                                isOverdue ? 'text-rose-600 font-bold' : 'text-slate-700'
+                                isOverdue ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-300'
                               }`}
                             >
                               {formatDate(debt.due_date)} {isOverdue && '(Kechikkan)'}
@@ -634,10 +634,10 @@ export default function DebtorProfilePage() {
                           variant="outline"
                           className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                             isPaid
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                               : isOverdue
-                              ? 'bg-rose-50 text-rose-800 border-rose-200'
-                              : 'bg-amber-50 text-amber-800 border-amber-200'
+                              ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                              : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                           }`}
                         >
                           {isPaid ? "To'langan" : isOverdue ? 'Muddati o\'tgan' : 'Ochiq qarz'}
@@ -648,7 +648,7 @@ export default function DebtorProfilePage() {
                           <Button
                             size="sm"
                             onClick={() => handleOpenPayment(debt.id, remaining)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-7 px-3 text-xs shadow-2xs"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-7 px-3 text-xs shadow-2xs cursor-pointer"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             To&apos;lash
@@ -660,23 +660,23 @@ export default function DebtorProfilePage() {
                     {/* Amounts */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm pt-1">
                       <div>
-                        <p className="text-slate-500 text-xs">Asl qarz</p>
-                        <p className="font-bold text-slate-900">{formatCurrency(debt.amount)}</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs">Asl qarz</p>
+                        <p className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(debt.amount)}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500 text-xs">To&apos;langan</p>
-                        <p className="font-bold text-emerald-600">{formatCurrency(debt.paid_amount)}</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs">To&apos;langan</p>
+                        <p className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(debt.paid_amount)}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500 text-xs">Qoldiq</p>
-                        <p className={`font-bold ${remaining > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs">Qoldiq</p>
+                        <p className={`font-bold ${remaining > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}`}>
                           {formatCurrency(remaining)}
                         </p>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200/60 dark:border-slate-700">
                       <div
                         className="bg-emerald-500 h-2 rounded-full transition-all"
                         style={{
@@ -687,8 +687,8 @@ export default function DebtorProfilePage() {
 
                     {/* Note */}
                     {debt.note && (
-                      <div className="text-xs text-slate-600 bg-slate-100/80 rounded-xl p-2.5">
-                        <span className="font-bold text-slate-700">Izoh:</span> {debt.note}
+                      <div className="text-xs text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800 rounded-xl p-2.5">
+                        <span className="font-bold text-slate-700 dark:text-slate-200">Izoh:</span> {debt.note}
                       </div>
                     )}
                   </div>
@@ -703,33 +703,33 @@ export default function DebtorProfilePage() {
       {/* 💳 1. TO'LOV QABUL QILISH MODALI                               */}
       {/* ============================================================== */}
       <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border border-slate-200 shadow-xl">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-xl">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-emerald-600" />
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               To&apos;lov qabul qilish
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               {data.name} mijozidan to&apos;lovni qayd etish
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmitPayment} className="space-y-4 py-2">
             {/* Umumiy Qoldiq Xabari */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-xs">
-              <span className="text-emerald-800 font-medium">Jami ochiq qoldiq:</span>
-              <span className="font-black text-emerald-900 text-sm">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800 text-xs">
+              <span className="text-emerald-800 dark:text-emerald-300 font-medium">Jami ochiq qoldiq:</span>
+              <span className="font-black text-emerald-900 dark:text-emerald-200 text-sm">
                 {formatCurrency(data.totalRemaining)}
               </span>
             </div>
 
             {/* Qaysi qarzga to'lanishi */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">To&apos;lov yo&apos;nalishi:</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">To&apos;lov yo&apos;nalishi:</label>
               <select
                 value={selectedDebtId}
                 onChange={(e) => setSelectedDebtId(e.target.value)}
-                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="auto">⚡ Barcha ochiq qarzlarga ketma-ket (avtomatik)</option>
                 {data.debts
@@ -745,9 +745,9 @@ export default function DebtorProfilePage() {
             {/* To'lov Summasi */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-semibold text-slate-700">To&apos;lov summasi (so&apos;m):</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300">To&apos;lov summasi (so&apos;m):</label>
                 {paymentAmount && !isNaN(Number(paymentAmount)) && (
-                  <span className="text-emerald-600 font-bold">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                     {formatCurrency(Number(paymentAmount))}
                   </span>
                 )}
@@ -757,7 +757,7 @@ export default function DebtorProfilePage() {
                 placeholder="Masalan: 100000"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
-                className="h-11 rounded-2xl border-slate-200 text-base font-bold focus:border-emerald-500"
+                className="h-11 rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-base font-bold focus:border-emerald-500"
                 required
               />
 
@@ -768,7 +768,7 @@ export default function DebtorProfilePage() {
                     key={amt}
                     type="button"
                     onClick={() => setPaymentAmount(amt.toString())}
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                   >
                     +{amt.toLocaleString('uz-UZ')}
                   </button>
@@ -777,7 +777,7 @@ export default function DebtorProfilePage() {
                   <button
                     type="button"
                     onClick={() => setPaymentAmount(data.totalRemaining.toString())}
-                    className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors ml-auto"
+                    className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-200 dark:hover:bg-emerald-900 text-emerald-800 dark:text-emerald-300 transition-colors ml-auto cursor-pointer"
                   >
                     To&apos;liq yopish
                   </button>
@@ -787,26 +787,26 @@ export default function DebtorProfilePage() {
 
             {/* Izoh */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Izoh (ixtiyoriy):</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Izoh (ixtiyoriy):</label>
               <Input
                 type="text"
                 placeholder="To'lov bo'yicha eslatma..."
                 value={paymentNote}
                 onChange={(e) => setPaymentNote(e.target.value)}
-                className="h-9 rounded-xl border-slate-200 text-xs"
+                className="h-9 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs"
               />
             </div>
 
             {/* Xatolik yoki Muvaffaqiyat xabari */}
             {paymentError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800 flex items-center gap-2">
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl text-xs font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
                 <span>{paymentError}</span>
               </div>
             )}
 
             {paymentSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                 <span>To&apos;lov muvaffaqiyatli qabul qilindi!</span>
               </div>
@@ -817,7 +817,7 @@ export default function DebtorProfilePage() {
                 type="button"
                 variant="outline"
                 onClick={() => setPaymentModalOpen(false)}
-                className="rounded-xl border-slate-200 font-semibold text-xs h-9 px-4"
+                className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs h-9 px-4 cursor-pointer transition-colors"
                 disabled={isSubmittingPayment}
               >
                 Bekor qilish
@@ -825,7 +825,7 @@ export default function DebtorProfilePage() {
               <Button
                 type="submit"
                 disabled={isSubmittingPayment || !paymentAmount || Number(paymentAmount) <= 0}
-                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-xs h-9 px-5 text-white shadow-xs"
+                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-xs h-9 px-5 text-white shadow-xs cursor-pointer transition-colors disabled:cursor-not-allowed"
               >
                 {isSubmittingPayment ? (
                   <>
@@ -848,21 +848,21 @@ export default function DebtorProfilePage() {
       {/* 💬 2. SMS ESLATMA MODALI                                       */}
       {/* ============================================================== */}
       <Dialog open={smsModalOpen} onOpenChange={setSmsModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border border-slate-200 shadow-xl">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-xl">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Send className="w-5 h-5 text-blue-600" />
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Send className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               SMS Eslatma yuborish
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               {data.name} ({data.phone}) mijoziga to&apos;lov eslatmasi
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             {/* SMS Balans */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
-              <span className="text-slate-600 font-medium flex items-center gap-1.5">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs">
+              <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5">
                 <MessageSquare className="w-4 h-4 text-slate-400" />
                 SMS balansingiz:
               </span>
@@ -875,14 +875,14 @@ export default function DebtorProfilePage() {
             </div>
 
             {smsCredits === 0 && (
-              <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-2xl text-xs text-amber-800 flex items-start justify-between gap-2">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 rounded-2xl text-xs text-amber-800 dark:text-amber-300 flex items-start justify-between gap-2">
                 <span>SMS yuborish uchun balansingizda kredit mavjud emas.</span>
                 <Link
                   href="/sms-credits"
                   target="_blank"
-                  className="font-bold text-amber-900 underline flex-shrink-0"
+                  className="font-bold text-amber-900 dark:text-amber-400 underline flex-shrink-0"
                 >
-                  Sotib olish ↗
+                  Sotib olish &rarr;
                 </Link>
               </div>
             )}
@@ -890,14 +890,14 @@ export default function DebtorProfilePage() {
             {/* Xabar Matni */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <label className="font-semibold text-slate-700">Xabar matni:</label>
+                <label className="font-semibold text-slate-700 dark:text-slate-300">Xabar matni:</label>
                 <span>{smsMessage.length} belgi</span>
               </div>
               <Textarea
                 value={smsMessage}
                 onChange={(e) => setSmsMessage(e.target.value)}
                 rows={4}
-                className="rounded-2xl border-slate-200 text-sm focus:border-blue-500 resize-none p-3"
+                className="rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:border-blue-500 resize-none p-3"
                 placeholder="Xabar matnini kiriting..."
               />
             </div>
@@ -907,14 +907,14 @@ export default function DebtorProfilePage() {
               <div
                 className={`p-3 rounded-2xl text-xs font-semibold flex items-center gap-2 ${
                   smsStatus.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                 }`}
               >
                 {smsStatus.type === 'success' ? (
-                  <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
                 )}
                 <span>{smsStatus.message}</span>
               </div>
@@ -925,7 +925,7 @@ export default function DebtorProfilePage() {
             <Button
               variant="outline"
               onClick={() => setSmsModalOpen(false)}
-              className="rounded-xl border-slate-200 font-semibold text-xs h-9 px-4"
+              className="rounded-xl border-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 font-semibold text-xs h-9 px-4"
               disabled={isSendingSMS}
             >
               Bekor qilish
@@ -955,38 +955,38 @@ export default function DebtorProfilePage() {
       {/* 📄 3. AKT-SVERKA (MIJOZ HISOBOT VARAQASI) MODALI                 */}
       {/* ============================================================== */}
       <Dialog open={statementModalOpen} onOpenChange={setStatementModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border border-slate-200 shadow-xl">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-xl">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Akt-sverka (Hisobot varaqasi)
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               {data.name} mijozining barcha qarz va to&apos;lovlari hisoboti
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             {/* Tezkor Ko'rsatkichlar */}
-            <div className="grid grid-cols-3 gap-2 text-center p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
+            <div className="grid grid-cols-3 gap-2 text-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs">
               <div>
-                <p className="text-slate-400 text-[10px]">Jami nasiya</p>
-                <p className="font-bold text-slate-800 truncate">{formatCurrency(data.totalAmount)}</p>
+                <p className="text-slate-400 dark:text-slate-500 text-[10px]">Jami nasiya</p>
+                <p className="font-bold text-slate-800 dark:text-slate-100 truncate">{formatCurrency(data.totalAmount)}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-[10px]">To&apos;langan</p>
-                <p className="font-bold text-emerald-600 truncate">{formatCurrency(data.totalPaid)}</p>
+                <p className="text-slate-400 dark:text-slate-500 text-[10px]">To&apos;langan</p>
+                <p className="font-bold text-emerald-600 dark:text-emerald-400 truncate">{formatCurrency(data.totalPaid)}</p>
               </div>
               <div>
-                <p className="text-slate-400 text-[10px]">Qoldiq qarz</p>
-                <p className="font-black text-rose-600 truncate">{formatCurrency(data.totalRemaining)}</p>
+                <p className="text-slate-400 dark:text-slate-500 text-[10px]">Qoldiq qarz</p>
+                <p className="font-black text-rose-600 dark:text-rose-400 truncate">{formatCurrency(data.totalRemaining)}</p>
               </div>
             </div>
 
             {/* Telegram / Xabar uchun tayyor matn */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Mijozga jo&apos;natish uchun xabar:</label>
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-700 font-mono whitespace-pre-wrap leading-relaxed max-h-44 overflow-y-auto">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Mijozga jo&apos;natish uchun xabar:</label>
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-700 dark:text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-44 overflow-y-auto">
                 {generateDebtorTelegramText({
                   storeName: user?.store_name || 'Qarz Daftari',
                   debtorName: data.name,
@@ -1004,7 +1004,7 @@ export default function DebtorProfilePage() {
               <Button
                 variant="outline"
                 onClick={handleCopyTelegramText}
-                className="rounded-xl border-slate-200 text-xs font-semibold h-9"
+                className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold h-9"
               >
                 {copiedText ? (
                   <>
@@ -1029,13 +1029,13 @@ export default function DebtorProfilePage() {
             </div>
 
             {/* PDF Akt-Sverka Hujjati */}
-            <div className="pt-2 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
               <Button
                 onClick={handleDownloadStatementPDF}
                 variant="outline"
-                className="w-full rounded-2xl border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50/70 text-indigo-700 font-bold text-xs h-10 flex items-center justify-center gap-2"
+                className="w-full rounded-2xl border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50/70 dark:bg-indigo-950/30 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-bold text-xs h-10 flex items-center justify-center gap-2"
               >
-                <FileText className="w-4 h-4 text-indigo-600" />
+                <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <span>Rasmiy PDF Akt-sverka yuklab olish (A4)</span>
               </Button>
             </div>
@@ -1045,7 +1045,7 @@ export default function DebtorProfilePage() {
             <Button
               variant="ghost"
               onClick={() => setStatementModalOpen(false)}
-              className="rounded-xl text-xs font-semibold text-slate-500 w-full"
+              className="rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800 w-full"
             >
               Yopish
             </Button>

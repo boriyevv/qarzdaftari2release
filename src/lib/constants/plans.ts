@@ -20,7 +20,7 @@ export interface PlanFeatures {
   max_debts: number // -1 = unlimited
   max_folders: number
   sms_notifications: boolean // Always false - SMS is separate
-  telegram_notifications: boolean
+  telegram_notifications?: boolean
   analytics: boolean
   analytics_period: 'monthly' | 'semi_annual' | 'annual' | null
   export: boolean
@@ -67,7 +67,6 @@ export const PLANS: Record<PlanType, Plan> = {
       max_debts: -1, // Unlimited during trial
       max_folders: -1, // Unlimited during trial
       sms_notifications: false, // SMS alohida sotib olinadi
-      telegram_notifications: true,
       analytics: true,
       analytics_period: 'monthly',
       export: true,
@@ -84,7 +83,6 @@ export const PLANS: Record<PlanType, Plan> = {
       max_debts: 500,
       max_folders: 10,
       sms_notifications: false, // SMS alohida sotib olinadi
-      telegram_notifications: true,
       analytics: true,
       analytics_period: 'monthly',
       export: true,
@@ -99,7 +97,6 @@ export const PLANS: Record<PlanType, Plan> = {
       max_debts: -1, // unlimited
       max_folders: -1, // unlimited
       sms_notifications: false, // SMS alohida sotib olinadi
-      telegram_notifications: true,
       analytics: true,
       analytics_period: 'annual',
       export: true,

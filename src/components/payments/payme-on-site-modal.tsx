@@ -260,19 +260,19 @@ export function PaymeOnSiteModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[440px] rounded-3xl p-0 border border-slate-200/90 shadow-2xl bg-white overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 [&>button.absolute]:hover:bg-slate-200 [&>button.absolute]:text-slate-500 [&>button.absolute]:top-4 [&>button.absolute]:right-4 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:border [&>button.absolute]:border-slate-200/80">
+      <DialogContent className="sm:max-w-[440px] rounded-3xl p-0 border border-slate-200/90 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 dark:[&>button.absolute]:bg-slate-800 [&>button.absolute]:hover:bg-slate-200 dark:[&>button.absolute]:hover:bg-slate-700 [&>button.absolute]:text-slate-500 dark:[&>button.absolute]:text-slate-400 [&>button.absolute]:top-4 [&>button.absolute]:right-4 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:border [&>button.absolute]:border-slate-200/80 dark:[&>button.absolute]:border-slate-700">
         {/* Header */}
-        <div className="p-6 pb-4 bg-gradient-to-b from-teal-50/70 via-slate-50/40 to-white border-b border-slate-100">
+        <div className="p-6 pb-4 bg-gradient-to-b from-teal-50/70 via-slate-50/40 to-white dark:from-teal-950/40 dark:via-slate-900 dark:to-slate-900 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200/80 p-1.5 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200/80 dark:border-teal-900/60 p-1.5 flex items-center justify-center">
                 <PaymeLogo className="h-5 w-auto" />
               </div>
               <div>
-                <DialogTitle className="text-base font-black text-slate-900 tracking-tight">
+                <DialogTitle className="text-base font-black text-slate-900 dark:text-slate-100 tracking-tight">
                   Payme orqali to&apos;lov
                 </DialogTitle>
-                <DialogDescription className="text-xs text-slate-500">
+                <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
                   {type === 'sms'
                     ? `${credits?.toLocaleString()} ta SMS paketi`
                     : `${planType} (${billingCycle === 'annual' ? 'Yillik' : billingCycle === 'semi_annual' ? '6 oylik' : 'Oylik'}) tarifi`}
@@ -280,7 +280,7 @@ export function PaymeOnSiteModal({
               </div>
             </div>
 
-            <Badge className="bg-teal-600/10 text-teal-800 border-teal-200 font-extrabold text-xs px-2.5 py-1">
+            <Badge className="bg-teal-600/10 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-800 font-extrabold text-xs px-2.5 py-1">
               {formatPrice(amount)}
             </Badge>
           </div>
@@ -298,12 +298,12 @@ export function PaymeOnSiteModal({
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                   To&apos;lov muvaffaqiyatli amalga oshirildi!
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Payme orqali{' '}
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
                     {formatPrice(amount)}
                   </span>{' '}
                   qabul qilindi. Xizmat faollashtirildi.
@@ -389,7 +389,7 @@ export function PaymeOnSiteModal({
 
               {/* Error Alert */}
               {cardError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{cardError}</span>
                 </div>
@@ -398,7 +398,7 @@ export function PaymeOnSiteModal({
               {/* Form Inputs */}
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="payme-card-number" className="text-xs font-semibold text-slate-700">
+                  <Label htmlFor="payme-card-number" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Karta raqami
                   </Label>
                   <div className="relative mt-1">
@@ -409,7 +409,7 @@ export function PaymeOnSiteModal({
                       placeholder="8600 0000 0000 0000"
                       value={cardNumber}
                       onChange={(e) => handleCardNumberChange(e.target.value)}
-                      className="h-11 rounded-xl text-sm font-mono tracking-wider pl-10"
+                      className="h-11 rounded-xl text-sm font-mono tracking-wider pl-10 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                       maxLength={19}
                       autoFocus
                     />
@@ -418,7 +418,7 @@ export function PaymeOnSiteModal({
                 </div>
 
                 <div>
-                  <Label htmlFor="payme-expire-date" className="text-xs font-semibold text-slate-700">
+                  <Label htmlFor="payme-expire-date" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Amal qilish muddati
                   </Label>
                   <Input
@@ -429,7 +429,7 @@ export function PaymeOnSiteModal({
                     placeholder="MM/YY"
                     value={expireDate}
                     onChange={(e) => handleExpireChange(e.target.value)}
-                    className="h-11 rounded-xl text-sm font-mono text-center tracking-widest mt-1"
+                    className="h-11 rounded-xl text-sm font-mono text-center tracking-widest mt-1 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                     maxLength={5}
                   />
                 </div>
@@ -439,7 +439,7 @@ export function PaymeOnSiteModal({
               <Button
                 type="submit"
                 disabled={cardLoading}
-                className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md shadow-teal-600/20 transition-all text-xs"
+                className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md shadow-teal-600/20 transition-all text-xs cursor-pointer disabled:cursor-not-allowed"
               >
                 {cardLoading ? (
                   <>
@@ -452,12 +452,12 @@ export function PaymeOnSiteModal({
               </Button>
 
               {/* Alternative: Payme App Redirect */}
-              <div className="pt-2 border-t border-slate-100 text-center">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
                 <button
                   type="button"
                   onClick={handlePaymeRedirect}
                   disabled={redirectLoading}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors cursor-pointer"
                 >
                   {redirectLoading ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -471,26 +471,26 @@ export function PaymeOnSiteModal({
           ) : (
             /* OTP STEP */
             <form onSubmit={handleOtpSubmit} className="space-y-4">
-              <div className="p-3.5 rounded-2xl bg-teal-50/80 border border-teal-200/80 text-xs text-teal-900 space-y-1">
+              <div className="p-3.5 rounded-2xl bg-teal-50/80 dark:bg-teal-950/50 border border-teal-200/80 dark:border-teal-900/60 text-xs text-teal-900 dark:text-teal-200 space-y-1">
                 <div className="font-bold flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-teal-700" />
+                  <ShieldCheck className="w-4 h-4 text-teal-700 dark:text-teal-400" />
                   <span>SMS tasdiqlash kodi yuborildi</span>
                 </div>
-                <p className="text-[11px] text-teal-700/90">
+                <p className="text-[11px] text-teal-700/90 dark:text-teal-400/90">
                   Kartaga ulangan telefon raqamiga yuborilgan 6 xonali tasdiqlash kodini kiriting
                   {cardPhone ? ` (${cardPhone})` : ''}.
                 </p>
               </div>
 
               {cardError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{cardError}</span>
                 </div>
               )}
 
               <div>
-                <Label htmlFor="payme-sms-code" className="text-xs font-semibold text-slate-700">
+                <Label htmlFor="payme-sms-code" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   SMS kod
                 </Label>
                 <Input
@@ -503,16 +503,16 @@ export function PaymeOnSiteModal({
                     setSmsCode(e.target.value.replace(/\D/g, '').slice(0, 6))
                     setCardError(null)
                   }}
-                  className="h-12 rounded-xl text-center text-lg font-mono tracking-widest mt-1"
+                  className="h-12 rounded-xl text-center text-lg font-mono tracking-widest mt-1 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                   maxLength={6}
                   autoFocus
                 />
               </div>
 
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                 <button
                   type="button"
-                  className="flex items-center gap-1 hover:text-slate-800 font-medium"
+                  className="flex items-center gap-1 hover:text-slate-800 dark:hover:text-slate-200 font-medium cursor-pointer transition-colors"
                   onClick={() => setCardStep('details')}
                 >
                   <ArrowLeft className="w-3 h-3" />
@@ -524,7 +524,7 @@ export function PaymeOnSiteModal({
                 ) : (
                   <button
                     type="button"
-                    className="text-teal-700 font-semibold hover:underline flex items-center gap-1"
+                    className="text-teal-700 dark:text-teal-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer transition-colors"
                     onClick={handleCardSubmit}
                   >
                     <RotateCw className="w-3 h-3" />
@@ -536,7 +536,7 @@ export function PaymeOnSiteModal({
               <Button
                 type="submit"
                 disabled={cardLoading || smsCode.length < 4}
-                className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md shadow-teal-600/20 transition-all text-xs"
+                className="w-full h-11 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md shadow-teal-600/20 transition-all text-xs cursor-pointer disabled:cursor-not-allowed"
               >
                 {cardLoading ? (
                   <>
@@ -552,7 +552,7 @@ export function PaymeOnSiteModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+        <div className="px-6 py-3 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5 text-slate-400" />
             <span>Payme 3D-Secure</span>
@@ -562,7 +562,7 @@ export function PaymeOnSiteModal({
             <button
               type="button"
               onClick={onBack}
-              className="text-teal-700 hover:text-teal-800 font-bold hover:underline cursor-pointer"
+              className="text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-bold hover:underline cursor-pointer"
             >
               ← Boshqa to&apos;lov usuli
             </button>

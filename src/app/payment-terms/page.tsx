@@ -24,27 +24,29 @@ import {
   PaymeLogo,
   PaymentMethodsRow,
 } from '@/components/payments/payment-logos'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export default function PaymentTermsPage() {
   const [lang, setLang] = useState<'uz' | 'ru'>('ru') // Default to Russian for Uzum Bank audit
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 text-slate-900 dark:text-slate-100">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-800 hover:text-blue-600 transition">
+      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition">
             <ArrowLeft className="w-5 h-5" />
             <span className="font-semibold text-lg">Qarz Daftari</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             <Tabs value={lang} onValueChange={(v) => setLang(v as 'uz' | 'ru')}>
-              <TabsList className="grid grid-cols-2 w-32">
+              <TabsList className="grid grid-cols-2 w-28 bg-slate-100 dark:bg-slate-800">
                 <TabsTrigger value="ru">Рус</TabsTrigger>
-                <TabsTrigger value="uz">O'zb</TabsTrigger>
+                <TabsTrigger value="uz">O&apos;zb</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button size="sm" asChild variant="outline">
+            <Button size="sm" asChild variant="outline" className="border-slate-200 dark:border-slate-700">
               <Link href="/login">Kirish</Link>
             </Button>
           </div>
@@ -54,15 +56,15 @@ export default function PaymentTermsPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-8">
-          <div className="inline-flex p-3 bg-purple-100 text-purple-600 rounded-2xl mb-4">
+          <div className="inline-flex p-3 bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 rounded-2xl mb-4">
             <CreditCard className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             {lang === 'ru'
               ? 'Способы оплаты и правила возврата денежных средств'
               : 'To\'lov usullari va mablag\'larni qaytarish tartibi'}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             {lang === 'ru'
               ? 'Подробная информация о платежах, тарифах и процедуре возврата на сервисе «Qarz Daftari»'
               : '«Qarz Daftari» xizmatida to\'lovlar, tariflar va qaytarish qoidalari haqida to\'liq ma\'lumot'}
@@ -74,15 +76,15 @@ export default function PaymentTermsPage() {
           </p>
         </div>
 
-        <Card className="shadow-sm">
-          <CardContent className="p-6 md:p-10 space-y-10 text-slate-700 leading-relaxed text-sm md:text-base">
+        <Card className="shadow-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <CardContent className="p-6 md:p-10 space-y-10 text-slate-700 dark:text-slate-300 leading-relaxed text-sm md:text-base">
             {lang === 'ru' ? (
               <>
                 {/* 1. PAYMENT METHODS */}
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <CreditCard className="w-6 h-6 text-purple-600" />
-                    <h2 className="text-xl font-bold text-slate-900">1. Доступные способы оплаты</h2>
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <CreditCard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">1. Доступные способы оплаты</h2>
                   </div>
                   <p>
                     Оплата услуг сервиса «Qarz Daftari» (подписки Plus, Pro и пакеты СМС-кредитов) осуществляется
@@ -93,55 +95,55 @@ export default function PaymentTermsPage() {
 
                   <div className="grid sm:grid-cols-3 gap-4 pt-2">
                     {/* Uzum Bank */}
-                    <div className="border border-purple-200 bg-purple-50/50 rounded-xl p-4 flex flex-col justify-between">
+                    <div className="border border-purple-200 dark:border-purple-900/60 bg-purple-50/50 dark:bg-purple-950/30 rounded-xl p-4 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <UzumBankLogo className="h-10 w-auto rounded-lg shadow-xs" />
-                          <span className="text-[10px] font-semibold bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-semibold bg-purple-200 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300 px-2 py-0.5 rounded-full">
                             Рекомендуем
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 mb-3">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
                           Интернет-эквайринг АО «UZUM BANK» и Uzum Pay.
                         </p>
                       </div>
-                      <div className="text-[11px] font-medium text-slate-500 pt-2 border-t border-purple-100">
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 pt-2 border-t border-purple-100 dark:border-purple-900/50">
                         Uzcard, Humo
                       </div>
                     </div>
 
                     {/* Click */}
-                    <div className="border border-blue-200 bg-blue-50/50 rounded-xl p-4 flex flex-col justify-between">
+                    <div className="border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/30 rounded-xl p-4 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <ClickLogo className="h-8 w-auto rounded-lg shadow-xs" />
-                          <span className="text-[10px] font-semibold bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-semibold bg-blue-200 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-full">
                             Online
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 mb-3">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
                           Click Up, Click Pass и оплата через веб-шлюз.
                         </p>
                       </div>
-                      <div className="text-[11px] font-medium text-slate-500 pt-2 border-t border-blue-100">
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 pt-2 border-t border-blue-100 dark:border-blue-900/50">
                         Uzcard, Humo
                       </div>
                     </div>
 
                     {/* Payme */}
-                    <div className="border border-emerald-200 bg-emerald-50/50 rounded-xl p-4 flex flex-col justify-between">
+                    <div className="border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl p-4 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <PaymeLogo className="h-8 w-auto rounded-lg shadow-xs" />
-                          <span className="text-[10px] font-semibold bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-semibold bg-emerald-200 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full">
                             Online
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 mb-3">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">
                           Шлюз Payme и мобильное приложение.
                         </p>
                       </div>
-                      <div className="text-[11px] font-medium text-slate-500 pt-2 border-t border-emerald-100">
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 pt-2 border-t border-emerald-100 dark:border-emerald-900/50">
                         Uzcard, Humo
                       </div>
                     </div>
@@ -157,9 +159,9 @@ export default function PaymentTermsPage() {
 
                 {/* 2. PAYMENT PROCEDURE */}
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <CheckCircle2 className="w-6 h-6 text-green-600" />
-                    <h2 className="text-xl font-bold text-slate-900">2. Порядок проведения оплаты</h2>
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">2. Порядок проведения оплаты</h2>
                   </div>
                   <ol className="list-decimal pl-5 space-y-2">
                     <li>
@@ -187,9 +189,9 @@ export default function PaymentTermsPage() {
 
                 {/* 3. REFUND POLICY */}
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <RotateCcw className="w-6 h-6 text-rose-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <RotateCcw className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       3. Правила и порядок возврата денежных средств
                     </h2>
                   </div>
@@ -199,11 +201,11 @@ export default function PaymentTermsPage() {
                   </p>
 
                   <div className="space-y-3">
-                    <div className="bg-rose-50 border border-rose-200 rounded-lg p-4">
-                      <strong className="block text-rose-950 font-bold mb-1">
+                    <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-lg p-4">
+                      <strong className="block text-rose-950 dark:text-rose-200 font-bold mb-1">
                         Обязательное банковское условие возврата:
                       </strong>
-                      <p className="text-xs md:text-sm text-rose-900">
+                      <p className="text-xs md:text-sm text-rose-900 dark:text-rose-300">
                         Возврат денежных средств осуществляется <strong>исключительно на ту же банковскую карту</strong>,
                         с которой была произведена первоначальная оплата. Выплата наличными денежными средствами либо
                         перевод на иные счета и карты третьих лиц не допускается правилами банковской безопасности и
@@ -229,8 +231,8 @@ export default function PaymentTermsPage() {
                     <p>
                       <strong>Сроки обработки и перечисления возврата:</strong>
                     </p>
-                    <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border text-sm">
-                      <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 rounded-lg text-sm">
+                      <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                       <span>
                         Заявка на возврат обрабатывается Оператором в течение <strong>1–2 рабочих дней</strong>. Зачисление
                         средств на карту Пользователя банком-эмитентом занимает от <strong>3 до 10 банковских дней</strong>{' '}
@@ -259,9 +261,9 @@ export default function PaymentTermsPage() {
 
                 {/* 4. SUBSCRIPTION CANCELLATION */}
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <ShieldCheck className="w-6 h-6 text-blue-600" />
-                    <h2 className="text-xl font-bold text-slate-900">4. Отмена подписки</h2>
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <ShieldCheck className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">4. Отмена подписки</h2>
                   </div>
                   <p>
                     Пользователь вправе отказаться от продления платного тарифа в любой момент в личном кабинете в разделе
@@ -273,8 +275,8 @@ export default function PaymentTermsPage() {
 
                 {/* 5. CONTACTS */}
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">5. Реквизиты и контакты поддержки</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-xs md:text-sm">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">5. Реквизиты и контакты поддержки</h2>
+                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-lg space-y-2 text-xs md:text-sm">
                     <p className="flex items-center gap-2">
                       <Building className="w-4 h-4 text-blue-600" />
                       <strong>Предприятие:</strong> «ASADBEK BURIYEV WS» NTM (Сервис «Qarz Daftari»)
@@ -297,9 +299,9 @@ export default function PaymentTermsPage() {
               <>
                 {/* UZBEK VERSION */}
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <CreditCard className="w-6 h-6 text-purple-600" />
-                    <h2 className="text-xl font-bold text-slate-900">1. To'lov usullari</h2>
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <CreditCard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">1. To'lov usullari</h2>
                   </div>
                   <p>
                     «Qarz Daftari» platformasida pullik xizmatlar (Plus, Pro tariflari hamda SMS paketlar) uchun to'lovlar
@@ -308,31 +310,31 @@ export default function PaymentTermsPage() {
                   </p>
 
                   <div className="grid sm:grid-cols-3 gap-4 pt-2">
-                    <div className="border border-purple-200 bg-purple-50/50 rounded-xl p-4 flex flex-col justify-between">
+                    <div className="border border-purple-200 dark:border-purple-900/60 bg-purple-50/50 dark:bg-purple-950/30 rounded-xl p-4 flex flex-col justify-between">
                       <div>
                         <UzumBankLogo className="h-10 w-auto rounded-lg shadow-xs mb-2" />
-                        <p className="text-xs text-slate-600 mb-2">AO «UZUM BANK» ekvayring va Uzum Pay.</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">AO «UZUM BANK» ekvayring va Uzum Pay.</p>
                       </div>
-                      <span className="text-[11px] text-slate-500 font-medium pt-2 border-t border-purple-100">Uzcard, Humo</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-purple-100 dark:border-purple-900/50">Uzcard, Humo</span>
                     </div>
-                    <div className="border border-blue-200 bg-blue-50/50 rounded-xl p-4 flex flex-col justify-between">
+                    <div className="border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/30 rounded-xl p-4 flex flex-col justify-between">
                       <div>
                         <ClickLogo className="h-8 w-auto rounded-lg shadow-xs mb-2" />
-                        <p className="text-xs text-slate-600 mb-2">Click Up va veb-shlyuz.</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Click Up va veb-shlyuz.</p>
                       </div>
-                      <span className="text-[11px] text-slate-500 font-medium pt-2 border-t border-blue-100">Uzcard, Humo</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-blue-100 dark:border-blue-900/50">Uzcard, Humo</span>
                     </div>
-                    <div className="border border-emerald-200 bg-emerald-50/50 rounded-xl p-4 flex flex-col justify-between">
+                    <div className="border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl p-4 flex flex-col justify-between">
                       <div>
                         <PaymeLogo className="h-8 w-auto rounded-lg shadow-xs mb-2" />
-                        <p className="text-xs text-slate-600 mb-2">Payme to'lov tizimi.</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Payme to'lov tizimi.</p>
                       </div>
-                      <span className="text-[11px] text-slate-500 font-medium pt-2 border-t border-emerald-100">Uzcard, Humo</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-2 border-t border-emerald-100 dark:border-emerald-900/50">Uzcard, Humo</span>
                     </div>
                   </div>
 
                   <div className="pt-2">
-                    <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider text-center">
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider text-center">
                       Qabul qilinadigan bank kartalari va to'lov tizimlari:
                     </p>
                     <PaymentMethodsRow />
@@ -340,13 +342,13 @@ export default function PaymentTermsPage() {
                 </section>
 
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <RotateCcw className="w-6 h-6 text-rose-600" />
-                    <h2 className="text-xl font-bold text-slate-900">2. Mablag'larni qaytarish qoidalari</h2>
+                  <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <RotateCcw className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">2. Mablag'larni qaytarish qoidalari</h2>
                   </div>
-                  <div className="bg-rose-50 border border-rose-200 rounded-lg p-4">
-                    <strong className="block text-rose-950 font-bold mb-1">Majburiy bank qoidasi:</strong>
-                    <p className="text-xs md:text-sm text-rose-900">
+                  <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-lg p-4">
+                    <strong className="block text-rose-950 dark:text-rose-200 font-bold mb-1">Majburiy bank qoidasi:</strong>
+                    <p className="text-xs md:text-sm text-rose-900 dark:text-rose-300">
                       Bank xavfsizligi qoidalariga ko'ra, mablag'lar <strong>faqat to'lov amalga oshirilgan bank kartasining o'ziga</strong> qaytariladi.
                       Naqd pul berish yoki begona kartalarga o'tkazish qat'iyan taqiqlanadi.
                     </p>
@@ -360,8 +362,8 @@ export default function PaymentTermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">3. Bog'lanish va rekvizitlar</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-xs md:text-sm">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">3. Bog'lanish va rekvizitlar</h2>
+                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-lg space-y-2 text-xs md:text-sm">
                     <p><strong>Tashkilot:</strong> «ASADBEK BURIYEV WS» NTM</p>
                     <p><strong>Email:</strong> boriyevdev08@gmail.com</p>
                     <p><strong>Telefon:</strong> +998 (90) 443-55-67</p>

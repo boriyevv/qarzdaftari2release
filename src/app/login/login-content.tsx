@@ -2,6 +2,7 @@
 'use client'
 
 import { OTPInput } from '@/components/auth/otp-input'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -237,19 +238,24 @@ export function LoginPageContent() {
 	}
 
 	return (
-		<div className='min-h-screen flex justify-center items-start pt-12 sm:pt-[15vh] lg:pt-[18vh] pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 p-4'>
-			<Card className='w-full max-w-md transition-all duration-300 ease-in-out shadow-xl border-slate-200'>
+		<div className='min-h-screen flex justify-center items-start pt-12 sm:pt-[15vh] lg:pt-[18vh] pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4 relative'>
+			{/* Top Right Theme Toggle */}
+			<div className="absolute top-4 right-4 z-20">
+				<ThemeToggle />
+			</div>
+
+			<Card className='w-full max-w-md transition-all duration-300 ease-in-out shadow-xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100'>
 				<CardHeader className='space-y-1'>
-					<CardTitle className='text-2xl font-bold text-center'>
+					<CardTitle className='text-2xl font-bold text-center text-slate-900 dark:text-slate-100'>
 						Qarz Daftari
 					</CardTitle>
-					<CardDescription className='text-center'>
+					<CardDescription className='text-center text-slate-500 dark:text-slate-400'>
 						Hisobingizga kirish
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Tabs defaultValue='email' className='w-full'>
-						<TabsList className='grid w-full grid-cols-3'>
+						<TabsList className='grid w-full grid-cols-3 bg-slate-100/90 dark:bg-slate-800/80'>
 							<TabsTrigger value='email'>Email</TabsTrigger>
 							<TabsTrigger value='phone'>Telefon ⚡</TabsTrigger>
 							<TabsTrigger value='cashier'>Kassir 👥</TabsTrigger>
@@ -268,7 +274,7 @@ export function LoginPageContent() {
 													type='button'
 													variant='outline'
 													size='sm'
-													className='w-full text-xs bg-white text-slate-800 border-red-300 hover:bg-slate-50'
+													className='w-full text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-rose-300 dark:border-rose-900/60 hover:bg-slate-50 dark:hover:bg-slate-700'
 												>
 													Yangi hisob yaratish (Ro&apos;yxatdan o&apos;tish) →
 												</Button>
@@ -279,7 +285,7 @@ export function LoginPageContent() {
 							</Alert>
 						)}
 						{success && (
-							<Alert className='mt-4 bg-green-50 text-green-900 border-green-200'>
+							<Alert className='mt-4 bg-green-50 dark:bg-emerald-950/40 text-green-900 dark:text-emerald-300 border-green-200 dark:border-emerald-800'>
 								<AlertDescription>{success}</AlertDescription>
 							</Alert>
 						)}
@@ -355,16 +361,16 @@ export function LoginPageContent() {
 							) : (
 								<div className='space-y-4'>
 									{displayCode && (
-										<div className='p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-sm space-y-1.5 shadow-sm'>
+										<div className='p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-lg text-blue-900 dark:text-blue-200 text-sm space-y-1.5 shadow-2xs'>
 											<div className='flex items-center justify-between'>
-												<span className='font-semibold text-blue-800 flex items-center gap-1.5 text-xs sm:text-sm'>
+												<span className='font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-1.5 text-xs sm:text-sm'>
 													ℹ️ Sinov kodi (Eskiz to&apos;lovisiz):
 												</span>
-												<span className='font-mono text-base font-semibold bg-white text-blue-900 px-2.5 py-0.5 rounded border border-blue-200 tracking-wider shadow-2xs'>
+												<span className='font-mono text-base font-semibold bg-white dark:bg-slate-850 text-blue-900 dark:text-blue-300 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-800 tracking-wider shadow-2xs'>
 													{displayCode}
 												</span>
 											</div>
-											<p className='text-xs text-blue-700'>
+											<p className='text-xs text-blue-700 dark:text-blue-300/90'>
 												Eskiz.uz SMS to&apos;lovisiz sinash uchun kod ekranga
 												chiqarildi va avtomatik kiritildi.
 											</p>
@@ -461,10 +467,10 @@ export function LoginPageContent() {
 					</Tabs>
 
 					<div className='mt-6 text-center text-sm'>
-						<span className='text-slate-600'>Hisobingiz yo&apos;qmi? </span>
+						<span className='text-slate-600 dark:text-slate-400'>Hisobingiz yo&apos;qmi? </span>
 						<Link
 							href='/register'
-							className='text-blue-600 hover:underline font-medium'
+							className='text-blue-600 dark:text-blue-400 hover:underline font-semibold'
 						>
 							Ro&apos;yxatdan o&apos;ting
 						</Link>

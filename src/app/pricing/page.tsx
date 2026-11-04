@@ -62,7 +62,7 @@ const FAQS = [
   },
   {
     q: "SMS xabarnomalar qanday ishlaydi?",
-    a: "Telegram eslatmalar barcha tariflarda cheksiz va bepul ishlaydi. SMS xabarlar esa mijozning telefoniga to'g'ridan-to'g'ri SMS yuborish uchun xizmat qiladi va alohida SMS kreditlar orqali sarflanadi.",
+    a: "SMS xabarlar mijozning telefoniga to'g'ridan-to'g'ri eslatma yuborish uchun xizmat qiladi va hisobingizdagi SMS kreditlar orqali sarflanadi.",
   },
   {
     q: "To'lov xavfsizligi kafolatlanganmi?",
@@ -172,8 +172,8 @@ export default function PricingPage() {
         <div className="container mx-auto px-4 py-8 sm:py-12 max-w-6xl">
           {/* Header */}
           <div className="text-center space-y-3.5 mb-10 sm:mb-12">
-            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200/80 text-blue-700 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               Tariflar va Rejalar
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-[2.65rem] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
@@ -224,7 +224,7 @@ export default function PricingPage() {
 
           {/* Active Subscription Banner for Logged-In User */}
           {user && user.plan_type && user.plan_type !== 'FREE' && (
-            <div className="max-w-4xl mx-auto mb-10 relative overflow-hidden bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border border-emerald-300/90 rounded-2xl p-4 sm:p-5 shadow-xs">
+            <div className="max-w-4xl mx-auto mb-10 relative overflow-hidden bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-green-950/30 border border-emerald-300/90 dark:border-emerald-800 rounded-2xl p-4 sm:p-5 shadow-xs">
               <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
                 <div className="flex items-center gap-3.5">
                   <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0">
@@ -232,7 +232,7 @@ export default function PricingPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-extrabold text-slate-900 text-base sm:text-lg">
+                      <span className="font-extrabold text-slate-900 dark:text-slate-100 text-base sm:text-lg">
                         Sizda {user.plan_type} tarifi faol
                       </span>
                       <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
@@ -240,7 +240,7 @@ export default function PricingPage() {
                         Faol Obuna
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-emerald-900/80 mt-0.5">
+                    <p className="text-xs sm:text-sm text-emerald-900/80 dark:text-emerald-300/90 mt-0.5">
                       Barcha {user.plan_type} imkoniyatlaridan to&apos;liq foydalanishingiz mumkin.
                     </p>
                   </div>
@@ -249,7 +249,7 @@ export default function PricingPage() {
                 {user.plan_type === 'PLUS' && (
                   <button
                     onClick={() => handleSelectPlan('PRO')}
-                    className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 flex-shrink-0"
+                    className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer"
                   >
                     <Crown className="w-3.5 h-3.5" />
                     Pro ga oshirish
@@ -278,50 +278,50 @@ export default function PricingPage() {
 
               // Card styling states
               let cardBorderClass = 'border-slate-200/90 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg'
-              let cardHeaderBg = 'bg-slate-50/70 border-b border-slate-100'
-              let iconBg = 'bg-slate-100 text-slate-700'
+              let cardHeaderBg = 'bg-slate-50/70 dark:bg-slate-850/60 border-b border-slate-100 dark:border-slate-800'
+              let iconBg = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
 
               if (isCurrentPlan) {
-                cardBorderClass = 'border-2 border-emerald-500 shadow-xl ring-4 ring-emerald-500/10 bg-white'
-                cardHeaderBg = 'bg-gradient-to-br from-emerald-50/70 to-teal-50/50 border-b border-emerald-100'
+                cardBorderClass = 'border-2 border-emerald-500 dark:border-emerald-500 shadow-xl ring-4 ring-emerald-500/10 dark:ring-emerald-500/20 bg-white dark:bg-slate-900'
+                cardHeaderBg = 'bg-gradient-to-br from-emerald-50/70 to-teal-50/50 dark:from-emerald-950/40 dark:to-teal-950/30 border-b border-emerald-100 dark:border-emerald-900/60'
                 iconBg = 'bg-emerald-600 text-white shadow-xs'
               } else if (isPro) {
                 cardBorderClass = isUpgrade
-                  ? 'border-2 border-purple-500 shadow-xl ring-4 ring-purple-500/10 bg-white hover:border-purple-600'
-                  : 'border border-purple-200 shadow-md bg-white hover:border-purple-300 hover:shadow-xl'
-                cardHeaderBg = 'bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-white border-b border-purple-100'
+                  ? 'border-2 border-purple-500 dark:border-purple-500 shadow-xl ring-4 ring-purple-500/10 dark:ring-purple-500/20 bg-white dark:bg-slate-900 hover:border-purple-600 dark:hover:border-purple-400'
+                  : 'border border-purple-200 dark:border-purple-900/60 shadow-md bg-white dark:bg-slate-900 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-xl'
+                cardHeaderBg = 'bg-gradient-to-br from-purple-50/80 via-violet-50/60 to-white dark:from-purple-950/40 dark:via-violet-950/30 dark:to-slate-900 border-b border-purple-100 dark:border-purple-900/60'
                 iconBg = 'bg-purple-600 text-white shadow-xs'
               } else if (plan.popular) {
-                cardBorderClass = 'border-2 border-blue-500 shadow-xl ring-4 ring-blue-500/10 bg-white hover:border-blue-600'
-                cardHeaderBg = 'bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-white border-b border-blue-100'
+                cardBorderClass = 'border-2 border-blue-500 dark:border-blue-500 shadow-xl ring-4 ring-blue-500/10 dark:ring-blue-500/20 bg-white dark:bg-slate-900 hover:border-blue-600 dark:hover:border-blue-400'
+                cardHeaderBg = 'bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-white dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-slate-900 border-b border-blue-100 dark:border-blue-900/60'
                 iconBg = 'bg-blue-600 text-white shadow-xs'
               }
 
               // CTA Button Configuration
               let buttonText = 'Sotib olish'
               let buttonDisabled = false
-              let buttonClass = 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'
+              let buttonClass = 'bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white shadow-md'
 
               if (!user) {
                 buttonText = isFree ? 'Bepul boshlash' : "Tanlash va Ro'yxatdan o'tish"
                 buttonDisabled = false
                 buttonClass = isFree
-                  ? 'bg-white hover:bg-slate-50 text-slate-900 border border-slate-300'
+                  ? 'bg-white hover:bg-slate-50 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700'
                   : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20'
               } else if (isCurrentPlan) {
                 buttonText = 'Hozirgi tarifingiz'
                 buttonDisabled = true
-                buttonClass = 'bg-emerald-50 text-emerald-700 border-2 border-emerald-300/80 cursor-default font-bold'
+                buttonClass = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-2 border-emerald-300/80 dark:border-emerald-800 cursor-default font-bold'
               } else if (isDowngrade) {
                 buttonText = 'Amaldagi tarifdan past'
                 buttonDisabled = true
-                buttonClass = 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                buttonClass = 'bg-slate-100 dark:bg-slate-850 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 cursor-not-allowed'
               } else if (isUpgrade) {
                 buttonText = 'Tarifni oshirish (Upgrade)'
                 buttonDisabled = false
-                buttonClass = 'bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:via-indigo-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/25 font-bold'
+                buttonClass = 'bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:via-indigo-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/25 font-bold cursor-pointer'
               } else if (plan.popular) {
-                buttonClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 font-bold'
+                buttonClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 font-bold cursor-pointer'
               }
 
               return (
@@ -365,10 +365,10 @@ export default function PricingPage() {
                     <div className={`p-6 sm:p-7 rounded-t-3xl ${cardHeaderBg}`}>
                       <div className="flex items-center justify-between gap-3 mb-3">
                         <div>
-                          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                          <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                             {plan.displayName}
                           </h3>
-                          <p className="text-xs text-slate-500 mt-0.5 font-medium leading-relaxed">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium leading-relaxed">
                             {plan.description}
                           </p>
                         </div>
@@ -378,7 +378,7 @@ export default function PricingPage() {
                           ) : plan.popular ? (
                             <Zap className="w-5 h-5" />
                           ) : (
-                            <Gift className="w-5 h-5 text-slate-700" />
+                            <Gift className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                           )}
                         </div>
                       </div>
@@ -388,31 +388,31 @@ export default function PricingPage() {
                         {isFree ? (
                           <div className="space-y-1">
                             <div className="flex items-baseline gap-1.5">
-                              <span className="text-4xl font-extrabold text-slate-900 tracking-tight">0</span>
-                              <span className="text-base font-bold text-slate-500">so&apos;m</span>
+                              <span className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">0</span>
+                              <span className="text-base font-bold text-slate-500 dark:text-slate-400">so&apos;m</span>
                             </div>
-                            <p className="text-xs text-slate-500 font-medium">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                               30 kun to&apos;liq funksiyalardan bepul sinov
                             </p>
                           </div>
                         ) : (
                           <div className="space-y-1.5">
                             <div className="flex items-baseline gap-1.5 flex-wrap">
-                              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" suppressHydrationWarning>
+                              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight" suppressHydrationWarning>
                                 {billingCycle === 'monthly'
                                   ? formatPrice(price)
                                   : formatPrice(Math.round(price / months))}
                               </span>
-                              <span className="text-sm font-bold text-slate-500">/oy</span>
+                              <span className="text-sm font-bold text-slate-500 dark:text-slate-400">/oy</span>
                             </div>
 
                             {/* Multi-month billing details */}
                             {months > 1 && (
                               <div className="flex items-center gap-2 flex-wrap pt-0.5" suppressHydrationWarning>
-                                <span className="text-xs text-slate-400 line-through">
+                                <span className="text-xs text-slate-400 dark:text-slate-500 line-through">
                                   {formatPrice(monthlyPrice * months)}
                                 </span>
-                                <span className="text-xs font-bold text-slate-700 bg-white/90 border border-slate-200/80 px-2 py-0.5 rounded-md shadow-2xs">
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 px-2 py-0.5 rounded-md shadow-2xs">
                                   {formatPrice(price)} / {BILLING_CYCLE_LABELS[billingCycle].toLowerCase()}
                                 </span>
                               </div>
@@ -421,7 +421,7 @@ export default function PricingPage() {
                             {/* Savings Badge */}
                             {discount.amount > 0 && (
                               <div className="pt-1">
-                                <span className="inline-flex items-center gap-1 bg-emerald-100/90 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded-md border border-emerald-200/80" suppressHydrationWarning>
+                                <span className="inline-flex items-center gap-1 bg-emerald-100/90 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold px-2 py-0.5 rounded-md border border-emerald-200/80 dark:border-emerald-800" suppressHydrationWarning>
                                   <Zap className="w-3 h-3 text-emerald-600 fill-current" />
                                   {formatPrice(discount.amount)} tejaladi
                                 </span>
@@ -445,11 +445,6 @@ export default function PricingPage() {
                       <FeatureItem
                         text={`${plan.features.max_folders === -1 ? 'Cheksiz' : plan.features.max_folders} ta papka (folder)`}
                         highlight={plan.features.max_folders === -1}
-                      />
-                      <FeatureItem
-                        text="Telegram eslatmalar"
-                        enabled={plan.features.telegram_notifications}
-                        subtext="Cheksiz & bepul"
                       />
                       <FeatureItem
                         text="SMS eslatmalar"
@@ -497,9 +492,9 @@ export default function PricingPage() {
           {/* Savings Highlight Callout */}
           {billingCycle !== 'monthly' && (
             <div className="mt-10 text-center">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl px-5 py-2.5 shadow-xs">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl px-5 py-2.5 shadow-xs">
                 <Zap className="w-4 h-4 text-emerald-600 fill-current" />
-                <span className="text-emerald-950 font-bold text-xs sm:text-sm">
+                <span className="text-emerald-950 dark:text-emerald-200 font-bold text-xs sm:text-sm">
                   {billingCycle === 'semi_annual' ? '6 oylik' : 'Yillik'} to&apos;lovda {BILLING_CYCLE_DISCOUNTS[billingCycle]}% chegirmadan foydalanmoqdasiz!
                 </span>
               </div>
@@ -507,8 +502,8 @@ export default function PricingPage() {
           )}
 
           {/* Supported Payments & Security Compliance Banner */}
-          <div className="mt-16 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xs text-center space-y-5">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/80 border border-blue-200/70 text-blue-900 mx-auto">
+          <div className="mt-16 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs text-center space-y-5">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/80 dark:bg-blue-950/50 border border-blue-200/70 dark:border-blue-800/60 text-blue-900 dark:text-blue-300 mx-auto">
               <Shield className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
               <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">
                 Rasmiy to&apos;lov tizimlari va bank kartalari
@@ -517,16 +512,16 @@ export default function PricingPage() {
 
             <PaymentMethodsRow />
 
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-500 pt-4 border-t border-slate-100">
-              <Link href="/payment-terms" className="hover:text-blue-600 transition underline underline-offset-4 decoration-slate-300">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Link href="/payment-terms" className="hover:text-blue-600 dark:hover:text-blue-400 transition underline underline-offset-4 decoration-slate-300 dark:decoration-slate-700">
                 To&apos;lov usullari va mablag&apos;larni qaytarish qoidalari
               </Link>
-              <span className="text-slate-300">•</span>
-              <Link href="/security" className="hover:text-blue-600 transition underline underline-offset-4 decoration-slate-300">
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <Link href="/security" className="hover:text-blue-600 dark:hover:text-blue-400 transition underline underline-offset-4 decoration-slate-300 dark:decoration-slate-700">
                 Xavfsizlik va Antifraud nazorati
               </Link>
-              <span className="text-slate-300">•</span>
-              <Link href="/terms" className="hover:text-blue-600 transition underline underline-offset-4 decoration-slate-300">
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <Link href="/terms" className="hover:text-blue-600 dark:hover:text-blue-400 transition underline underline-offset-4 decoration-slate-300 dark:decoration-slate-700">
                 Ommaviy oferta
               </Link>
             </div>
@@ -535,11 +530,11 @@ export default function PricingPage() {
           {/* Interactive FAQ Section */}
           <div className="mt-16 max-w-3xl mx-auto space-y-4">
             <div className="text-center space-y-1.5 mb-8">
-              <div className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
                 <HelpCircle className="w-3.5 h-3.5" />
                 Ko&apos;p beriladigan savollar
               </div>
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 Savollaringiz bormi?
               </h2>
             </div>
@@ -550,22 +545,22 @@ export default function PricingPage() {
                 return (
                   <div
                     key={idx}
-                    className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs transition-all"
+                    className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs transition-all"
                   >
                     <button
                       type="button"
                       onClick={() => setOpenFaq(isOpen ? null : idx)}
-                      className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-sm hover:text-blue-600 transition-colors"
+                      className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 font-bold text-slate-900 dark:text-slate-100 text-sm hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                     >
                       <span>{faq.q}</span>
                       <ChevronDown
-                        className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-blue-600' : ''
+                        className={`w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
                         }`}
                       />
                     </button>
                     {isOpen && (
-                      <div className="px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                      <div className="px-5 pb-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
                         {faq.a}
                       </div>
                     )}
@@ -575,9 +570,9 @@ export default function PricingPage() {
             </div>
 
             <div className="text-center pt-6">
-              <p className="text-xs sm:text-sm text-slate-500">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                 Qo&apos;shimcha savollaringiz bormi?{' '}
-                <Link href="/contact" className="text-blue-600 font-bold hover:underline">
+                <Link href="/contact" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">
                   Qo&apos;llab-quvvatlash xizmati bilan bog&apos;laning
                 </Link>
               </p>
@@ -588,28 +583,28 @@ export default function PricingPage() {
 
       {/* Payment Provider Selection Modal - The Big Three */}
       <Dialog open={showProviderModal} onOpenChange={setShowProviderModal}>
-        <DialogContent className="sm:max-w-[440px] rounded-3xl p-0 border border-slate-200 shadow-2xl bg-white overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 [&>button.absolute]:hover:bg-slate-200 [&>button.absolute]:text-slate-500 [&>button.absolute]:top-4 [&>button.absolute]:right-4 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:border [&>button.absolute]:border-slate-200/80">
+        <DialogContent className="sm:max-w-[440px] rounded-3xl p-0 border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 dark:[&>button.absolute]:bg-slate-800 [&>button.absolute]:hover:bg-slate-200 dark:[&>button.absolute]:hover:bg-slate-700 [&>button.absolute]:text-slate-500 dark:[&>button.absolute]:text-slate-300 [&>button.absolute]:top-4 [&>button.absolute]:right-4 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:border [&>button.absolute]:border-slate-200/80 dark:[&>button.absolute]:border-slate-700">
           {/* Modal Header */}
-          <div className="p-6 pb-4 bg-gradient-to-b from-slate-50/80 to-white border-b border-slate-100">
+          <div className="p-6 pb-4 bg-gradient-to-b from-slate-50/80 to-white dark:from-slate-850/80 dark:to-slate-900 border-b border-slate-100 dark:border-slate-800">
             <DialogHeader className="space-y-1 text-left">
-              <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+              <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                 To&apos;lov usulini tanlang
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
                 Qaysi to&apos;lov tizimi orqali to&apos;lashni ma&apos;qul ko&apos;rasiz?
               </DialogDescription>
             </DialogHeader>
 
             {/* Selected Plan Summary Pill */}
             {selectedPlanObj && (
-              <div className="mt-3.5 p-3 rounded-2xl bg-slate-100/90 border border-slate-200/80 flex items-center justify-between text-xs">
+              <div className="mt-3.5 p-3 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between text-xs">
                 <div>
-                  <span className="font-extrabold text-slate-900">{selectedPlanObj.displayName}</span>
-                  <span className="text-slate-500 ml-1">
+                  <span className="font-extrabold text-slate-900 dark:text-slate-100">{selectedPlanObj.displayName}</span>
+                  <span className="text-slate-500 dark:text-slate-400 ml-1">
                     ({billingCycle === 'annual' ? 'Yillik' : billingCycle === 'semi_annual' ? '6 oylik' : 'Oylik'})
                   </span>
                 </div>
-                <div className="font-black text-slate-900 text-sm">
+                <div className="font-black text-slate-900 dark:text-slate-100 text-sm">
                   {formatPrice(selectedPlanPrice)}
                 </div>
               </div>
@@ -621,79 +616,79 @@ export default function PricingPage() {
             {/* 1. UZUM BANK */}
             <button
               type="button"
-              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 hover:border-purple-400 hover:bg-purple-50/40 transition-all duration-200 shadow-2xs hover:shadow-md text-left"
+              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-purple-400 dark:hover:border-purple-500/80 hover:bg-purple-50/40 dark:hover:bg-purple-950/30 transition-all duration-200 shadow-2xs hover:shadow-md text-left cursor-pointer"
               onClick={() => handleProviderSelect('uzum')}
               disabled={loading !== null}
             >
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-purple-50 border border-purple-200/80 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200/80 dark:border-purple-800/60 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <UzumBankLogo className="h-8 w-auto" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <span>Uzum Bank</span>
-                  <span className="bg-purple-100 text-purple-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  <span className="bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
                     Tavsiya etiladi
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                   Uzcard, Humo, Visa va Mastercard orqali saytda to&apos;lov
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+              <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
             </button>
 
             {/* 2. CLICK */}
             <button
               type="button"
-              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 hover:border-blue-400 hover:bg-blue-50/40 transition-all duration-200 shadow-2xs hover:shadow-md text-left"
+              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500/80 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-all duration-200 shadow-2xs hover:shadow-md text-left cursor-pointer"
               onClick={() => handleProviderSelect('click')}
               disabled={loading !== null}
             >
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-50 border border-blue-200/80 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-800/60 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <ClickLogo className="h-6 w-auto" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <span>Click</span>
-                  <span className="bg-blue-100 text-blue-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  <span className="bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
                     Saytda to&apos;lov
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                   Bank kartasi yoki Click Up ilovasi orqali to&apos;lov
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+              <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
             </button>
 
             {/* 3. PAYME */}
             <button
               type="button"
-              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 hover:border-teal-400 hover:bg-teal-50/40 transition-all duration-200 shadow-2xs hover:shadow-md text-left"
+              className="group w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500/80 hover:bg-teal-50/40 dark:hover:bg-teal-950/30 transition-all duration-200 shadow-2xs hover:shadow-md text-left cursor-pointer"
               onClick={() => handleProviderSelect('payme')}
               disabled={loading !== null}
             >
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-teal-50 border border-teal-200/80 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/50 border border-teal-200/80 dark:border-teal-800/60 p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <PaymeLogo className="h-6 w-auto" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <span>Payme</span>
-                  <span className="bg-teal-100 text-teal-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  <span className="bg-teal-100 dark:bg-teal-950/80 text-teal-700 dark:text-teal-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
                     Tezkor
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                   Payme ilovasi yoki bank kartasi orqali to&apos;lov
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+              <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
             </button>
           </div>
 
           {/* Modal Footer */}
-          <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-500">
-            <Lock className="w-3.5 h-3.5 text-slate-400" />
+          <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-850/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+            <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             <span>To&apos;lov 100% xavfsiz va shifrlangan</span>
           </div>
         </DialogContent>
@@ -782,12 +777,12 @@ function FeatureItem({
       <div
         className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
           !enabled
-            ? 'bg-slate-100 text-slate-400'
+            ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
             : isSmsNotice
-            ? 'bg-blue-100 text-blue-700'
+            ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400'
             : highlight
             ? 'bg-emerald-600 text-white shadow-2xs'
-            : 'bg-emerald-100 text-emerald-700'
+            : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
         }`}
       >
         {enabled ? (
@@ -801,10 +796,10 @@ function FeatureItem({
         <span
           className={`${
             !enabled
-              ? 'text-slate-400 line-through'
+              ? 'text-slate-400 dark:text-slate-500 line-through'
               : highlight
-              ? 'text-slate-900 font-bold'
-              : 'text-slate-700 font-medium'
+              ? 'text-slate-900 dark:text-slate-100 font-bold'
+              : 'text-slate-700 dark:text-slate-300 font-medium'
           }`}
         >
           {text}
@@ -813,8 +808,8 @@ function FeatureItem({
           <span
             className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded ${
               isSmsNotice
-                ? 'bg-blue-50 text-blue-600 border border-blue-200/60'
-                : 'bg-slate-100 text-slate-500'
+                ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/60'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
             }`}
           >
             {subtext}

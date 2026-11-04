@@ -1,19 +1,36 @@
 // src/app/contact/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-
-
-
+import { Alert } from '@/components/ui/alert'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { useUser } from '@/lib/contexts/user-context'
+import {
+  ArrowLeft,
+  ArrowRight,
+  LayoutDashboard,
+  Mail,
+  Phone,
+  Send,
+  CheckCircle2,
+  HelpCircle,
+  ShieldCheck,
+  Smartphone,
+  CreditCard,
+  MessageSquare
+} from 'lucide-react'
 
 export default function ContactPage() {
+  const router = useRouter()
+  const { user, loading: userLoading } = useUser()
+
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -23,6 +40,17 @@ export default function ContactPage() {
     subject: '',
     message: '',
   })
+
+  // Tizimga kirgan foydalanuvchi ma'lumotlarini formaga avtomatik to'ldirish
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.full_name || user.store_name || '',
+        email: prev.email || user.email || '',
+      }))
+    }
+  }, [user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,360 +62,436 @@ export default function ContactPage() {
     setTimeout(() => {
       setSuccess(true)
       setLoading(false)
-      setFormData({ name: '', email: '', subject: '', message: '' })
+      setFormData({
+        name: user?.full_name || user?.store_name || '',
+        email: user?.email || '',
+        subject: '',
+        message: '',
+      })
     }, 1000)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between">
       {/* Header */}
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
+      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-blue-600">Qarz Daftari</h1>
-            </Link>
-            <div className="flex gap-2">
-              <Button variant="outline" asChild>
-                <Link href="/login">Kirish</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Ro'yxatdan o'tish</Link>
-              </Button>
+            {/* Chap tomon: Ortga qaytish + Logo */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Ortga qaytish"
+                aria-label="Ortga qaytish"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              <Link href={user ? '/dashboard' : '/'} className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 tracking-tight">
+                  Qarz Daftari
+                </h1>
+              </Link>
+            </div>
+
+            {/* O'ng tomon: ThemeToggle + Auth / Dashboard tugmalari */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+
+              {!userLoading && (
+                user ? (
+                  <Button
+                    size="sm"
+                    asChild
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold h-9 px-3.5 shadow-2xs transition-all active:scale-95"
+                  >
+                    <Link href="/dashboard" className="flex items-center gap-1.5">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span className="hidden xs:inline sm:inline">Dashboard</span>
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 h-9 px-3 sm:px-3.5 font-semibold text-xs"
+                    >
+                      <Link href="/login">Kirish</Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      asChild
+                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold h-9 px-3.5 shadow-2xs transition-all active:scale-95 text-xs"
+                    >
+                      <Link href="/register">Ro&apos;yxatdan o&apos;tish</Link>
+                    </Button>
+                  </>
+                )
+              )}
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Hero */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Yordam Markazi</h1>
-            <p className="text-xl text-slate-600">
-              Sizga qanday yordam berishimiz mumkin?
-            </p>
-          </div>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-1 w-full">
+        {/* Ortga qaytish / Navigatsiya tugmasi */}
+        <div className="mb-6 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="rounded-xl gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Ortga qaytish</span>
+          </Button>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {/* Email Support */}
-            <Card>
-              <CardHeader>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg
-                    className="w-6 h-6 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <CardTitle>Email</CardTitle>
-                <CardDescription>
-                  Bizga email yuboring
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <a
-                  href="mailto:boriyevdev08@gmail.com"
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  boriyevdev08@gmail.com
-                </a>
-                <p className="text-sm text-slate-600 mt-2">
-                  24 soat ichida javob beramiz
-                </p>
-              </CardContent>
-            </Card>
+          {user && (
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+            >
+              <Link href="/dashboard" className="flex items-center gap-1">
+                <span>Dashboardga o&apos;tish</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </Button>
+          )}
+        </div>
 
-            {/* Phone Support */}
-            <Card>
-              <CardHeader>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg
-                    className="w-6 h-6 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                </div>
-                <CardTitle>Telefon</CardTitle>
-                <CardDescription>
-                  Qo'ng'iroq qiling
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <a
-                  href="tel:+998904435567"
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  +998 (90) 443-55-67
-                </a>
-                <p className="text-sm text-slate-600 mt-2">
-                  Ish kunlari 9:00 - 18:00
-                </p>
-              </CardContent>
-            </Card>
+        {/* Hero sarlavha */}
+        <div className="text-center mb-10 space-y-2">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+            Yordam Markazi
+          </h1>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+            Savollaringiz bormi yoki yordam kerakmi? Biz sizga mamnuniyat bilan ko&apos;maklashamiz!
+          </p>
+        </div>
 
-            {/* Telegram Support */}
-            <Card>
-              <CardHeader>
-                <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg
-                    className="w-6 h-6 text-sky-600"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z" />
-                  </svg>
-                </div>
-                <CardTitle>Telegram</CardTitle>
-                <CardDescription>
-                  Telegram orqali yozing
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <a
-                  href="https://t.me/qarzdaftari_support_bot"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  @qarzdaftari_support_bot
-                </a>
-                <p className="text-sm text-slate-600 mt-2">
-                  Tez javob olish uchun
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* FAQ Section */}
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">Ko'p So'raladigan Savollar</h2>
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Qarz Daftari nima?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">
-                    Qarz Daftari - bu do'kon egalari va tadbirkorlar uchun zamonaviy qarz boshqaruv platformasi. 
-                    Siz qarzlaringizni oson nazorat qilishingiz, SMS eslatmalar yuborishingiz va to'liq hisobotlarni olishingiz mumkin.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Qanday narx? Bepulmi?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">
-                    Ha! Biz FREE tarif taklif qilamiz - 50 tagacha qarz va asosiy funksiyalar bepul. 
-                    Ko'proq funksiyalar uchun PLUS (49,900 so'm/oy) va PRO (99,900 so'm/oy) tariflar mavjud.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">SMS eslatmalar qanday ishlaydi?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">
-                    SMS kreditleri alohida sotib olinadi. Siz kerakli miqdorda SMS paket xarid qilasiz va 
-                    qarzdorlaringizga avtomatik eslatmalar yuboriladi. PRO userlarga chegirmalar va bonuslar mavjud.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Ma'lumotlarim xavfsizmi?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">
-                    Ha! Barcha ma'lumotlar shifrlangan va xavfsiz serverda saqlanadi. Faqat siz o'z ma'lumotlaringizni 
-                    ko'ra olasiz. Biz hech qachon ma'lumotlaringizni uchinchi shaxslarga sotmaymiz.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Mobil app bormi?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600">
-                    Hozircha bizning platformamiz PWA (Progressive Web App) sifatida ishlaydi - ya'ni brauzerdan 
-                    to'g'ridan-to'g'ri telefoningizga o'rnatishingiz mumkin va u mobil app kabi ishlaydi.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Contact Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Bizga Murojaat Qiling</CardTitle>
-              <CardDescription>
-                Savolingiz bormi? Formani to'ldiring, biz sizga tez orada javob beramiz
+        {/* Aloqa Kartalari (Email, Telefon, Telegram) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12">
+          {/* Email Support */}
+          <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs hover:border-blue-300 dark:hover:border-blue-800 transition-all">
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 bg-blue-100/90 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-3 shadow-2xs">
+                <Mail className="w-6 h-6" />
+              </div>
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                Email
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                Bizga email orqali yozing
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {success ? (
-                <Alert className="border-green-200 bg-green-50">
-                  <svg
-                    className="h-5 w-5 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">
-                      Xabaringiz yuborildi!
-                    </h3>
-                    <p className="mt-1 text-sm text-green-700">
-                      Tez orada sizga javob beramiz. Emailingizni tekshiring.
-                    </p>
-                  </div>
-                </Alert>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+              <a
+                href="mailto:boriyevdev08@gmail.com"
+                className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:underline font-bold break-all"
+              >
+                boriyevdev08@gmail.com
+              </a>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                24 soat ichida javob beramiz
+              </p>
+            </CardContent>
+          </Card>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Ismingiz
-                        <span className="text-red-500 ml-1">*</span>
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="Ali Valiyev"
-                        required
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        disabled={loading}
-                      />
-                    </div>
+          {/* Phone Support */}
+          <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs hover:border-emerald-300 dark:hover:border-emerald-800 transition-all">
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 bg-emerald-100/90 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-3 shadow-2xs">
+                <Phone className="w-6 h-6" />
+              </div>
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                Telefon
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                To&apos;g&apos;ridan-to&apos;g&apos;ri qo&apos;ng&apos;iroq qiling
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <a
+                href="tel:+998904435567"
+                className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
+              >
+                +998 (90) 443-55-67
+              </a>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Ish kunlari 9:00 dan 18:00 gacha
+              </p>
+            </CardContent>
+          </Card>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">
-                        Email
-                        <span className="text-red-500 ml-1">*</span>
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="ali@example.com"
-                        required
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">
-                      Mavzu
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Input
-                      id="subject"
-                      placeholder="Savolingizning mavzusi"
-                      required
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">
-                      Xabar
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Xabaringizni yozing..."
-                      required
-                      rows={6}
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Yuborilmoqda...
-                      </div>
-                    ) : (
-                      'Xabar Yuborish'
-                    )}
-                  </Button>
-                </form>
-              )}
+          {/* Telegram Support */}
+          <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs hover:border-sky-300 dark:hover:border-sky-800 transition-all">
+            <CardHeader className="pb-3">
+              <div className="w-12 h-12 bg-sky-100/90 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center mb-3 shadow-2xs">
+                <Send className="w-6 h-6" />
+              </div>
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                Telegram
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                Telegram qo&apos;llab-quvvatlash
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <a
+                href="https://t.me/qarzdaftari_support_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs sm:text-sm text-sky-600 dark:text-sky-400 hover:underline font-bold"
+              >
+                @qarzdaftari_support_bot
+              </a>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Tezkor javob olish uchun
+              </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Tez-tez so'raladigan savollar (FAQ) */}
+        <div className="mb-12 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+              Ko&apos;p So&apos;raladigan Savollar
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+                  Qarz Daftari nima?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Qarz Daftari — bu do&apos;kon egalari, savdogarlar va tadbirkorlar uchun zamonaviy qarz boshqaruv platformasi. Siz berilgan nasiyalaringizni osongina nazorat qilishingiz, to&apos;lov muddatlarini kuzatishingiz va hisobotlarni eksport qilishingiz mumkin.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+                  Qanday narx? Bepul sinov bormi?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Ha! Har bir yangi ro&apos;yxatdan o&apos;tgan foydalanuvchiga 30 kunlik to&apos;liq funksiyalarga ega bepul sinov (Trial) beriladi. Keyinchalik o&apos;z biznesingizga mos PLUS yoki PRO tarifini tanlashingiz mumkin.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+                  SMS eslatmalar qanday ishlaydi?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  SMS xabarlar mijozning telefon raqamiga to&apos;g&apos;ridan-to&apos;g&apos;ri eslatma yuborish uchun xizmat qiladi. Tizimda qulay tayyor shablonlar va avtomatik eslatma mexanizmi mavjud.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+                  Ma&apos;lumotlarim xavfsizligi qanday ta&apos;minlanadi?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Barcha ma&apos;lumotlar shifrlangan holatda xavfsiz ma&apos;lumotlar bazasida saqlanadi. Ma&apos;lumotlarga faqat do&apos;kon egasi va uning ruxsat bergan kassirlari kira oladi.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Murojaat formasi */}
+        <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span>Bizga Murojaat Qiling</span>
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+              Savolingiz yoki taklifingiz bormi? Formani to&apos;ldiring, tez orada javob beramiz.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {success ? (
+              <Alert className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl p-4 flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-bold text-emerald-800 dark:text-emerald-300">
+                    Xabaringiz muvaffaqiyatli yuborildi!
+                  </h3>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">
+                    Tez orada siz bilan bog&apos;lanamiz. Emailingizni tekshirib turing.
+                  </p>
+                </div>
+              </Alert>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <Alert variant="destructive" className="rounded-2xl">
+                    <p className="text-xs">{error}</p>
+                  </Alert>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Ismingiz <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="Ismingizni kiriting"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      disabled={loading}
+                      className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs sm:text-sm h-10"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Email <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="example@mail.com"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      disabled={loading}
+                      className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs sm:text-sm h-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="subject" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Mavzu <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="subject"
+                    placeholder="Murojaatingiz mavzusi"
+                    required
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    disabled={loading}
+                    className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs sm:text-sm h-10"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="message" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Xabar matni <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Savolingiz yoki taklifingizni yozing..."
+                    required
+                    rows={5}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    disabled={loading}
+                    className="rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs sm:text-sm p-3 resize-none"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl h-10 text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all active:scale-95"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Yuborilmoqda...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Send className="w-4 h-4" />
+                      <span>Xabar Yuborish</span>
+                    </div>
+                  )}
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-slate-600">
-            <p>&copy; 2026 Qarz Daftari. Barcha huquqlar himoyalangan.</p>
-            <div className="flex gap-4 justify-center mt-4 text-sm">
-              <Link href="/" className="hover:text-blue-600">
-                Bosh sahifa
-              </Link>
-              <Link href="/login" className="hover:text-blue-600">
-                Kirish
-              </Link>
-              <Link href="/register" className="hover:text-blue-600">
-                Ro'yxatdan o'tish
-              </Link>
-            </div>
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-12 text-slate-600 dark:text-slate-400 py-6">
+        <div className="max-w-6xl mx-auto px-4 text-center space-y-3">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            &copy; {new Date().getFullYear()} Qarz Daftari. Barcha huquqlar himoyalangan.
+          </p>
+          <div className="flex gap-4 justify-center text-xs font-semibold">
+            <Link
+              href={user ? '/dashboard' : '/'}
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              {user ? 'Dashboard' : 'Bosh sahifa'}
+            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/pricing"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Tariflar
+                </Link>
+                <Link
+                  href="/profile"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Profil
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Kirish
+                </Link>
+                <Link
+                  href="/register"
+                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Ro&apos;yxatdan o&apos;tish
+                </Link>
+              </>
+            )}
+            <Link
+              href="/terms"
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              Foydalanish shartlari
+            </Link>
           </div>
         </div>
       </footer>

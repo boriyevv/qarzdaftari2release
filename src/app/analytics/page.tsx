@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -136,6 +137,7 @@ interface MonthData {
 
 export default function AnalyticsPage() {
   const { user, loading: userLoading } = useUser()
+  const { resolvedTheme } = useTheme()
   const [period, setPeriod] = useState<Period>('monthly')
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<AnalyticsData | null>(null)
@@ -143,6 +145,8 @@ export default function AnalyticsPage() {
   const [mounted, setMounted] = useState(false)
   const [activePieIndex, setActivePieIndex] = useState<number | null>(null)
   const [isHoveringPie, setIsHoveringPie] = useState(false)
+
+  const isDark = mounted && resolvedTheme === 'dark'
 
   const effectivePlan = (subPlan || user?.plan_type || 'FREE').toUpperCase()
   const hasAccess = Boolean(user?.is_trial_active || (effectivePlan && effectivePlan !== 'FREE'))
@@ -313,15 +317,15 @@ export default function AnalyticsPage() {
     return (
       <AppShell title="Analytics" subtitle="Biznesingiz statistikasi">
         <div className="max-w-md mx-auto py-12 px-4">
-          <Card className="shadow-lg border-slate-200 rounded-3xl text-center">
+          <Card className="shadow-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-3xl text-center">
             <CardHeader className="text-center pb-2">
-              <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 shadow-xs">
+              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-950/60 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400 shadow-xs">
                 <Lock className="w-7 h-7" />
               </div>
-              <CardTitle className="text-xl font-bold text-slate-900">
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Analytics — Obuna Talab Qilinadi
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm text-slate-500 mt-1">
+              <CardDescription className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Batafsil tahlillar, oylik grafiklar va hisobotlar uchun Plus yoki Pro tarifiga o&apos;ting
               </CardDescription>
             </CardHeader>
@@ -377,18 +381,18 @@ export default function AnalyticsPage() {
   const CustomBarTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-xl border border-slate-800 text-xs space-y-1.5 min-w-[170px]">
-          <p className="font-bold text-slate-200 border-b border-slate-800 pb-1.5">{label}</p>
+        <div className="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl border border-slate-700/80 dark:border-slate-800 text-xs space-y-1.5 min-w-[170px] pointer-events-none z-50">
+          <p className="font-bold text-slate-200 border-b border-slate-800 dark:border-slate-800/80 pb-1.5">{label}</p>
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-1.5 text-slate-400">
                 <span
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: entry.color }}
                 />
                 {entry.name}:
               </span>
-              <span className="font-extrabold text-white">
+              <span className="font-extrabold text-white font-mono">
                 {formatCurrency(Number(entry.value) || 0)}
               </span>
             </div>
@@ -426,7 +430,7 @@ export default function AnalyticsPage() {
         {/* Period Selector & Tarif Badge */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
-            <TabsList className="grid w-full grid-cols-3 max-w-md bg-slate-200/80 p-1 rounded-2xl">
+            <TabsList className="grid w-full grid-cols-3 max-w-md bg-slate-200/80 dark:bg-slate-800 p-1 rounded-2xl">
               <TabsTrigger value="monthly" className="rounded-xl font-semibold text-xs py-2 px-2 sm:px-3">
                 Oylik <span className="hidden sm:inline">(30 kun)</span>
               </TabsTrigger>
@@ -456,16 +460,16 @@ export default function AnalyticsPage() {
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
-              className="text-xs font-semibold py-1.5 px-3 bg-white border-slate-200 shadow-2xs rounded-xl"
+              className="text-xs font-semibold py-1.5 px-3 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 shadow-2xs rounded-xl"
             >
               Tarif:{' '}
               <span
                 className={`font-black ml-1.5 ${
                   effectivePlan === 'PRO'
-                    ? 'text-amber-600'
+                    ? 'text-amber-600 dark:text-amber-400'
                     : effectivePlan === 'PLUS'
-                    ? 'text-emerald-600'
-                    : 'text-blue-600'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-blue-600 dark:text-blue-400'
                 }`}
               >
                 {effectivePlan}
@@ -478,26 +482,26 @@ export default function AnalyticsPage() {
                 <Button
                   variant="outline"
                   disabled={Boolean(exporting) || loading || !data}
-                  className="rounded-xl border-slate-200 hover:border-blue-300 font-bold text-xs h-8 px-3 shadow-2xs bg-white text-slate-700 hover:text-blue-600 flex items-center gap-1.5 transition-colors"
+                  className="rounded-xl border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 font-bold text-xs h-9 px-3.5 shadow-2xs bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 transition-colors"
                 >
                   {exporting ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600 dark:text-blue-400" />
                   ) : (
-                    <Download className="w-3.5 h-3.5 text-blue-600" />
+                    <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   )}
                   <span>{exporting ? 'Yuklanmoqda...' : 'Eksport'}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-slate-200 bg-white">
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5 shadow-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">
                   Hisobotni yuklab olish
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-slate-100 my-1" />
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
                 <DropdownMenuItem
                   onClick={() => handleExport('excel')}
-                  className="rounded-xl flex items-center gap-2.5 p-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer transition-colors"
+                  className="rounded-xl flex items-center gap-2.5 p-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 focus:bg-emerald-50 dark:focus:bg-emerald-950/40 cursor-pointer transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100/90 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100/90 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center flex-shrink-0">
                     <FileSpreadsheet className="w-4 h-4" />
                   </div>
                   <div>
@@ -508,9 +512,9 @@ export default function AnalyticsPage() {
 
                 <DropdownMenuItem
                   onClick={() => handleExport('pdf')}
-                  className="rounded-xl flex items-center gap-2.5 p-2 text-xs font-semibold text-slate-700 hover:text-rose-700 hover:bg-rose-50 cursor-pointer transition-colors"
+                  className="rounded-xl flex items-center gap-2.5 p-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 focus:bg-rose-50 dark:focus:bg-rose-950/40 cursor-pointer transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-rose-100/90 text-rose-700 flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-rose-100/90 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 flex items-center justify-center flex-shrink-0">
                     <FileText className="w-4 h-4" />
                   </div>
                   <div>
@@ -524,22 +528,22 @@ export default function AnalyticsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200/80 shadow-2xs">
+          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
             <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-slate-500 mt-3 text-xs font-medium">Hisobotlar tahlil qilinmoqda...</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-3 text-xs font-medium">Hisobotlar tahlil qilinmoqda...</p>
           </div>
         ) : data ? (
           <>
             {/* 1. Kengaytirilgan Asosiy KPI kartalari (Dashboard bilan 100% uyg'un va keng) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Berilgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 border border-blue-200/80 hover:border-blue-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
-                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-                <TrendingUp className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-blue-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 dark:from-blue-950/40 dark:via-slate-900 dark:to-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-800 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-blue-500/15 dark:bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+                <TrendingUp className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-blue-600/10 dark:text-blue-400/5 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Berilgan Nasiya
                     </span>
                     <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center bg-blue-600 text-white shadow-md shadow-blue-500/25">
@@ -548,14 +552,14 @@ export default function AnalyticsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                       {formatCurrency(data.summary.totalIssued)}
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
                         {data.summary.totalDebtsCount || 0} ta qarz yozuvi
                       </p>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 text-blue-700 border-blue-200/60">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800">
                         {period === 'monthly' ? '30 kunlik' : period === 'semi_annual' ? '6 oylik' : '1 yillik'}
                       </span>
                     </div>
@@ -564,13 +568,13 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Qaytgan / Undirilgan */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 border border-emerald-200/80 hover:border-emerald-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
-                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-                <TrendingDown className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-emerald-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-slate-900 dark:to-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-800 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-emerald-500/15 dark:bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                <TrendingDown className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-emerald-600/10 dark:text-emerald-400/5 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Qaytarilgan
                     </span>
                     <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center bg-emerald-600 text-white shadow-md shadow-emerald-500/25">
@@ -579,14 +583,14 @@ export default function AnalyticsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                       {formatCurrency(data.summary.totalReturned)}
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
                         Kutilayotgan tushumlar
                       </p>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-100/80 text-emerald-700 border-emerald-200/60">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-100/80 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800">
                         {data.summary.repaymentRate}% yig&apos;ildi
                       </span>
                     </div>
@@ -595,13 +599,13 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Qoldiq */}
-              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 border border-amber-200/80 hover:border-amber-300 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
-                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
-                <Clock className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-amber-600/10 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
+              <div className="group relative overflow-hidden bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 dark:from-amber-950/40 dark:via-slate-900 dark:to-amber-950/20 border border-amber-200/80 dark:border-amber-900/50 hover:border-amber-300 dark:hover:border-amber-800 rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 bg-amber-500/15 dark:bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                <Clock className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 text-amber-600/10 dark:text-amber-400/5 -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Qoldiq Qarz
                     </span>
                     <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center bg-amber-600 text-white shadow-md shadow-amber-500/25">
@@ -610,14 +614,14 @@ export default function AnalyticsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                       {formatCurrency(data.summary.totalRemaining)}
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
                         {data.summary.activeDebtorsCount || 0} ta qarzdorda
                       </p>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100/80 text-amber-700 border-amber-200/60">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100/80 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200/60 dark:border-amber-800">
                         Kutilmoqda
                       </span>
                     </div>
@@ -626,13 +630,13 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Muddati o'tgan */}
-              <div className={`group relative overflow-hidden bg-gradient-to-br ${data.summary.overdueCount > 0 ? 'from-rose-50/60 via-white to-rose-50/30 border-rose-200/80 hover:border-rose-300' : 'from-slate-50/60 via-white to-slate-50/30 border-slate-200/80 hover:border-slate-300'} border rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs`}>
-                <div className={`absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 ${data.summary.overdueCount > 0 ? 'bg-rose-500/15' : 'bg-slate-500/10'} rounded-full blur-2xl pointer-events-none`} />
-                <ShieldAlert className={`absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 ${data.summary.overdueCount > 0 ? 'text-rose-600/10' : 'text-slate-600/10'} -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6`} />
+              <div className={`group relative overflow-hidden bg-gradient-to-br ${data.summary.overdueCount > 0 ? 'from-rose-50/60 via-white to-rose-50/30 dark:from-rose-950/40 dark:via-slate-900 dark:to-rose-950/20 border-rose-200/80 dark:border-rose-900/50 hover:border-rose-300 dark:hover:border-rose-800' : 'from-slate-50/60 via-white to-slate-50/30 dark:from-slate-800/60 dark:via-slate-900 dark:to-slate-800/30 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'} border rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs`}>
+                <div className={`absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 ${data.summary.overdueCount > 0 ? 'bg-rose-500/15 dark:bg-rose-500/10' : 'bg-slate-500/10 dark:bg-slate-500/5'} rounded-full blur-2xl pointer-events-none`} />
+                <ShieldAlert className={`absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-28 h-28 sm:w-36 sm:h-36 ${data.summary.overdueCount > 0 ? 'text-rose-600/10 dark:text-rose-400/5' : 'text-slate-600/10 dark:text-slate-400/5'} -rotate-12 pointer-events-none transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-rotate-6`} />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Muddati O&apos;tgan
                     </span>
                     <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${data.summary.overdueCount > 0 ? 'bg-rose-600 text-white shadow-md shadow-rose-500/25' : 'bg-slate-700 text-white shadow-xs'}`}>
@@ -641,16 +645,16 @@ export default function AnalyticsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight tabular-nums">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
                       {data.summary.overdueCount} ta mijoz
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                      <p className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
                         {data.summary.overdueCount > 0
                           ? `${formatCurrency(data.summary.overdueAmount)} xavfli`
                           : 'Hammasi joyida'}
                       </p>
-                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${data.summary.overdueCount > 0 ? 'bg-rose-100/90 text-rose-700 border-rose-200/60' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${data.summary.overdueCount > 0 ? 'bg-rose-100/90 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200/60 dark:border-rose-900/60' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'}`}>
                         {data.summary.overdueCount > 0 ? 'Diqqat talab' : 'Nazoratda'}
                       </span>
                     </div>
@@ -661,14 +665,14 @@ export default function AnalyticsPage() {
 
             {/* 🌟 Kichik va ixcham info banner: faqat qarz yozuvlari kiritilmagan bo'lsa */}
             {data.summary.totalDebtsCount === 0 && (
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-3.5 border border-blue-100 flex items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2.5 text-slate-700">
-                  <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-purple-950/30 rounded-2xl p-3.5 border border-blue-100 dark:border-blue-900/60 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 text-slate-700 dark:text-slate-200">
+                  <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                   <span>Tanlangan davrda qarz yozuvlari mavjud emas.</span>
                 </div>
                 <Link href="/dashboard">
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl h-7 px-3 text-xs shadow-2xs">
-                    <Plus className="w-3 h-3 mr-1" />
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl h-8 px-3.5 text-xs shadow-2xs">
+                    <Plus className="w-3.5 h-3.5 mr-1" />
                     Qarz qo&apos;shish
                   </Button>
                 </Link>
@@ -676,14 +680,14 @@ export default function AnalyticsPage() {
             )}
 
             {/* 2. Asosiy Vizual Grafik (BarChart Cashflow) */}
-            <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden">
-              <CardHeader className="pb-2 border-b border-slate-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <Card className="border-slate-200/80 dark:border-slate-800 shadow-2xs rounded-3xl bg-white dark:bg-slate-900 overflow-hidden">
+              <CardHeader className="pb-2 border-b border-slate-100/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     Nasiya berilishi va Undirilishi dinamikasi
                   </CardTitle>
-                  <CardDescription className="text-xs text-slate-500 mt-0.5">
+                  <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {period === 'monthly'
                       ? 'Oxirgi 30 kunlik haftalik pul oqimi va kutilayotgan tushumlar'
                       : "Oylar bo'yicha pul oqimi va tushumlar"}
@@ -692,11 +696,11 @@ export default function AnalyticsPage() {
                 {/* Legend indicator */}
                 {hasChartActivity && (
                   <div className="flex items-center gap-3 text-xs font-semibold">
-                    <span className="flex items-center gap-1.5 text-slate-600">
+                    <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                       <span className="w-3 h-3 rounded-md bg-blue-500" />
                       Berildi
                     </span>
-                    <span className="flex items-center gap-1.5 text-slate-600">
+                    <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                       <span className="w-3 h-3 rounded-md bg-emerald-500" />
                       Qaytdi
                     </span>
@@ -709,53 +713,63 @@ export default function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={data.chartData}
-                        margin={{ top: 10, right: 10, left: -24, bottom: 0 }}
+                        margin={{ top: 12, right: 12, left: -14, bottom: 4 }}
+                        barGap={6}
                       >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           vertical={false}
-                          stroke="#f1f5f9"
+                          stroke={isDark ? 'rgba(51, 65, 85, 0.4)' : '#f1f5f9'}
                         />
                         <XAxis
                           dataKey="name"
-                          tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
+                          tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11, fontWeight: 600 }}
                           tickLine={false}
-                          axisLine={{ stroke: '#e2e8f0' }}
+                          axisLine={{ stroke: isDark ? '#334155' : '#e2e8f0' }}
+                          dy={6}
                         />
                         <YAxis
-                          tick={{ fill: '#64748b', fontSize: 9 }}
+                          tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 10, fontWeight: 500 }}
                           tickLine={false}
                           axisLine={false}
                           tickFormatter={(val) => formatCurrencyShort(Number(val) || 0)}
+                          dx={-4}
                         />
-                        <Tooltip content={<CustomBarTooltip />} />
+                        <Tooltip
+                          content={<CustomBarTooltip />}
+                          cursor={{
+                            fill: isDark ? 'rgba(51, 65, 85, 0.25)' : 'rgba(241, 245, 249, 0.7)',
+                            radius: 12,
+                          }}
+                          wrapperStyle={{ outline: 'none' }}
+                        />
                         <Bar
                           dataKey="issued"
                           name="Berildi"
                           fill="#3b82f6"
                           radius={[6, 6, 0, 0]}
-                          maxBarSize={36}
+                          maxBarSize={38}
                         />
                         <Bar
                           dataKey="returned"
                           name="Qaytdi"
                           fill="#10b981"
                           radius={[6, 6, 0, 0]}
-                          maxBarSize={36}
+                          maxBarSize={38}
                         />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
                   /* 🎯 CHART EMPTY STATE: Qulay va tushunarli holat */
-                  <div className="h-[260px] sm:h-[280px] flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-slate-150 rounded-2xl bg-slate-50/60">
-                    <div className="w-13 h-13 rounded-2xl bg-blue-100/80 text-blue-600 flex items-center justify-center mb-3 shadow-2xs">
+                  <div className="h-[260px] sm:h-[280px] flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/60 dark:bg-slate-800/40">
+                    <div className="w-13 h-13 rounded-2xl bg-blue-100/80 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 shadow-2xs">
                       <BarChart3 className="w-6 h-6" />
                     </div>
-                    <h4 className="font-bold text-slate-800 text-sm">
+                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
                       Pul oqimi grafigi shakllanmoqda
                     </h4>
-                    <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4 leading-relaxed">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-4 leading-relaxed">
                       Ushbu davrda qarz yoki to&apos;lov kiritilgach, bu yerda haftalik tushumlar va
                       berilgan nasiyalar dinamikasi avtomatik aks etadi.
                     </p>
@@ -776,13 +790,13 @@ export default function AnalyticsPage() {
             {/* 3. Ikki ustunli blok: Status Donut Chart & Eng ko'p qarzdorlar */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Status Taqsimoti (Donut Chart) */}
-              <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden flex flex-col">
-                <CardHeader className="pb-3 border-b border-slate-100/80">
-                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <PieChartIcon className="w-5 h-5 text-indigo-600" />
+              <Card className="border-slate-200/80 dark:border-slate-800 shadow-2xs rounded-3xl bg-white dark:bg-slate-900 overflow-hidden flex flex-col">
+                <CardHeader className="pb-3 border-b border-slate-100/80 dark:border-slate-800">
+                  <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <PieChartIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     Qarzlar holati taqsimoti
                   </CardTitle>
-                  <CardDescription className="text-xs text-slate-500">
+                  <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
                     To&apos;langan, kutilayotgan va kechikkan summalar ulushi
                   </CardDescription>
                 </CardHeader>
@@ -790,14 +804,7 @@ export default function AnalyticsPage() {
                   {mounted && statusChartData.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-4 py-2">
                       {/* Donut chart */}
-                      <div
-                        className="h-[180px] sm:h-[200px] w-full relative flex items-center justify-center select-none"
-                        onMouseEnter={() => setIsHoveringPie(true)}
-                        onMouseLeave={() => {
-                          setIsHoveringPie(false)
-                          setActivePieIndex(null)
-                        }}
-                      >
+                      <div className="h-[180px] sm:h-[200px] w-full relative flex items-center justify-center select-none">
                         <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
                             <Tooltip content={<CustomPieTooltip />} wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }} />
@@ -809,14 +816,6 @@ export default function AnalyticsPage() {
                               outerRadius={78}
                               paddingAngle={4}
                               dataKey="value"
-                              onMouseEnter={(_, index) => {
-                                setIsHoveringPie(true)
-                                setActivePieIndex(index)
-                              }}
-                              onMouseLeave={() => {
-                                setIsHoveringPie(false)
-                                setActivePieIndex(null)
-                              }}
                             >
                               {statusChartData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -824,18 +823,12 @@ export default function AnalyticsPage() {
                             </Pie>
                           </PieChart>
                         </ResponsiveContainer>
-                        {/* Donut Markaziy Ko'rsatkich - Hover qilinganda Tooltip bilan to'qnashmasligi uchun to'liq yashiriladi */}
-                        <div
-                          className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-all duration-200 z-0 ${
-                            isHoveringPie || activePieIndex !== null
-                              ? 'opacity-0 scale-90 pointer-events-none'
-                              : 'opacity-100 scale-100'
-                          }`}
-                        >
-                          <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                        {/* Donut Markaziy Ko'rsatkich - Doim barqaror ko'rinadi */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                          <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                             {data.summary.repaymentRate}%
                           </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
                             Undirildi
                           </span>
                         </div>
@@ -846,7 +839,7 @@ export default function AnalyticsPage() {
                         {statusChartData.map((item) => (
                           <div
                             key={item.name}
-                            className="p-2.5 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center justify-between text-xs"
+                            className="p-2.5 bg-slate-50/80 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs"
                           >
                             <div className="flex items-center gap-2">
                               <span
@@ -854,13 +847,13 @@ export default function AnalyticsPage() {
                                 style={{ backgroundColor: item.color }}
                               />
                               <div>
-                                <p className="font-bold text-slate-800">{item.name}</p>
-                                <p className="text-[10px] text-slate-400">
+                                <p className="font-bold text-slate-800 dark:text-slate-200">{item.name}</p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-400">
                                   {item.count} ta qarz ({item.percentage}%)
                                 </p>
                               </div>
                             </div>
-                            <span className="font-extrabold text-slate-900">
+                            <span className="font-extrabold text-slate-900 dark:text-slate-100">
                               {formatCurrency(item.value)}
                             </span>
                           </div>
@@ -870,13 +863,13 @@ export default function AnalyticsPage() {
                   ) : (
                     /* 🎯 DONUT EMPTY STATE: Barcha hisob-kitoblar toza */
                     <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
-                      <div className="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 shadow-2xs">
+                      <div className="w-13 h-13 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 shadow-2xs">
                         <CheckCircle2 className="w-7 h-7" />
                       </div>
-                      <h4 className="font-bold text-slate-800 text-sm">
+                      <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
                         Barcha hisob-kitoblar toza
                       </h4>
-                      <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mt-1 leading-relaxed">
                         Ushbu davrda faol yoki kechiktirilgan qarzlar yo&apos;q. Yangi qarzlar kiritilganda
                         to&apos;lovlar holati shu yerda taqsimlanadi.
                       </p>
@@ -884,8 +877,8 @@ export default function AnalyticsPage() {
                   )}
 
                   {/* Maslahat kartasi */}
-                  <div className="mt-4 p-3 bg-blue-50/80 border border-blue-100 rounded-2xl text-[11px] text-blue-900 flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="mt-4 p-3 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-[11px] text-blue-900 dark:text-blue-200 flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <span>
                       Qarz qaytarilish samaradorligini 85% dan yuqori saqlash biznesingiz pul oqimi
                       barqarorligini ta&apos;minlaydi.
@@ -895,14 +888,14 @@ export default function AnalyticsPage() {
               </Card>
 
               {/* Eng ko'p qarzdorlar (Top Debtors) */}
-              <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden flex flex-col">
-                <CardHeader className="pb-3 border-b border-slate-100/80 flex items-center justify-between flex-row">
+              <Card className="border-slate-200/80 dark:border-slate-800 shadow-2xs rounded-3xl bg-white dark:bg-slate-900 overflow-hidden flex flex-col">
+                <CardHeader className="pb-3 border-b border-slate-100/80 dark:border-slate-800 flex items-center justify-between flex-row">
                   <div>
-                    <CardTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                      <Users className="w-5 h-5 text-blue-600" />
+                    <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       Eng ko&apos;p qarzdorlar (Top 5)
                     </CardTitle>
-                    <CardDescription className="text-xs text-slate-500">
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
                       Eng katta qoldiq summasiga ega mijozlar
                     </CardDescription>
                   </div>
@@ -913,10 +906,10 @@ export default function AnalyticsPage() {
                       {data.topDebtors.map((debtor, index) => (
                         <div
                           key={debtor.phone || index}
-                          className="flex items-center justify-between p-3 sm:p-3.5 bg-slate-50/80 hover:bg-slate-100/80 transition-colors border border-slate-100 rounded-2xl gap-3"
+                          className="flex items-center justify-between p-3 sm:p-3.5 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-colors border border-slate-100 dark:border-slate-800 rounded-2xl gap-3"
                         >
                           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-100/90 text-blue-700 flex items-center justify-center font-black text-xs flex-shrink-0">
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-100/90 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 flex items-center justify-center font-black text-xs flex-shrink-0">
                               {index + 1}
                             </div>
                             <div className="min-w-0">
@@ -924,12 +917,12 @@ export default function AnalyticsPage() {
                                 {debtor.phone ? (
                                   <Link
                                     href={`/debtor/${debtor.phone}`}
-                                    className="font-bold text-sm text-slate-900 hover:text-blue-600 transition-colors truncate"
+                                    className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
                                   >
                                     {debtor.name}
                                   </Link>
                                 ) : (
-                                  <span className="font-bold text-sm text-slate-900 truncate">
+                                  <span className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">
                                     {debtor.name}
                                   </span>
                                 )}
@@ -942,16 +935,16 @@ export default function AnalyticsPage() {
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-slate-500 truncate">{debtor.phone || 'Telefon kiritilmagan'}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{debtor.phone || 'Telefon kiritilmagan'}</p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <div className="text-right">
-                              <p className="font-black text-blue-600 text-sm sm:text-base">
+                              <p className="font-black text-blue-600 dark:text-blue-400 text-sm sm:text-base">
                                 {formatCurrency(debtor.amount)}
                               </p>
-                              <p className="text-[10px] text-slate-400 font-medium">
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                                 {debtor.debtCount || 1} ta faol qarz
                               </p>
                             </div>
@@ -962,7 +955,7 @@ export default function AnalyticsPage() {
                                 <a
                                   href={`tel:${debtor.phone}`}
                                   title="Qo'ng'iroq qilish"
-                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 border border-slate-200/80 flex items-center justify-center transition-colors shadow-2xs"
+                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors shadow-2xs"
                                 >
                                   <Phone className="w-3.5 h-3.5" />
                                 </a>
@@ -972,7 +965,7 @@ export default function AnalyticsPage() {
                                 variant="outline"
                                 onClick={() => handleOpenSMS(debtor)}
                                 title="SMS Eslatma yuborish"
-                                className="w-7 h-7 sm:w-8 sm:h-8 p-0 rounded-xl bg-white hover:bg-blue-50 hover:text-blue-600 text-slate-600 border border-slate-200/80 flex items-center justify-center transition-colors shadow-2xs"
+                                className="w-7 h-7 sm:w-8 sm:h-8 p-0 rounded-xl bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 dark:hover:text-blue-400 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors shadow-2xs"
                               >
                                 <Send className="w-3.5 h-3.5" />
                               </Button>
@@ -980,7 +973,7 @@ export default function AnalyticsPage() {
                                 <Link
                                   href={`/debtor/${debtor.phone}`}
                                   title="Mijoz profiliga o'tish"
-                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white hover:bg-slate-200 text-slate-500 border border-slate-200/80 hidden sm:flex items-center justify-center transition-colors shadow-2xs"
+                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700 hidden sm:flex items-center justify-center transition-colors shadow-2xs"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 </Link>
@@ -993,20 +986,20 @@ export default function AnalyticsPage() {
                   ) : (
                     /* 🎯 TOP DEBTORS EMPTY STATE */
                     <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
-                      <div className="w-13 h-13 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 shadow-2xs">
+                      <div className="w-13 h-13 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 shadow-2xs">
                         <Users className="w-6 h-6" />
                       </div>
-                      <h4 className="font-bold text-slate-800 text-sm">
+                      <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">
                         Qarzdor mijozlar yo&apos;q
                       </h4>
-                      <p className="text-xs text-slate-500 max-w-xs mt-1 mb-4 leading-relaxed">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mt-1 mb-4 leading-relaxed">
                         Hozirda qarzdorlar ro&apos;yxati toza yoki barcha qarzlar to&apos;liq yopilgan.
                       </p>
                       <Link href="/dashboard">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold h-8 px-3"
+                          className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-xs font-semibold h-8 px-3 transition-colors"
                         >
                           <Plus className="w-3.5 h-3.5 mr-1" />
                           Yangi qarz qo&apos;shish
@@ -1019,13 +1012,13 @@ export default function AnalyticsPage() {
             </div>
 
             {/* 4. Oylik taqsimot jadvali */}
-            <Card className="border-slate-200/80 shadow-2xs rounded-3xl bg-white overflow-hidden">
-              <CardHeader className="pb-3 border-b border-slate-100">
-                <CardTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-blue-600" />
+            <Card className="border-slate-200/80 dark:border-slate-800 shadow-2xs rounded-3xl bg-white dark:bg-slate-900 overflow-hidden">
+              <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
+                <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   Oylik batafsil taqsimot
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-500">
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
                   Har bir oy bo&apos;yicha berilgan, undirilgan va qoldiq hisob-kitobi
                 </CardDescription>
               </CardHeader>
@@ -1035,15 +1028,15 @@ export default function AnalyticsPage() {
                     {data.months.map((month) => (
                       <div
                         key={month.month}
-                        className="border-b border-slate-100 pb-4 last:border-b-0 last:pb-0"
+                        className="border-b border-slate-100 dark:border-slate-800 pb-4 last:border-b-0 last:pb-0"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
                             {month.month}
                             {month.repaymentRate !== undefined && (
                               <Badge
                                 variant="outline"
-                                className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border-emerald-200"
+                                className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800"
                               >
                                 {month.repaymentRate}% yig&apos;ildi
                               </Badge>
@@ -1056,21 +1049,21 @@ export default function AnalyticsPage() {
                           )}
                         </div>
                         <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
-                          <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-                            <p className="text-slate-500 text-[11px] mb-0.5">Berildi</p>
-                            <p className="font-bold text-slate-900 truncate">
+                          <div className="bg-slate-50/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <p className="text-slate-500 dark:text-slate-400 text-[11px] mb-0.5">Berildi</p>
+                            <p className="font-bold text-slate-900 dark:text-slate-100 truncate">
                               {formatCurrency(month.issued)}
                             </p>
                           </div>
-                          <div className="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100">
-                            <p className="text-emerald-700 text-[11px] mb-0.5">Qaytdi</p>
-                            <p className="font-bold text-emerald-700 truncate">
+                          <div className="bg-emerald-50/60 dark:bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
+                            <p className="text-emerald-700 dark:text-emerald-400 text-[11px] mb-0.5">Qaytdi</p>
+                            <p className="font-bold text-emerald-700 dark:text-emerald-300 truncate">
                               {formatCurrency(month.returned)}
                             </p>
                           </div>
-                          <div className="bg-amber-50/60 p-2.5 rounded-xl border border-amber-100">
-                            <p className="text-amber-700 text-[11px] mb-0.5">Qoldiq</p>
-                            <p className="font-bold text-amber-700 truncate">
+                          <div className="bg-amber-50/60 dark:bg-amber-950/30 p-2.5 rounded-xl border border-amber-100 dark:border-amber-900/50">
+                            <p className="text-amber-700 dark:text-amber-400 text-[11px] mb-0.5">Qoldiq</p>
+                            <p className="font-bold text-amber-700 dark:text-amber-300 truncate">
                               {formatCurrency(month.remaining)}
                             </p>
                           </div>
@@ -1080,9 +1073,9 @@ export default function AnalyticsPage() {
                   </div>
                 ) : (
                   /* 🎯 OYLIK JADVAL EMPTY STATE */
-                  <div className="py-8 text-center text-slate-500 text-xs">
-                    <p className="font-semibold text-slate-700">Oylik arxiv ma&apos;lumotlari hali shakllanmagan</p>
-                    <p className="text-slate-400 mt-1">
+                  <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">Oylik arxiv ma&apos;lumotlari hali shakllanmagan</p>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">
                       Yangi oylar o&apos;tishi bilan oylik taqqosiy statistika avtomatik jamlanadi.
                     </p>
                   </div>
@@ -1092,14 +1085,14 @@ export default function AnalyticsPage() {
           </>
         ) : (
           /* 🎯 BUTUN SAHIFA UCHUN EMPTY HERO STATE (agar API hech narsa qaytarmasa) */
-          <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-2xs max-w-lg mx-auto">
-            <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 shadow-xs">
+          <div className="text-center py-16 px-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xs max-w-lg mx-auto">
+            <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-4 shadow-xs">
               <BarChart3 className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
               Analitika ma&apos;lumotlari topilmadi
             </h3>
-            <p className="text-xs text-slate-500 mt-1.5 mb-5 max-w-xs mx-auto leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 max-w-xs mx-auto leading-relaxed">
               Do&apos;koningizda hali qarzlar mavjud emas. Yangi qarz qo&apos;shib, analitika hisobotlarini shakllantiring.
             </p>
             <Link href="/dashboard">
@@ -1114,21 +1107,21 @@ export default function AnalyticsPage() {
 
       {/* 📩 SMS Eslatma Yuborish Modali */}
       <Dialog open={smsModalOpen} onOpenChange={setSmsModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border border-slate-200 shadow-xl">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-xl">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Send className="w-5 h-5 text-blue-600" />
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Send className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               SMS Eslatma yuborish
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               {selectedDebtor?.name} ({selectedDebtor?.phone || 'Telefon yo\'q'}) mijoziga to&apos;lov eslatmasi
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             {/* SMS Credits Balans Ko'rsatkichi */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
-              <span className="text-slate-600 font-medium flex items-center gap-1.5">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 text-xs">
+              <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5">
                 <MessageSquare className="w-4 h-4 text-slate-400" />
                 SMS balansingiz:
               </span>
@@ -1141,12 +1134,12 @@ export default function AnalyticsPage() {
             </div>
 
             {smsCredits === 0 && (
-              <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-2xl text-xs text-amber-800 flex items-start justify-between gap-2">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 rounded-2xl text-xs text-amber-800 dark:text-amber-300 flex items-start justify-between gap-2">
                 <span>SMS yuborish uchun balansingizda kredit mavjud emas.</span>
                 <Link
                   href="/sms-credits"
                   target="_blank"
-                  className="font-bold text-amber-900 underline flex-shrink-0"
+                  className="font-bold text-amber-900 dark:text-amber-400 underline flex-shrink-0"
                 >
                   Sotib olish ↗
                 </Link>
@@ -1155,15 +1148,15 @@ export default function AnalyticsPage() {
 
             {/* Xabar Matni */}
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs text-slate-500">
-                <label className="font-semibold text-slate-700">Xabar matni:</label>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <label className="font-semibold text-slate-700 dark:text-slate-300">Xabar matni:</label>
                 <span>{smsMessage.length} belgi</span>
               </div>
               <Textarea
                 value={smsMessage}
                 onChange={(e) => setSmsMessage(e.target.value)}
                 rows={4}
-                className="rounded-2xl border-slate-200 text-sm focus:border-blue-500 resize-none p-3"
+                className="rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:border-blue-500 resize-none p-3"
                 placeholder="Xabar matnini kiriting..."
               />
             </div>
@@ -1173,14 +1166,14 @@ export default function AnalyticsPage() {
               <div
                 className={`p-3 rounded-2xl text-xs font-semibold flex items-center gap-2 ${
                   smsStatus.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                 }`}
               >
                 {smsStatus.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
                 )}
                 <span>{smsStatus.message}</span>
               </div>
@@ -1191,7 +1184,7 @@ export default function AnalyticsPage() {
             <Button
               variant="outline"
               onClick={() => setSmsModalOpen(false)}
-              className="rounded-xl border-slate-200 font-semibold text-xs h-9 px-4"
+              className="rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-xs h-9 px-4"
               disabled={isSendingSMS}
             >
               Bekor qilish

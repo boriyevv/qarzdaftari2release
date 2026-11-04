@@ -344,7 +344,7 @@ export function CashiersManagement() {
               Kassirlar ro&apos;yxati yuklanmoqda...
             </div>
           ) : cashiers.length === 0 ? (
-            <div className="py-10 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/40 dark:bg-slate-850/40">
+            <div className="py-10 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/40 dark:bg-slate-900/40">
               <Users className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Hozircha birorta kassir qo&apos;shilmagan
@@ -368,7 +368,7 @@ export function CashiersManagement() {
               {cashiers.map((cashier) => (
                 <div
                   key={cashier.id}
-                  className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 hover:bg-slate-50/60 dark:hover:bg-slate-850/50 transition-colors"
+                  className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0">
@@ -399,11 +399,11 @@ export function CashiersManagement() {
                           <button
                             type="button"
                             onClick={() => handleCopy(cashier.phone, cashier.id)}
-                            className="text-slate-400 hover:text-slate-600 ml-0.5 cursor-pointer"
+                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ml-0.5 cursor-pointer transition-colors"
                             title="Nusxalash"
                           >
                             {copiedId === cashier.id ? (
-                              <Check className="w-3 h-3 text-emerald-600" />
+                              <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                             ) : (
                               <Copy className="w-3 h-3" />
                             )}
@@ -424,8 +424,8 @@ export function CashiersManagement() {
                       onClick={() => handleToggleActive(cashier)}
                       className={`h-8 px-2.5 rounded-xl text-[11px] font-bold transition-all ${
                         cashier.is_active
-                          ? 'text-slate-600 dark:text-slate-300 hover:text-amber-600 hover:border-amber-300'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                          ? 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 dark:hover:border-amber-700 hover:bg-amber-50/50 dark:hover:bg-amber-950/30'
+                          : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
                       }`}
                       title={cashier.is_active ? 'Kassir kirishini to\'xtatish' : 'Kassir kirishini yoqish'}
                     >
@@ -438,7 +438,7 @@ export function CashiersManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => setCashierToDelete(cashier)}
-                      className="h-8 px-2.5 rounded-xl text-[11px] font-bold text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 dark:border-red-900/50"
+                      className="h-8 px-2.5 rounded-xl text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300 border-rose-200 dark:border-rose-900/50 transition-colors"
                       title="Kassirni butunlay o'chirish"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -592,14 +592,14 @@ export function CashiersManagement() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsAddOpen(false)}
-                className="flex-1 h-10 rounded-xl text-xs font-bold text-slate-600"
+                className="flex-1 h-10 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
               >
                 Bekor qilish
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 h-10 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs"
+                className="flex-1 h-10 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs cursor-pointer transition-colors disabled:cursor-not-allowed"
               >
                 {submitting ? 'Saqlanmoqda...' : 'Kassirni Saqlash'}
               </Button>
@@ -629,7 +629,7 @@ export function CashiersManagement() {
               type="button"
               variant="outline"
               onClick={() => setCashierToDelete(null)}
-              className="flex-1 h-10 rounded-xl text-xs font-bold text-slate-600"
+              className="flex-1 h-10 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
             >
               Bekor qilish
             </Button>
@@ -637,7 +637,7 @@ export function CashiersManagement() {
               type="button"
               onClick={handleDeleteCashier}
               disabled={deleting}
-              className="flex-1 h-10 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-xs"
+              className="flex-1 h-10 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-xs cursor-pointer transition-colors disabled:cursor-not-allowed"
             >
               {deleting ? 'O\'chirilmoqda...' : 'Ha, o\'chirish'}
             </Button>

@@ -134,7 +134,7 @@ export function MastercardLogo({ className = 'h-10 w-auto', alt = 'Mastercard', 
  */
 export function PaymentMethodsRow({ className = '' }: { className?: string }) {
   const badgeCardClass =
-    'h-12 sm:h-14 px-3 sm:px-4 py-2 bg-white border border-slate-200/90 rounded-xl shadow-xs flex items-center justify-center transition-all hover:scale-105 hover:border-slate-300 hover:shadow-md'
+    'h-12 sm:h-14 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700/80 rounded-xl shadow-xs flex items-center justify-center transition-all hover:scale-105 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md'
 
   return (
     <div className={`flex flex-wrap items-center justify-center gap-3 sm:gap-3.5 ${className}`}>

@@ -96,13 +96,13 @@ function SortableFolderRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100/80 dark:hover:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 transition-all"
+      className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100/80 dark:hover:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 transition-all"
     >
       <div className="flex items-center gap-3 min-w-0">
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-slate-600 rounded touch-none"
+          className="cursor-grab active:cursor-grabbing p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 rounded touch-none transition-colors"
           title="Tartibini o'zgartirish"
         >
           <GripVertical className="w-4 h-4" />
@@ -111,10 +111,10 @@ function SortableFolderRow({
           className="w-3.5 h-3.5 rounded-full flex-shrink-0"
           style={{ backgroundColor: folder.color }}
         />
-        <span className="font-semibold text-sm text-slate-900 truncate">
+        <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">
           {folder.name}
         </span>
-        <Badge variant="secondary" className="text-xs bg-slate-200/70 text-slate-700">
+        <Badge variant="secondary" className="text-xs bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
           {folder.debt_count || 0} ta qarz
         </Badge>
       </div>
@@ -124,7 +124,7 @@ function SortableFolderRow({
           variant="ghost"
           size="sm"
           onClick={onEdit}
-          className="h-8 w-8 p-0 text-slate-600 hover:text-blue-600 rounded-lg"
+          className="h-8 w-8 p-0 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/70 dark:hover:bg-slate-700 rounded-lg transition-colors"
           title="Tahrirlash"
         >
           <Edit2 className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ function SortableFolderRow({
             variant="ghost"
             size="sm"
             onClick={onDelete}
-            className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 rounded-lg"
+            className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
             title="O'chirish"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -311,10 +311,10 @@ export function FolderFilterBar({
         <button
           onClick={() => onFolderChange('all')}
           className={cn(
-            'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex-shrink-0 shadow-2xs',
+            'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex-shrink-0 shadow-2xs cursor-pointer',
             activeFolder === 'all'
               ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-800',
+              : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700',
           )}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -339,10 +339,10 @@ export function FolderFilterBar({
               key={folder.id}
               onClick={() => onFolderChange(folder.id)}
               className={cn(
-                'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex-shrink-0 shadow-2xs',
+                'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex-shrink-0 shadow-2xs cursor-pointer',
                 isActive
-                  ? 'bg-slate-900 dark:bg-slate-800 text-white dark:text-slate-100 shadow-md'
-                  : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-800',
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md'
+                  : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700',
               )}
             >
               <span
@@ -354,7 +354,7 @@ export function FolderFilterBar({
                 className={cn(
                   'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
                   isActive
-                    ? 'bg-slate-800 dark:bg-slate-700 text-slate-200'
+                    ? 'bg-slate-800 dark:bg-slate-200 text-slate-200 dark:text-slate-800'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
                 )}
               >
@@ -367,7 +367,7 @@ export function FolderFilterBar({
         {/* Add Folder Quick Chip */}
         <button
           onClick={() => setIsAddOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-950/60 border border-blue-200/80 dark:border-blue-900/50 flex-shrink-0 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200/80 dark:border-blue-900/60 hover:border-blue-300 dark:hover:border-blue-700 flex-shrink-0 transition-all cursor-pointer"
           title="Yangi papka qo'shish"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -378,7 +378,7 @@ export function FolderFilterBar({
         {folders.length > 0 && (
           <button
             onClick={() => setIsManageOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 flex-shrink-0 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 flex-shrink-0 transition-colors cursor-pointer"
             title="Papkalarni tartibga solish va boshqarish"
           >
             <Settings2 className="w-3.5 h-3.5" />
@@ -463,26 +463,26 @@ export function FolderFilterBar({
           ADD FOLDER DIALOG
           ========================================================= */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
               Yangi Papka
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               Qarzlaringizni guruhlashtirish uchun papka yarating
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleAddFolder} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label htmlFor="folder_name" className="text-xs font-bold text-slate-700">
+              <Label htmlFor="folder_name" className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Papka nomi
               </Label>
               <Input
                 id="folder_name"
                 placeholder="Masalan: Ulgurji, Bozor, Qarindoshlar"
                 required
-                className="rounded-xl"
+                className="rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -491,7 +491,7 @@ export function FolderFilterBar({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-slate-700">
+              <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Rang belgisi
               </Label>
               <div className="grid grid-cols-3 gap-2">
@@ -505,8 +505,8 @@ export function FolderFilterBar({
                     className={cn(
                       'p-2.5 rounded-xl border-2 transition-all flex items-center gap-2 text-xs font-semibold',
                       formData.color === color.value
-                        ? 'border-blue-600 bg-blue-50/50 text-blue-900'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-600',
+                        ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-600 dark:text-slate-300',
                     )}
                   >
                     <div
@@ -523,7 +523,7 @@ export function FolderFilterBar({
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-xl"
+                className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                 onClick={() => setIsAddOpen(false)}
               >
                 Bekor qilish
@@ -543,22 +543,22 @@ export function FolderFilterBar({
           EDIT FOLDER DIALOG
           ========================================================= */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
               Papkani Tahrirlash
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleEditFolder} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label htmlFor="edit_folder_name" className="text-xs font-bold text-slate-700">
+              <Label htmlFor="edit_folder_name" className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Papka nomi
               </Label>
               <Input
                 id="edit_folder_name"
                 required
-                className="rounded-xl"
+                className="rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -567,7 +567,7 @@ export function FolderFilterBar({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-slate-700">
+              <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Rang belgisi
               </Label>
               <div className="grid grid-cols-3 gap-2">
@@ -581,8 +581,8 @@ export function FolderFilterBar({
                     className={cn(
                       'p-2.5 rounded-xl border-2 transition-all flex items-center gap-2 text-xs font-semibold',
                       formData.color === color.value
-                        ? 'border-blue-600 bg-blue-50/50 text-blue-900'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-600',
+                        ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-600 dark:text-slate-300',
                     )}
                   >
                     <div
@@ -599,7 +599,7 @@ export function FolderFilterBar({
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-xl"
+                className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                 onClick={() => setIsEditOpen(false)}
               >
                 Bekor qilish

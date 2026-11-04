@@ -152,7 +152,7 @@ export default function SMSCreditsPage() {
 				{/* Current Balance */}
 				{loading ? (
 					// Ma'lumot yuklanguncha ko'rinib turadigan chiroyli skeleton
-					<div className='h-32 w-full bg-slate-200/70 animate-pulse rounded-2xl' />
+					<div className='h-32 w-full bg-slate-200/70 dark:bg-slate-800 animate-pulse rounded-2xl' />
 				) : credits ? (
 					// Ma'lumot kelgach o'rniga tushadigan ko'k karta
 					<Card className='bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-md border-0'>
@@ -237,7 +237,7 @@ export default function SMSCreditsPage() {
 								<CardFooter>
 									<Button
 										onClick={() => handleSelectPackage(pkg.id)}
-										className='w-full rounded-xl font-bold text-xs'
+										className='w-full rounded-xl font-bold text-xs cursor-pointer'
 										variant={pkg.popular ? 'default' : 'outline'}
 									>
 										Sotib olish
@@ -250,10 +250,10 @@ export default function SMSCreditsPage() {
 
 				{/* Recent Activity */}
 				{credits && credits.usage_history.length > 0 && (
-					<Card className='rounded-2xl border-slate-200/80 shadow-2xs'>
-						<CardHeader className='pb-3 border-b border-slate-100'>
-							<CardTitle className='flex items-center gap-2 text-base font-bold text-slate-900'>
-								<History className='w-4 h-4 text-blue-600' />
+					<Card className='rounded-2xl border-slate-200/80 dark:border-slate-800 dark:bg-slate-900 shadow-2xs'>
+						<CardHeader className='pb-3 border-b border-slate-100 dark:border-slate-800'>
+							<CardTitle className='flex items-center gap-2 text-base font-bold text-slate-900 dark:text-slate-100'>
+								<History className='w-4 h-4 text-blue-600 dark:text-blue-400' />
 								So&apos;ngi yuborilgan SMSlar
 							</CardTitle>
 						</CardHeader>
@@ -262,17 +262,17 @@ export default function SMSCreditsPage() {
 								{credits.usage_history.slice(0, 5).map((item, index) => (
 									<div
 										key={index}
-										className='flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0'
+										className='flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0'
 									>
 										<div>
-											<p className='font-semibold text-sm text-slate-900'>
+											<p className='font-semibold text-sm text-slate-900 dark:text-slate-100'>
 												{item.recipient_phone}
 											</p>
-											<p className='text-xs text-slate-500'>
+											<p className='text-xs text-slate-500 dark:text-slate-400'>
 												{new Date(item.created_at).toLocaleString('uz-UZ')}
 											</p>
 										</div>
-										<Badge variant='outline' className='text-xs bg-slate-50'>
+										<Badge variant='outline' className='text-xs bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'>
 											1 kredit
 										</Badge>
 									</div>
@@ -298,26 +298,26 @@ export default function SMSCreditsPage() {
 					<div className='space-y-3 pt-3'>
 						{/* Uzum Bank */}
 						<Button
-							className='group w-full justify-start h-20 py-3 px-4 hover:border-purple-400 hover:bg-purple-50/40 transition-all rounded-2xl border-slate-200/80 shadow-xs'
+							className='group w-full justify-start h-20 py-3 px-4 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50/40 dark:hover:bg-purple-950/30 transition-all rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs cursor-pointer'
 							variant='outline'
 							onClick={() => handlePurchase('uzum')}
 							disabled={purchaseLoading}
 						>
 							<div className='flex items-center gap-3.5 w-full'>
-								<div className='flex-shrink-0 w-14 h-14 rounded-2xl bg-purple-50 border border-purple-200/80 p-2 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform'>
+								<div className='flex-shrink-0 w-14 h-14 rounded-2xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200/80 dark:border-purple-800/60 p-2 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform'>
 									<UzumBankLogo className='h-9 w-auto' />
 								</div>
 								<div className='text-left flex-1 min-w-0'>
-									<div className='font-bold text-slate-900 flex items-center gap-2'>
+									<div className='font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2'>
 										<span>Uzum Bank</span>
 										<Badge
 											variant='secondary'
-											className='bg-purple-100 text-purple-700 text-[10px] font-bold py-0 px-2 rounded-full'
+											className='bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 text-[10px] font-bold py-0 px-2 rounded-full'
 										>
 											Tavsiya etiladi
 										</Badge>
 									</div>
-									<div className='text-xs text-slate-500 truncate mt-0.5'>
+									<div className='text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5'>
 										Uzcard, Humo, Visa va Mastercard orqali saytda to&apos;lov
 									</div>
 								</div>
@@ -326,26 +326,26 @@ export default function SMSCreditsPage() {
 
 						{/* Click */}
 						<Button
-							className='group w-full justify-start h-20 py-3 px-4 hover:border-blue-400 hover:bg-blue-50/40 transition-all rounded-2xl border-slate-200/80 shadow-xs'
+							className='group w-full justify-start h-20 py-3 px-4 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-blue-950/30 transition-all rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs cursor-pointer'
 							variant='outline'
 							onClick={() => handlePurchase('click')}
 							disabled={purchaseLoading}
 						>
 							<div className='flex items-center gap-3.5 w-full'>
-								<div className='flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200/80 p-2 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform'>
+								<div className='flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-800/60 p-2 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform'>
 									<ClickLogo className='h-7 w-auto' />
 								</div>
 								<div className='text-left flex-1 min-w-0'>
-									<div className='font-bold text-slate-900 flex items-center gap-2'>
+									<div className='font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2'>
 										<span>Click</span>
 										<Badge
 											variant='secondary'
-											className='bg-blue-100 text-blue-700 text-[10px] font-bold py-0 px-2 rounded-full'
+											className='bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 text-[10px] font-bold py-0 px-2 rounded-full'
 										>
 											Saytda to&apos;lov
 										</Badge>
 									</div>
-									<div className='text-xs text-slate-500 truncate mt-0.5'>
+									<div className='text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5'>
 										Bank kartasi yoki Click Up ilovasi orqali to&apos;lov
 									</div>
 								</div>
@@ -354,26 +354,26 @@ export default function SMSCreditsPage() {
 
 						{/* Payme */}
 						<Button
-							className='group w-full justify-start h-20 py-3 px-4 hover:border-emerald-400 hover:bg-emerald-50/40 transition-all rounded-2xl border-slate-200/80 shadow-xs'
+							className='group w-full justify-start h-20 py-3 px-4 hover:border-emerald-400 dark:hover:border-emerald-500 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/30 transition-all rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs cursor-pointer'
 							variant='outline'
 							onClick={() => handlePurchase('payme')}
 							disabled={purchaseLoading}
 						>
 							<div className='flex items-center gap-3.5 w-full'>
-								<div className='flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/80 p-2 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform'>
+								<div className='flex-shrink-0 w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 p-2 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform'>
 									<PaymeLogo className='h-7 w-auto' />
 								</div>
 								<div className='text-left flex-1 min-w-0'>
-									<div className='font-bold text-slate-900 flex items-center gap-2'>
+									<div className='font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2'>
 										<span>Payme</span>
 										<Badge
 											variant='secondary'
-											className='bg-emerald-100 text-emerald-700 text-[10px] font-bold py-0 px-2 rounded-full'
+											className='bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold py-0 px-2 rounded-full'
 										>
 											Tezkor
 										</Badge>
 									</div>
-									<div className='text-xs text-slate-500 truncate mt-0.5'>
+									<div className='text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5'>
 										Payme ilovasi yoki karta orqali to&apos;lov
 									</div>
 								</div>

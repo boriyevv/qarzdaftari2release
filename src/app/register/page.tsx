@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { OTPInput } from '@/components/auth/otp-input'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -276,19 +277,24 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-start pt-6 sm:pt-10 pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex justify-center items-start pt-6 sm:pt-10 pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4 relative">
+      {/* Top Right Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-lg transition-all duration-300 ease-in-out">
         <div className="text-center mb-6">
           <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-blue-600">Qarz Daftari</h1>
+            <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">Qarz Daftari</h1>
           </Link>
-          <p className="text-slate-600 mt-1 text-sm">Bepul account yarating</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm">Bepul account yarating</p>
         </div>
 
-        <Card className="shadow-xl border-slate-200 transition-all duration-300 ease-in-out">
+        <Card className="shadow-xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all duration-300 ease-in-out">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-bold text-center">Ro&apos;yxatdan o&apos;tish</CardTitle>
-            <CardDescription className="text-center">
+            <CardTitle className="text-2xl font-bold text-center text-slate-900 dark:text-slate-100">Ro&apos;yxatdan o&apos;tish</CardTitle>
+            <CardDescription className="text-center text-slate-500 dark:text-slate-400">
               Email yoki telefon bilan ro&apos;yxatdan o&apos;ting
             </CardDescription>
           </CardHeader>
@@ -305,7 +311,7 @@ export default function RegisterPage() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="w-full text-xs bg-white text-slate-800 border-blue-300 hover:bg-slate-50"
+                          className="w-full text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-blue-300 dark:border-blue-800 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                           Mavjud hisobga kirish (Login) →
                         </Button>
@@ -317,7 +323,7 @@ export default function RegisterPage() {
             )}
 
             <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as 'email' | 'phone')}>
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-2 mb-4 bg-slate-100/90 dark:bg-slate-800/80">
                 <TabsTrigger value="email">Email</TabsTrigger>
                 <TabsTrigger value="phone">Telefon ⚡</TabsTrigger>
               </TabsList>
@@ -433,42 +439,42 @@ export default function RegisterPage() {
                 <div className="flex items-center justify-between text-xs font-medium text-slate-500 pb-3.5 px-2">
                   <span
                     className={`flex items-center gap-1.5 ${
-                      !otpSent ? 'text-blue-600 font-semibold' : 'text-slate-400'
+                      !otpSent ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
-                        !otpSent ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                        !otpSent ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                       }`}
                     >
                       1
                     </span>
                     Telefon
                   </span>
-                  <span className="w-8 h-px bg-slate-200" />
+                  <span className="w-8 h-px bg-slate-200 dark:bg-slate-800" />
                   <span
                     className={`flex items-center gap-1.5 ${
-                      otpSent && !otpVerified ? 'text-blue-600 font-semibold' : 'text-slate-400'
+                      otpSent && !otpVerified ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
-                        otpSent && !otpVerified ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                        otpSent && !otpVerified ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                       }`}
                     >
                       2
                     </span>
                     SMS Kod
                   </span>
-                  <span className="w-8 h-px bg-slate-200" />
+                  <span className="w-8 h-px bg-slate-200 dark:bg-slate-800" />
                   <span
                     className={`flex items-center gap-1.5 ${
-                      otpVerified ? 'text-blue-600 font-semibold' : 'text-slate-400'
+                      otpVerified ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] ${
-                        otpVerified ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                        otpVerified ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                       }`}
                     >
                       3
@@ -495,11 +501,11 @@ export default function RegisterPage() {
 
                       {!otpSent ? (
                         <>
-                          <div className="p-3.5 bg-blue-50/70 border border-blue-100 rounded-xl text-xs text-blue-900 space-y-1.5">
-                            <div className="font-semibold flex items-center gap-1.5 text-blue-800">
+                          <div className="p-3.5 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 rounded-xl text-xs text-blue-900 dark:text-blue-200 space-y-1.5">
+                            <div className="font-semibold flex items-center gap-1.5 text-blue-800 dark:text-blue-300">
                               ⚡ Tezkor ro&apos;yxatdan o&apos;tish afzalliklari:
                             </div>
-                            <ul className="space-y-1 text-blue-700/90 list-disc list-inside text-[11px] leading-relaxed">
+                            <ul className="space-y-1 text-blue-700/90 dark:text-blue-300/80 list-disc list-inside text-[11px] leading-relaxed">
                               <li>Parol o&apos;ylab topish yoki eslab qolish shart emas</li>
                               <li>SMS kod bilan 30 soniyada hisobingiz faollashadi</li>
                               <li>Do&apos;koningiz uchun barcha asosiy imkoniyatlar ochiladi</li>
@@ -517,16 +523,16 @@ export default function RegisterPage() {
                       ) : (
                         <>
                           {displayCode && (
-                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-sm space-y-1.5 shadow-sm">
+                            <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-lg text-blue-900 dark:text-blue-200 text-sm space-y-1.5 shadow-2xs">
                               <div className="flex items-center justify-between">
-                                <span className="font-semibold text-blue-800 flex items-center gap-1.5 text-xs sm:text-sm">
+                                <span className="font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-1.5 text-xs sm:text-sm">
                                   ℹ️ Sinov kodi (Eskiz to&apos;lovisiz):
                                 </span>
-                                <span className="font-mono text-base font-semibold bg-white text-blue-900 px-2.5 py-0.5 rounded border border-blue-200 tracking-wider shadow-2xs">
+                                <span className="font-mono text-base font-semibold bg-white dark:bg-slate-850 text-blue-900 dark:text-blue-300 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-800 tracking-wider shadow-2xs">
                                   {displayCode}
                                 </span>
                               </div>
-                              <p className="text-xs text-blue-700">
+                              <p className="text-xs text-blue-700 dark:text-blue-300/90">
                                 Eskiz.uz SMS to&apos;lovisiz sinash uchun kod ekranga chiqarildi va avtomatik kiritildi.
                               </p>
                             </div>
@@ -568,8 +574,8 @@ export default function RegisterPage() {
                     </>
                   ) : (
                     <>
-                      <Alert className="border-green-200 bg-green-50">
-                        <AlertDescription className="text-green-800">
+                      <Alert className="border-green-200 dark:border-emerald-800 bg-green-50 dark:bg-emerald-950/40">
+                        <AlertDescription className="text-green-800 dark:text-emerald-300">
                           ✅ Telefon tasdiqlandi!
                         </AlertDescription>
                       </Alert>
@@ -625,44 +631,44 @@ export default function RegisterPage() {
           <CardFooter className="flex flex-col space-y-4">
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-slate-200 dark:border-slate-800" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-500">yoki</span>
+                <span className="bg-white dark:bg-slate-900 px-2 text-slate-500 dark:text-slate-400">yoki</span>
               </div>
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Hisobingiz bormi?{' '}
-                <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+                <Link href="/login" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                   Kirish
                 </Link>
               </p>
             </div>
 
             <div className="text-center">
-              <Link href="/" className="text-sm text-slate-500 hover:text-slate-700 hover:underline">
+              <Link href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline">
                 ← Bosh sahifaga
               </Link>
             </div>
 
-            <div className="pt-3 border-t text-center text-[11px] text-slate-500 space-y-1">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
               <p>Ro&apos;yxatdan o&apos;tish orqali siz shartlarga rozilik bildirasiz:</p>
-              <div className="flex flex-wrap justify-center gap-2 text-slate-600">
-                <Link href="/terms" className="hover:text-blue-600 underline">
+              <div className="flex flex-wrap justify-center gap-2 text-slate-600 dark:text-slate-400">
+                <Link href="/terms" className="hover:text-blue-600 dark:hover:text-blue-400 underline">
                   Ommaviy oferta (Оферта)
                 </Link>
                 <span>•</span>
-                <Link href="/security" className="hover:text-blue-600 underline">
+                <Link href="/security" className="hover:text-blue-600 dark:hover:text-blue-400 underline">
                   Xavfsizlik & Antifraud
                 </Link>
                 <span>•</span>
-                <Link href="/payment-terms" className="hover:text-blue-600 underline">
+                <Link href="/payment-terms" className="hover:text-blue-600 dark:hover:text-blue-400 underline">
                   To&apos;lov va qaytarish
                 </Link>
                 <span>•</span>
-                <Link href="/privacy" className="hover:text-blue-600 underline">
+                <Link href="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400 underline">
                   Maxfiylik
                 </Link>
               </div>

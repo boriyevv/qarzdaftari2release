@@ -258,7 +258,7 @@ export function AppShell({
         openAddDebt,
       }}
     >
-      <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-blue-600 selection:text-white">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white transition-colors duration-200">
         {/* =========================================================
             DESKTOP SIDEBAR (lg:flex)
             ========================================================= */}
@@ -358,7 +358,7 @@ export function AppShell({
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                       title="Hisobdan chiqish"
                     >
                       <LogOut className="w-4 h-4" />
@@ -417,7 +417,7 @@ export function AppShell({
                     <button
                       type="button"
                       onClick={triggerPwaInstallPrompt}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/60 shadow-2xs active:scale-95"
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/80 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/60 shadow-2xs active:scale-95 cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                       <span>Ilovani o&apos;rnatish</span>
@@ -427,7 +427,7 @@ export function AppShell({
                     <button
                       type="button"
                       onClick={handleStartTour}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50/80 dark:hover:bg-slate-800 rounded-xl transition-all border border-blue-200/60 dark:border-blue-900/50 bg-white dark:bg-slate-800/60 shadow-2xs active:scale-95"
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50/80 dark:hover:bg-slate-800 rounded-xl transition-all border border-blue-200/60 dark:border-blue-900/50 bg-white dark:bg-slate-800/60 shadow-2xs active:scale-95 cursor-pointer"
                     >
                       <Compass className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                       <span>Tizim qo&apos;llanmasi</span>
@@ -435,7 +435,7 @@ export function AppShell({
 
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Hisobdan chiqish</span>

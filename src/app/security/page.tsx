@@ -18,27 +18,29 @@ import {
   Mail,
   Phone,
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export default function SecurityAntifraudPage() {
   const [lang, setLang] = useState<'uz' | 'ru'>('ru') // Default to Russian as Uzum Bank antifraud department audits in Russian
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 text-slate-900 dark:text-slate-100">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-800 hover:text-blue-600 transition">
+      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition">
             <ArrowLeft className="w-5 h-5" />
             <span className="font-semibold text-lg">Qarz Daftari</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             <Tabs value={lang} onValueChange={(v) => setLang(v as 'uz' | 'ru')}>
-              <TabsList className="grid grid-cols-2 w-32">
+              <TabsList className="grid grid-cols-2 w-28 bg-slate-100 dark:bg-slate-800">
                 <TabsTrigger value="ru">Рус</TabsTrigger>
-                <TabsTrigger value="uz">O'zb</TabsTrigger>
+                <TabsTrigger value="uz">O&apos;zb</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button size="sm" asChild variant="outline">
+            <Button size="sm" asChild variant="outline" className="border-slate-200 dark:border-slate-700">
               <Link href="/login">Kirish</Link>
             </Button>
           </div>
@@ -48,15 +50,15 @@ export default function SecurityAntifraudPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-8">
-          <div className="inline-flex p-3 bg-emerald-100 text-emerald-600 rounded-2xl mb-4">
+          <div className="inline-flex p-3 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-2xl mb-4">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             {lang === 'ru'
               ? 'Политика безопасности и предотвращения мошеннических операций'
               : 'Xavfsizlik va firibgarlikning oldini olish siyosati'}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             {lang === 'ru'
               ? 'Меры ограничения и контроля рисков мошеннических операций в рамках Договора интернет-эквайринга'
               : 'Internet-ekvayring shartnomasi doirasida xavflarni cheklash va firibgarlikni nazorat qilish choralari'}
@@ -68,18 +70,18 @@ export default function SecurityAntifraudPage() {
           </p>
         </div>
 
-        <Card className="shadow-sm">
-          <CardContent className="p-6 md:p-10 space-y-8 text-slate-700 leading-relaxed text-sm md:text-base">
+        <Card className="shadow-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <CardContent className="p-6 md:p-10 space-y-8 text-slate-700 dark:text-slate-300 leading-relaxed text-sm md:text-base">
             {lang === 'ru' ? (
               <>
                 {/* Antifraud Overview Banner */}
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-emerald-900 flex gap-4 items-start">
-                  <Lock className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl p-5 text-emerald-900 dark:text-emerald-200 flex gap-4 items-start">
+                  <Lock className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-bold text-base mb-1">
                       Контроль и минимизация рисков мошеннических операций
                     </h3>
-                    <p className="text-xs md:text-sm text-emerald-800">
+                    <p className="text-xs md:text-sm text-emerald-800 dark:text-emerald-300">
                       Сервис «Qarz Daftari» (https://debtbook.uz) реализует комплекс мер противодействия
                       несанкционированным и мошенническим операциям, взаимодействуя с антифрод-системами банка-эквайера
                       (АО «UZUM BANK») в строгом соответствии с Договором интернет-эквайринга (ИЭ).
@@ -90,8 +92,8 @@ export default function SecurityAntifraudPage() {
                 {/* Section 1 */}
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <FileCheck className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       1. Протокол двухфакторной аутентификации 3D-Secure 2.0
                     </h2>
                   </div>
@@ -116,8 +118,8 @@ export default function SecurityAntifraudPage() {
                 {/* Section 2 */}
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       2. Стандарт безопасности PCI-DSS и защита реквизитов карт
                     </h2>
                   </div>
@@ -142,8 +144,8 @@ export default function SecurityAntifraudPage() {
                 {/* Section 3 */}
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-amber-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       3. Ограничения и лимиты согласно Договору интернет-эквайринга
                     </h2>
                   </div>
@@ -151,30 +153,30 @@ export default function SecurityAntifraudPage() {
                     В целях предотвращения мошеннических операций (включая перебор номеров карт, card-testing и несанкционированные массовые списания) на стороне предприятия и платежного шлюза установлены следующие ограничения:
                   </p>
                   <div className="grid md:grid-cols-2 gap-3 pt-1">
-                    <div className="bg-slate-50 border p-3.5 rounded-lg">
-                      <strong className="block text-slate-900 text-sm mb-1">Лимит суммы одной операции:</strong>
-                      <span className="text-xs text-slate-600">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3.5 rounded-lg">
+                      <strong className="block text-slate-900 dark:text-slate-100 text-sm mb-1">Лимит суммы одной операции:</strong>
+                      <span className="text-xs text-slate-600 dark:text-slate-300">
                         Максимальная разовая сумма транзакции ограничена стоимостью действующих тарифных планов
                         сервиса и пакетов СМС.
                       </span>
                     </div>
-                    <div className="bg-slate-50 border p-3.5 rounded-lg">
-                      <strong className="block text-slate-900 text-sm mb-1">Лимит попыток платежей:</strong>
-                      <span className="text-xs text-slate-600">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3.5 rounded-lg">
+                      <strong className="block text-slate-900 dark:text-slate-100 text-sm mb-1">Лимит попыток платежей:</strong>
+                      <span className="text-xs text-slate-600 dark:text-slate-300">
                         Ограничение числа попыток оплаты с одного IP-адреса и учетной записи в единицу времени. При
                         повторных неудачных попытках транзакции блокируются.
                       </span>
                     </div>
-                    <div className="bg-slate-50 border p-3.5 rounded-lg">
-                      <strong className="block text-slate-900 text-sm mb-1">Контроль сессий:</strong>
-                      <span className="text-xs text-slate-600">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3.5 rounded-lg">
+                      <strong className="block text-slate-900 dark:text-slate-100 text-sm mb-1">Контроль сессий:</strong>
+                      <span className="text-xs text-slate-600 dark:text-slate-300">
                         Время жизни платежной сессии строго ограничено интервалом от 10 до 20 минут (session timeout),
                         после чего ссылка на оплату аннулируется.
                       </span>
                     </div>
-                    <div className="bg-slate-50 border p-3.5 rounded-lg">
-                      <strong className="block text-slate-900 text-sm mb-1">Геолокационный и IP-контроль:</strong>
-                      <span className="text-xs text-slate-600">
+                    <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3.5 rounded-lg">
+                      <strong className="block text-slate-900 dark:text-slate-100 text-sm mb-1">Геолокационный и IP-контроль:</strong>
+                      <span className="text-xs text-slate-600 dark:text-slate-300">
                         Автоматический анализ аномальной сетевой активности, блокировка попыток несанкционированного
                         доступа через скомпрометированные прокси-сети.
                       </span>
@@ -185,8 +187,8 @@ export default function SecurityAntifraudPage() {
                 {/* Section 4 */}
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Cpu className="w-5 h-5 text-purple-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <Cpu className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       4. Взаимодействие с антифрод-системой АО «UZUM BANK»
                     </h2>
                   </div>
@@ -210,8 +212,8 @@ export default function SecurityAntifraudPage() {
                 {/* Section 5 */}
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <RefreshCw className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <RefreshCw className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       5. Порядок действий при выявлении подозрительных операций
                     </h2>
                   </div>
@@ -235,20 +237,20 @@ export default function SecurityAntifraudPage() {
 
                 {/* Section 6 */}
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">
                     6. Контакты службы безопасности и поддержки
                   </h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-xs md:text-sm">
+                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-lg space-y-2 text-xs md:text-sm">
                     <p className="flex items-center gap-2">
-                      <Building className="w-4 h-4 text-blue-600" />
+                      <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Предприятие:</strong> «ASADBEK BURIYEV WS» NTM (Сервис «Qarz Daftari»)
                     </p>
                     <p className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-blue-600" />
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Email службы безопасности:</strong> boriyevdev08@gmail.com
                     </p>
                     <p className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-blue-600" />
+                      <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Горячая линия:</strong> +998 (90) 443-55-67
                     </p>
                   </div>
@@ -257,13 +259,13 @@ export default function SecurityAntifraudPage() {
             ) : (
               <>
                 {/* Antifraud Overview Banner UZ */}
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-emerald-900 flex gap-4 items-start">
-                  <Lock className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl p-5 text-emerald-900 dark:text-emerald-200 flex gap-4 items-start">
+                  <Lock className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-bold text-base mb-1">
                       Firibgarlik xavflarini cheklash va nazorat qilish
                     </h3>
-                    <p className="text-xs md:text-sm text-emerald-800">
+                    <p className="text-xs md:text-sm text-emerald-800 dark:text-emerald-300">
                       «Qarz Daftari» platformasi (https://debtbook.uz) ekvayring banki (AO «UZUM BANK») bilan tuzilgan
                       Internet-ekvayring shartnomasi talablariga qat'iy muvofiq ravishda ruxsatsiz va firibgarlik
                       operatsiyalarining oldini olish bo'yicha to'liq xavfsizlik choralarini qo'llaydi.
@@ -273,8 +275,8 @@ export default function SecurityAntifraudPage() {
 
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <FileCheck className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       1. 3D-Secure 2.0 ikki bosqichli autentifikatsiya
                     </h2>
                   </div>
@@ -287,8 +289,8 @@ export default function SecurityAntifraudPage() {
 
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       2. PCI-DSS standarti va maxfiy ma'lumotlar himoyasi
                     </h2>
                   </div>
@@ -301,8 +303,8 @@ export default function SecurityAntifraudPage() {
 
                 <section className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-amber-600" />
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                       3. Ekvayring shartnomasi bo'yicha limitlar va cheklovlar
                     </h2>
                   </div>
@@ -322,10 +324,10 @@ export default function SecurityAntifraudPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">
                     4. Bog'lanish va xavfsizlik xizmati
                   </h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-xs md:text-sm">
+                  <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-4 rounded-lg space-y-2 text-xs md:text-sm">
                     <p className="flex items-center gap-2">
                       <Building className="w-4 h-4 text-blue-600" />
                       <strong>Tashkilot:</strong> «ASADBEK BURIYEV WS» NTM

@@ -95,13 +95,13 @@ export function OTPInput({
               }
             }}
             className={cn(
-              'relative w-11 h-13 sm:w-13 sm:h-15 flex items-center justify-center rounded-xl border-2 transition-all duration-200 overflow-hidden bg-white select-none',
+              'relative w-11 h-13 sm:w-13 sm:h-15 flex items-center justify-center rounded-xl border-2 transition-all duration-200 overflow-hidden bg-white dark:bg-slate-900 select-none',
               isFocused
-                ? 'border-blue-600 ring-4 ring-blue-100 shadow-md scale-105 z-20'
+                ? 'border-blue-600 ring-4 ring-blue-100 dark:ring-blue-950/80 shadow-md scale-105 z-20'
                 : hasChar
-                ? 'border-blue-500 bg-blue-50/40 shadow-xs'
-                : 'border-slate-200 hover:border-slate-300 shadow-2xs',
-              disabled && 'opacity-60 cursor-not-allowed bg-slate-100'
+                ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-950/40 shadow-xs'
+                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs',
+              disabled && 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-800'
             )}
           >
             {/* Hidden native input for 100% accessible keyboard/mobile touch entry */}
@@ -128,14 +128,14 @@ export function OTPInput({
             {hasChar ? (
               <span
                 key={`${index}-${char}`}
-                className="text-xl sm:text-2xl font-semibold text-slate-800 animate-otp-digit pointer-events-none select-none"
+                className="text-xl sm:text-2xl font-semibold text-slate-800 dark:text-slate-100 animate-otp-digit pointer-events-none select-none"
               >
                 {char}
               </span>
             ) : isFocused ? (
               <span className="w-0.5 h-5 sm:h-6 bg-blue-600 animate-pulse rounded-full pointer-events-none" />
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-200 pointer-events-none" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 pointer-events-none" />
             )}
           </div>
         )

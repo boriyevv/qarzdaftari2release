@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
@@ -44,29 +45,34 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4 relative">
+      {/* Top Right Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-blue-600">Qarz Daftari</h1>
+            <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">Qarz Daftari</h1>
           </Link>
-          <p className="text-slate-600 mt-2">Parolni tiklash</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Parolni tiklash</p>
         </div>
 
-        <Card className="shadow-xl border-slate-200">
+        <Card className="shadow-xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Parolni unutdingizmi?</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">Parolni unutdingizmi?</CardTitle>
+            <CardDescription className="text-slate-500 dark:text-slate-400">
               Email manzilingizni kiriting, sizga parolni tiklash havolasi yuboramiz
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             {success ? (
-              <Alert className="border-green-200 bg-green-50">
+              <Alert className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40">
                 <svg
-                  className="h-5 w-5 text-green-600"
+                  className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -79,14 +85,14 @@ export default function ForgotPasswordPage() {
                   />
                 </svg>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">
+                  <h3 className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
                     Email yuborildi!
                   </h3>
-                  <div className="mt-2 text-sm text-green-700">
+                  <div className="mt-2 text-sm text-emerald-700 dark:text-emerald-300">
                     <p>
                       <strong>{email}</strong> manziliga parolni tiklash havolasi yuborildi.
                     </p>
-                    <p className="mt-2">
+                    <p className="mt-2 text-slate-600 dark:text-slate-400">
                       Emailingizni tekshiring va havolani bosing.
                     </p>
                     <p className="mt-2 text-xs">
@@ -177,13 +183,13 @@ export default function ForgotPasswordPage() {
         </Card>
 
         {/* Help Text */}
-        <div className="mt-6 text-center text-sm text-slate-600">
-          <p>Muammo bo'ldimi?</p>
+        <div className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          <p>Muammo bo&apos;ldimi?</p>
           <p className="mt-1">
-            <Link href="/contact" className="text-blue-600 hover:underline">
+            <Link href="/contact" className="text-blue-600 dark:text-blue-400 hover:underline">
               Yordam markazi
             </Link>
-            {' '}bilan bog'laning
+            {' '}bilan bog&apos;laning
           </p>
         </div>
       </div>

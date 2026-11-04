@@ -65,10 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ✅ Show loading only on initial check
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Yuklanmoqda...</p>
+          <p className="text-slate-600 dark:text-slate-400">Yuklanmoqda...</p>
         </div>
       </div>
     )

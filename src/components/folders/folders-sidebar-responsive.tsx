@@ -98,17 +98,19 @@ function SortableFolderItem({
 			style={style}
 			className={cn(
 				'group flex items-center justify-between p-3 rounded-lg transition-colors',
-				isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-slate-50',
+				isActive
+					? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold'
+					: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/70',
 			)}
 		>
 			{/* Drag Handle */}
 			<div
 				{...attributes}
 				{...listeners}
-				className='cursor-move p-1 hover:bg-slate-200 rounded mr-2 touch-none'
+				className='cursor-move p-1 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 rounded-lg mr-2 touch-none transition-colors'
 			>
 				<svg
-					className='w-4 h-4 text-slate-400'
+					className='w-4 h-4'
 					fill='currentColor'
 					viewBox='0 0 16 16'
 				>
@@ -125,12 +127,12 @@ function SortableFolderItem({
 					className='w-2 h-2 rounded-full'
 					style={{ backgroundColor: folder.color }}
 				/>
-				<span className='font-medium'>{folder.name}</span>
+				<span className='font-medium text-slate-900 dark:text-slate-100'>{folder.name}</span>
 			</button>
 
 			{/* Actions */}
 			<div className='flex items-center gap-2'>
-				<Badge variant='secondary'>{folder.debt_count || 0}</Badge>
+				<Badge variant='secondary' className='dark:bg-slate-800 dark:text-slate-300'>{folder.debt_count || 0}</Badge>
 
 				{!folder.is_default && (
 					<DropdownMenu>
@@ -138,7 +140,7 @@ function SortableFolderItem({
 							<Button
 								variant='ghost'
 								size='icon'
-								className='h-8 w-8 opacity-0 group-hover:opacity-100'
+								className='h-8 w-8 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 rounded-lg transition-all'
 							>
 								<svg
 									className='w-4 h-4'
@@ -149,9 +151,9 @@ function SortableFolderItem({
 								</svg>
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align='end'>
-							<DropdownMenuItem onClick={onEdit}>Tahrirlash</DropdownMenuItem>
-							<DropdownMenuItem onClick={onDelete} className='text-red-600'>
+						<DropdownMenuContent align='end' className='rounded-2xl p-1.5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl'>
+							<DropdownMenuItem onClick={onEdit} className='rounded-xl text-xs font-semibold py-2 cursor-pointer transition-colors'>Tahrirlash</DropdownMenuItem>
+							<DropdownMenuItem onClick={onDelete} className='rounded-xl text-xs font-semibold py-2 text-rose-600 dark:text-rose-400 focus:text-rose-700 dark:focus:text-rose-300 focus:bg-rose-50 dark:focus:bg-rose-950/40 cursor-pointer transition-colors'>
 								O'chirish
 							</DropdownMenuItem>
 						</DropdownMenuContent>
@@ -325,15 +327,12 @@ export function FoldersSidebarResponsive({
 	const totalDebts = folders.reduce((sum, folder) => sum + folder.debt_count, 0)
 
 	return (
-		<div className='h-full bg-white flex flex-col'>
+		<div className='h-full bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col'>
 			{/* Header */}
-			<div className='p-4 border-b flex items-center justify-between'>
-				<h2 className='text-lg font-semibold'>Folderlar</h2>
+			<div className='p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between'>
+				<h2 className='text-lg font-bold text-slate-900 dark:text-slate-100'>Folderlar</h2>
 				{onClose && (
-					<Button variant='ghost' size='icon' onClick={onClose}>
-						{/* <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg> */}
+					<Button variant='ghost' size='icon' onClick={onClose} className="rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
 					</Button>
 				)}
 			</div>
@@ -347,22 +346,22 @@ export function FoldersSidebarResponsive({
 						onClose?.()
 					}}
 					className={cn(
-						'w-full flex items-center justify-between p-3 rounded-lg transition-colors',
+						'w-full flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer',
 						activeFolder === 'all'
-							? 'bg-blue-50 text-blue-600'
-							: 'hover:bg-slate-50',
+							? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold'
+							: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/70',
 					)}
 				>
 					<div className='flex items-center gap-3'>
 						<div className='w-2 h-2 rounded-full bg-slate-400' />
-						<span className='font-medium'>Barcha qarzlar</span>
+						<span className='font-medium text-slate-900 dark:text-slate-100'>Barcha qarzlar</span>
 					</div>
-					<Badge variant='secondary'>{totalDebts}</Badge>
+					<Badge variant='secondary' className='dark:bg-slate-800 dark:text-slate-300'>{totalDebts}</Badge>
 				</button>
 
 				{/* Sortable Folders */}
 				{loading ? (
-					<div className='text-center py-8 text-slate-500'>Yuklanmoqda...</div>
+					<div className='text-center py-8 text-slate-400 dark:text-slate-500 text-sm'>Yuklanmoqda...</div>
 				) : (
 					<DndContext
 						sensors={sensors}
@@ -392,10 +391,10 @@ export function FoldersSidebarResponsive({
 			</div>
 
 			{/* Add Folder Button */}
-			<div className='p-4 border-t'>
+			<div className='p-4 border-t border-slate-200 dark:border-slate-800'>
 				<Button
 					variant='outline'
-					className='w-full'
+					className='w-full rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs h-10 transition-colors'
 					onClick={() => setIsAddOpen(true)}
 				>
 					<svg
@@ -415,20 +414,18 @@ export function FoldersSidebarResponsive({
 				</Button>
 			</div>
 
-			<div className='p-4 border-t'></div>
-
-			{/* Dialogs (same as before) */}
+			{/* Dialogs */}
 			<Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-				<DialogContent>
+				<DialogContent className="sm:max-w-[425px] rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
 					<DialogHeader>
-						<DialogTitle>Yangi Folder</DialogTitle>
-						<DialogDescription>
+						<DialogTitle className="text-lg font-black text-slate-900 dark:text-slate-100">Yangi Folder</DialogTitle>
+						<DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
 							Qarzlaringizni guruhlashtirish uchun folder yarating
 						</DialogDescription>
 					</DialogHeader>
 					<form onSubmit={handleAddFolder} className='space-y-4'>
 						<div className='space-y-2'>
-							<Label htmlFor='name'>Folder nomi</Label>
+							<Label htmlFor='name' className="text-xs font-bold text-slate-700 dark:text-slate-300">Folder nomi</Label>
 							<Input
 								id='name'
 								placeholder="Masalan: Do'kon"
@@ -437,11 +434,12 @@ export function FoldersSidebarResponsive({
 								onChange={e =>
 									setFormData({ ...formData, name: e.target.value })
 								}
+								className="rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs h-10 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
 							/>
 						</div>
 
 						<div className='space-y-2'>
-							<Label>Rang</Label>
+							<Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Rang</Label>
 							<div className='grid grid-cols-3 gap-2'>
 								{COLORS.map(color => (
 									<button
@@ -451,46 +449,47 @@ export function FoldersSidebarResponsive({
 											setFormData({ ...formData, color: color.value })
 										}
 										className={cn(
-											'p-3 rounded-lg border-2 transition-all',
+											'p-3 rounded-xl border-2 transition-all cursor-pointer',
 											formData.color === color.value
-												? 'border-blue-600 ring-2 ring-blue-100'
-												: 'border-slate-200 hover:border-slate-300',
+												? 'border-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/60 bg-blue-50/50 dark:bg-blue-950/30'
+												: 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300',
 										)}
 									>
 										<div className='flex items-center gap-2'>
 											<div
-												className='w-4 h-4 rounded-full'
+												className='w-4 h-4 rounded-full flex-shrink-0'
 												style={{ backgroundColor: color.value }}
 											/>
-											<span className='text-sm'>{color.name}</span>
+											<span className='text-xs font-medium truncate'>{color.name}</span>
 										</div>
 									</button>
 								))}
 							</div>
 						</div>
 
-						<DialogFooter>
+						<DialogFooter className="gap-2 sm:gap-0 pt-2">
 							<Button
 								type='button'
 								variant='outline'
 								onClick={() => setIsAddOpen(false)}
+								className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
 							>
 								Bekor qilish
 							</Button>
-							<Button type='submit'>Yaratish</Button>
+							<Button type='submit' className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">Yaratish</Button>
 						</DialogFooter>
 					</form>
 				</DialogContent>
 			</Dialog>
 
 			<Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-				<DialogContent>
+				<DialogContent className="sm:max-w-[425px] rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
 					<DialogHeader>
-						<DialogTitle>Folderni Tahrirlash</DialogTitle>
+						<DialogTitle className="text-lg font-black text-slate-900 dark:text-slate-100">Folderni Tahrirlash</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleEditFolder} className='space-y-4'>
 						<div className='space-y-2'>
-							<Label htmlFor='edit_name'>Folder nomi</Label>
+							<Label htmlFor='edit_name' className="text-xs font-bold text-slate-700 dark:text-slate-300">Folder nomi</Label>
 							<Input
 								id='edit_name'
 								required
@@ -498,11 +497,12 @@ export function FoldersSidebarResponsive({
 								onChange={e =>
 									setFormData({ ...formData, name: e.target.value })
 								}
+								className="rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs h-10 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
 							/>
 						</div>
 
 						<div className='space-y-2'>
-							<Label>Rang</Label>
+							<Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Rang</Label>
 							<div className='grid grid-cols-3 gap-2'>
 								{COLORS.map(color => (
 									<button
@@ -512,33 +512,34 @@ export function FoldersSidebarResponsive({
 											setFormData({ ...formData, color: color.value })
 										}
 										className={cn(
-											'p-3 rounded-lg border-2 transition-all',
+											'p-3 rounded-xl border-2 transition-all cursor-pointer',
 											formData.color === color.value
-												? 'border-blue-600 ring-2 ring-blue-100'
-												: 'border-slate-200 hover:border-slate-300',
+												? 'border-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/60 bg-blue-50/50 dark:bg-blue-950/30'
+												: 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300',
 										)}
 									>
 										<div className='flex items-center gap-2'>
 											<div
-												className='w-4 h-4 rounded-full'
+												className='w-4 h-4 rounded-full flex-shrink-0'
 												style={{ backgroundColor: color.value }}
 											/>
-											<span className='text-sm'>{color.name}</span>
+											<span className='text-xs font-medium truncate'>{color.name}</span>
 										</div>
 									</button>
 								))}
 							</div>
 						</div>
 
-						<DialogFooter>
+						<DialogFooter className="gap-2 sm:gap-0 pt-2">
 							<Button
 								type='button'
 								variant='outline'
 								onClick={() => setIsEditOpen(false)}
+								className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
 							>
 								Bekor qilish
 							</Button>
-							<Button type='submit'>Saqlash</Button>
+							<Button type='submit' className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white">Saqlash</Button>
 						</DialogFooter>
 					</form>
 				</DialogContent>

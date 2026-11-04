@@ -61,9 +61,9 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     id: 'sms-credits',
-    title: 'Avtomatik eslatmalar (Telegram & SMS)',
+    title: 'SMS Eslatmalar',
     description:
-      'To\'lov muddati yaqinlashganda mijozlarga eslatma yuboring: Telegram orqali cheksiz bepul, telefoniga esa SMS xabarnoma orqali.',
+      'To\'lov muddati yaqinlashganda mijozlarga avtomatik va tezkor SMS xabarnomalar yuboring.',
     targetSelector: '#tour-nav-sms',
     mobileTargetSelector: '#tour-nav-sms-mobile',
     preferredPosition: 'right',

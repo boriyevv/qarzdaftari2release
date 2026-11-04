@@ -1,4 +1,4 @@
-// src/lib/contexts/user-context.tsx
+﻿// src/lib/contexts/user-context.tsx
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'

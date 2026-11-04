@@ -7,27 +7,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, FileText, Shield, CheckCircle2, Building, Mail, Phone } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export default function TermsPage() {
   const [lang, setLang] = useState<'uz' | 'ru'>('uz')
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 text-slate-900 dark:text-slate-100">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-800 hover:text-blue-600 transition">
+      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition">
             <ArrowLeft className="w-5 h-5" />
             <span className="font-semibold text-lg">Qarz Daftari</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             <Tabs value={lang} onValueChange={(v) => setLang(v as 'uz' | 'ru')}>
-              <TabsList className="grid grid-cols-2 w-32">
-                <TabsTrigger value="uz">O'zb</TabsTrigger>
+              <TabsList className="grid grid-cols-2 w-28 bg-slate-100 dark:bg-slate-800">
+                <TabsTrigger value="uz">O&apos;zb</TabsTrigger>
                 <TabsTrigger value="ru">Рус</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button size="sm" asChild variant="outline">
+            <Button size="sm" asChild variant="outline" className="border-slate-200 dark:border-slate-700">
               <Link href="/login">Kirish</Link>
             </Button>
           </div>
@@ -37,13 +39,13 @@ export default function TermsPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-8">
-          <div className="inline-flex p-3 bg-blue-100 text-blue-600 rounded-2xl mb-4">
+          <div className="inline-flex p-3 bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-2xl mb-4">
             <FileText className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             {lang === 'uz' ? 'Ommaviy Oferta' : 'Публичная оферта'}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             {lang === 'uz'
               ? 'Qarz Daftari platformasidan foydalanish shartlari va xizmat ko\'rsatish shartnomasi'
               : 'Договор публичной оферты на оказание услуг сервиса «Qarz Daftari»'}
@@ -53,12 +55,12 @@ export default function TermsPage() {
           </p>
         </div>
 
-        <Card className="shadow-sm">
-          <CardContent className="p-6 md:p-10 space-y-8 text-slate-700 leading-relaxed text-sm md:text-base">
+        <Card className="shadow-sm border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <CardContent className="p-6 md:p-10 space-y-8 text-slate-700 dark:text-slate-300 leading-relaxed text-sm md:text-base">
             {lang === 'uz' ? (
               <>
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">1. Umumiy qoidalar</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">1. Umumiy qoidalar</h2>
                   <p>
                     1.1. Mazkur hujjat O'zbekiston Respublikasi Fuqarolik kodeksining 367 va 369-moddalariga muvofiq
                     rasmiy ommaviy oferta (keyingi o'rinlarda — «Oferta») hisoblanadi va «Qarz Daftari» dasturiy
@@ -73,7 +75,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">2. Asosiy atamalar va ta'riflar</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">2. Asosiy atamalar va ta'riflar</h2>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>
                       <strong>Platforma (Xizmat)</strong> — qarzlar hisobini yuritish, do'kon va mijozlar o'rtasidagi
@@ -96,7 +98,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">3. Shartnoma predmeti</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">3. Shartnoma predmeti</h2>
                   <p>
                     3.1. Ijrochi Buyurtmachiga Platformaning funksional imkoniyatlaridan (bepul yoki pullik tariflar
                     asosida) masofadan foydalanish bo'yicha noeksklyuziv litsenziya taqdim etadi, shuningdek,
@@ -110,7 +112,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">4. Xizmatlar qiymati va to'lov tartibi</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">4. Xizmatlar qiymati va to'lov tartibi</h2>
                   <p>
                     4.1. Pullik xizmatlar (Plus, Pro tariflari va SMS kreditlar) narxi Platformaning «Tariflar» bo'limida
                     ko'rsatilgan va O'zbekiston so'mida (UZS) belgilanadi.
@@ -126,7 +128,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">5. Tomonlarning huquq va majburiyatlari</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">5. Tomonlarning huquq va majburiyatlari</h2>
                   <p>
                     5.1. <strong>Ijrochi majburiyatlari:</strong> Platformaning uzluksiz ishlashini ta'minlash,
                     Foydalanuvchi ma'lumotlarining xavfsizligini saqlash, to'lov qilingan xizmatlarni o'z vaqtida taqdim etish.
@@ -139,7 +141,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">6. Shartnomani bekor qilish va to'lovni qaytarish</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">6. Shartnomani bekor qilish va to'lovni qaytarish</h2>
                   <p>
                     6.1. Foydalanuvchi istalgan vaqtda obunani bekor qilish huquqiga ega.
                   </p>
@@ -151,18 +153,18 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">7. Korxona rekvizitlari va aloqa</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-xs md:text-sm">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">7. Korxona rekvizitlari va aloqa</h2>
+                  <div className="bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 p-4 rounded-lg space-y-2 text-xs md:text-sm">
                     <p className="flex items-center gap-2">
-                      <Building className="w-4 h-4 text-blue-600" />
+                      <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Korxona nomi:</strong> «ASADBEK BURIYEV WS» NTM / «Qarz Daftari»
                     </p>
                     <p className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-blue-600" />
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Email:</strong> boriyevdev08@gmail.com
                     </p>
                     <p className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-blue-600" />
+                      <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Telefon:</strong> +998 (90) 443-55-67
                     </p>
                     <p>
@@ -174,7 +176,7 @@ export default function TermsPage() {
             ) : (
               <>
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">1. Общие положения</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">1. Общие положения</h2>
                   <p>
                     1.1. Настоящий документ является официальным предложением (публичной офертой в соответствии со
                     статьями 367, 369 Гражданского кодекса Республики Узбекистан) Оператора сервиса «Qarz Daftari»
@@ -188,7 +190,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">2. Предмет оферты</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">2. Предмет оферты</h2>
                   <p>
                     2.1. Исполнитель предоставляет Пользователю право удаленного доступа (простую неисключительную
                     лицензию SaaS) к сервису «Qarz Daftari» для автоматизации учета взаиморасчетов, долговых записей,
@@ -201,7 +203,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">3. Стоимость услуг и порядок оплаты</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">3. Стоимость услуг и порядок оплаты</h2>
                   <p>
                     3.1. Стоимость тарифов подписки (Plus, Pro) и пакетов СМС-кредитов указана на Сайте в разделе
                     «Тарифы» и выражается в узбекских сумах (UZS).
@@ -217,7 +219,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">4. Безопасность и защита данных</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">4. Безопасность и защита данных</h2>
                   <p>
                     4.1. Исполнитель обеспечивает конфиденциальность учетных данных и безопасность транзакций в
                     соответствии с требованиями стандартов PCI-DSS и законодательства Республики Узбекистан.
@@ -229,18 +231,18 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-3">
-                  <h2 className="text-xl font-bold text-slate-900 border-b pb-2">5. Реквизиты исполнителя</h2>
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-xs md:text-sm">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800 pb-2">5. Реквизиты исполнителя</h2>
+                  <div className="bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 p-4 rounded-lg space-y-2 text-xs md:text-sm">
                     <p className="flex items-center gap-2">
-                      <Building className="w-4 h-4 text-blue-600" />
+                      <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Организация:</strong> «ASADBEK BURIYEV WS» NTM / «Qarz Daftari»
                     </p>
                     <p className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-blue-600" />
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Email:</strong> boriyevdev08@gmail.com
                     </p>
                     <p className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-blue-600" />
+                      <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <strong>Телефон:</strong> +998 (90) 443-55-67
                     </p>
                     <p>

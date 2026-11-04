@@ -327,19 +327,19 @@ export function ClickOnSiteModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md w-[95vw] rounded-3xl p-6 border border-slate-200/80 shadow-2xl bg-white overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 [&>button.absolute]:hover:bg-slate-200 [&>button.absolute]:text-slate-500 [&>button.absolute]:hover:text-slate-800 [&>button.absolute]:top-5 [&>button.absolute]:right-5 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:transition-colors [&>button.absolute]:border [&>button.absolute]:border-slate-200/60">
+      <DialogContent className="sm:max-w-md w-[95vw] rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-hidden [&>button.absolute]:w-8 [&>button.absolute]:h-8 [&>button.absolute]:rounded-full [&>button.absolute]:bg-slate-100 dark:[&>button.absolute]:bg-slate-800 [&>button.absolute]:hover:bg-slate-200 dark:[&>button.absolute]:hover:bg-slate-700 [&>button.absolute]:text-slate-500 dark:[&>button.absolute]:text-slate-400 [&>button.absolute]:hover:text-slate-800 dark:[&>button.absolute]:hover:text-slate-200 [&>button.absolute]:top-5 [&>button.absolute]:right-5 [&>button.absolute]:flex [&>button.absolute]:items-center [&>button.absolute]:justify-center [&>button.absolute]:transition-colors [&>button.absolute]:border [&>button.absolute]:border-slate-200/60 dark:[&>button.absolute]:border-slate-700">
         {/* MODAL HEADER */}
         <DialogHeader className="space-y-1.5 pb-1">
           <div className="flex items-center justify-between pr-10">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
               <ClickLogo className="h-6 w-auto" />
               <span>Click to&apos;lov</span>
             </DialogTitle>
-            <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200 font-bold px-3 py-0.5 text-xs">
+            <Badge variant="outline" className="text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800 font-bold px-3 py-0.5 text-xs">
               {formatPrice(amount)}
             </Badge>
           </div>
-          <DialogDescription className="text-xs text-slate-500">
+          <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
             {type === 'sms'
               ? `${credits} ta SMS paketi uchun to'lov`
               : `${planType} rejasi (${billingCycle === 'annual' ? 'Yillik' : billingCycle === 'semi_annual' ? '6 oylik' : 'Oylik'})`}
@@ -357,11 +357,11 @@ export function ClickOnSiteModal({
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">
+              <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                 To&apos;lov muvaffaqiyatli amalga oshirildi!
               </h3>
-              <p className="text-xs text-slate-500">
-                Click orqali <span className="font-semibold text-slate-800">{formatPrice(amount)}</span> qabul qilindi. Xizmat faollashtirildi.
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Click orqali <span className="font-semibold text-slate-800 dark:text-slate-200">{formatPrice(amount)}</span> qabul qilindi. Xizmat faollashtirildi.
               </p>
             </div>
 
@@ -377,17 +377,17 @@ export function ClickOnSiteModal({
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full pt-1">
-            <TabsList className="grid grid-cols-2 w-full rounded-2xl p-1 bg-slate-100/90 h-11">
+            <TabsList className="grid grid-cols-2 w-full rounded-2xl p-1 bg-slate-100/90 dark:bg-slate-800/80 h-11">
               <TabsTrigger
                 value="card"
-                className="rounded-xl text-xs font-bold py-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-xs transition-all"
+                className="rounded-xl text-xs font-bold py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-400 text-slate-600 dark:text-slate-400 data-[state=active]:shadow-xs transition-all"
               >
                 <CreditCard className="w-3.5 h-3.5 mr-1.5" />
                 Bank kartasi
               </TabsTrigger>
               <TabsTrigger
                 value="invoice"
-                className="rounded-xl text-xs font-bold py-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-xs transition-all"
+                className="rounded-xl text-xs font-bold py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-blue-700 dark:data-[state=active]:text-blue-400 text-slate-600 dark:text-slate-400 data-[state=active]:shadow-xs transition-all"
               >
                 <Smartphone className="w-3.5 h-3.5 mr-1.5" />
                 Click Up ilovasi
@@ -458,7 +458,7 @@ export function ClickOnSiteModal({
                   {/* FORM INPUTS */}
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="card_number" className="text-xs font-semibold text-slate-700">
+                      <Label htmlFor="card_number" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                         Karta raqami (Uzcard, Humo, Visa, Mastercard)
                       </Label>
                       <div className="relative mt-1">
@@ -467,7 +467,7 @@ export function ClickOnSiteModal({
                           placeholder="8600 0000 0000 0000"
                           value={cardNumber}
                           onChange={(e) => handleCardNumberChange(e.target.value)}
-                          className="pr-16 text-sm font-mono tracking-wider h-11 rounded-xl bg-slate-50/50 focus:bg-white"
+                          className="pr-16 text-sm font-mono tracking-wider h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800"
                           maxLength={19}
                           autoFocus
                           required
@@ -485,7 +485,7 @@ export function ClickOnSiteModal({
                     </div>
 
                     <div>
-                      <Label htmlFor="expire_date" className="text-xs font-semibold text-slate-700">
+                      <Label htmlFor="expire_date" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                         Amal qilish muddati (OY / YIL)
                       </Label>
                       <Input
@@ -494,7 +494,7 @@ export function ClickOnSiteModal({
                         placeholder="MM / YY"
                         value={expireDate}
                         onChange={(e) => handleExpireChange(e.target.value)}
-                        className="mt-1 text-sm font-mono tracking-wider h-11 rounded-xl bg-slate-50/50 focus:bg-white"
+                        className="mt-1 text-sm font-mono tracking-wider h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800"
                         maxLength={5}
                         required
                       />
@@ -502,8 +502,8 @@ export function ClickOnSiteModal({
                   </div>
 
                   {cardError && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-start gap-2 animate-shake">
-                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
+                    <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs rounded-xl flex items-start gap-2 animate-shake">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
                       <span>{cardError}</span>
                     </div>
                   )}
@@ -532,14 +532,14 @@ export function ClickOnSiteModal({
                 /* STEP 2: SMS OTP VERIFICATION */
                 <form onSubmit={handleVerifyOtp} className="space-y-5 py-2">
                   <div className="text-center space-y-2">
-                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto border border-blue-200">
+                    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto border border-blue-200 dark:border-blue-900/60">
                       <Lock className="w-6 h-6" />
                     </div>
                     <div className="space-y-0.5">
-                      <h4 className="text-sm font-bold text-slate-900">SMS kodni kiriting</h4>
-                      <p className="text-xs text-slate-500">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">SMS kodni kiriting</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Tasdiqlash kodi telefoningizga{' '}
-                        {cardPhone ? <span className="font-bold text-slate-800">({cardPhone})</span> : ''} yuborildi.
+                        {cardPhone ? <span className="font-bold text-slate-800 dark:text-slate-200">({cardPhone})</span> : ''} yuborildi.
                       </p>
                     </div>
                   </div>
@@ -550,7 +550,7 @@ export function ClickOnSiteModal({
                       placeholder="12345"
                       value={smsCode}
                       onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="text-center text-2xl font-mono tracking-widest h-14 rounded-2xl border-2 border-blue-300 focus:border-blue-600 bg-blue-50/20"
+                      className="text-center text-2xl font-mono tracking-widest h-14 rounded-2xl border-2 border-blue-300 dark:border-blue-700 focus:border-blue-600 dark:focus:border-blue-500 bg-blue-50/20 dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                       maxLength={6}
                       autoFocus
                       required
@@ -558,8 +558,8 @@ export function ClickOnSiteModal({
                   </div>
 
                   {cardError && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
+                    <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs rounded-xl flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
                       <span>{cardError}</span>
                     </div>
                   )}
@@ -584,7 +584,7 @@ export function ClickOnSiteModal({
                       <button
                         type="button"
                         onClick={() => setCardStep('details')}
-                        className="text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium"
+                        className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 font-medium"
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
                         Kartani o&apos;zgartirish
@@ -596,7 +596,7 @@ export function ClickOnSiteModal({
                         <button
                           type="button"
                           onClick={(e) => handleCardSubmit(e as any)}
-                          className="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 font-semibold flex items-center gap-1"
                         >
                           <RotateCw className="w-3 h-3" />
                           Kodni qayta olish
@@ -612,18 +612,18 @@ export function ClickOnSiteModal({
             <TabsContent value="invoice" className="space-y-4 pt-3 focus-visible:outline-none">
               {invoiceStep === 'input' ? (
                 <form onSubmit={handleInvoiceSubmit} className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-200/70 space-y-1">
-                    <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                      <Smartphone className="w-4 h-4 text-blue-600" />
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:from-blue-950/40 dark:to-indigo-950/30 border border-blue-200/70 dark:border-blue-900/60 space-y-1">
+                    <div className="text-xs font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+                      <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       Click Up orqali bir bosishda to&apos;lov
                     </div>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
                       Telefon raqamingizni kiriting. Click Up ilovangizga to&apos;lov hisobi yuboriladi va push-xabarnoma orqali tasdiqlaysiz.
                     </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="phone_number" className="text-xs font-semibold text-slate-700">
+                    <Label htmlFor="phone_number" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Click ga ulangan telefon raqami
                     </Label>
                     <div className="relative mt-1">
@@ -635,7 +635,7 @@ export function ClickOnSiteModal({
                         placeholder="90 123 45 67"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
-                        className="pl-14 text-sm font-mono h-11 rounded-xl bg-slate-50/50 focus:bg-white"
+                        className="pl-14 text-sm font-mono h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800"
                         maxLength={12}
                         autoFocus
                         required
@@ -644,8 +644,8 @@ export function ClickOnSiteModal({
                   </div>
 
                   {invoiceError && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
+                    <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs rounded-xl flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
                       <span>{invoiceError}</span>
                     </div>
                   )}
@@ -671,20 +671,20 @@ export function ClickOnSiteModal({
                   {/* Concentric Pulse Animation */}
                   <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
                     <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-ping" />
-                    <div className="relative w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shadow-md">
-                      <Smartphone className="w-8 h-8 text-blue-700 animate-pulse" />
+                    <div className="relative w-16 h-16 bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center shadow-md">
+                      <Smartphone className="w-8 h-8 text-blue-700 dark:text-blue-300 animate-pulse" />
                     </div>
                   </div>
 
                   <div className="space-y-1.5 max-w-xs mx-auto">
-                    <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200 font-bold px-2.5 py-0.5 text-[11px]">
+                    <Badge variant="outline" className="text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800 font-bold px-2.5 py-0.5 text-[11px]">
                       Hisob yuborildi
                     </Badge>
-                    <h4 className="text-base font-extrabold text-slate-900">
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
                       Click Up ilovangizni oching
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      <span className="font-bold text-slate-800">{formatPrice(amount)}</span> miqdoridagi to&apos;lovni Click Up ilovangizda tasdiqlang.
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{formatPrice(amount)}</span> miqdoridagi to&apos;lovni Click Up ilovangizda tasdiqlang.
                     </p>
                   </div>
 
@@ -698,14 +698,14 @@ export function ClickOnSiteModal({
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
 
-                    <div className="flex items-center justify-center gap-2 text-xs text-blue-600 font-semibold pt-1">
+                    <div className="flex items-center justify-center gap-2 text-xs text-blue-600 dark:text-blue-400 font-semibold pt-1">
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       <span>Tasdiqlanishi kutilmoqda...</span>
                     </div>
 
                     <Button
                       variant="ghost"
-                      className="w-full text-xs text-slate-500 hover:text-slate-800"
+                      className="w-full text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                       onClick={() => setInvoiceStep('input')}
                     >
                       Raqamni qayta kiritish
@@ -718,12 +718,12 @@ export function ClickOnSiteModal({
         )}
 
         {/* Micro Footer: Fallback link */}
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
           {onBack ? (
             <button
               type="button"
               onClick={onBack}
-              className="text-slate-600 hover:text-slate-900 font-bold hover:underline cursor-pointer"
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold hover:underline cursor-pointer"
             >
               ← Boshqa usul
             </button>
@@ -733,7 +733,7 @@ export function ClickOnSiteModal({
           <button
             type="button"
             onClick={handleRedirectCheckout}
-            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:underline cursor-pointer"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1 hover:underline cursor-pointer"
           >
             Click Checkout ochish
             <ExternalLink className="w-3 h-3" />

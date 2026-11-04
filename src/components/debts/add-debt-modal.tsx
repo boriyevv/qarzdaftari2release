@@ -174,6 +174,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
           max-h-[90dvh]
           overflow-y-auto
           overscroll-contain
+          bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl
         "
         // Prevent Radix from auto-closing on overlay click while keyboard is open
         onInteractOutside={(e) => e.preventDefault()}
@@ -190,10 +191,10 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
           Agar sizning shadcn versiyangizda bu prop yo'q bo'lsa,
           quyidagi [&>button:first-of-type]:hidden trick ishlaydi.
         */}
-        <DialogHeader className="[&>button]:hidden flex-shrink-0 flex flex-row items-start justify-between p-4 pb-3 border-b">
+        <DialogHeader className="[&>button]:hidden flex-shrink-0 flex flex-row items-start justify-between p-4 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <DialogTitle className="text-base font-semibold">Yangi qarz</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
+            <DialogTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">Yangi qarz</DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Qarzdor ma&apos;lumotlari
             </DialogDescription>
           </div>
@@ -202,7 +203,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 -mt-1 -mr-1"
+              className="h-8 w-8 shrink-0 -mt-1 -mr-1 text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 rounded-full cursor-pointer transition-colors"
             >
               <span className="sr-only">Yopish</span>
               ✕
@@ -329,15 +330,15 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
             </div>
 
             {/* ── SMS Section ───────────────────────────────────── */}
-            <div className="border rounded-lg p-3 space-y-3 bg-slate-50">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 space-y-3 bg-slate-50/70 dark:bg-slate-900/60">
 
               {/* Toggle row */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-2 flex-1">
-                  <MessageSquare className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                  <MessageSquare className="w-5 h-5 text-green-600 dark:text-green-500 mt-0.5 shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">SMS yuborish</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Qarzdorga eslatma</p>
+                    <p className="font-semibold text-sm text-slate-900 dark:text-slate-100">SMS yuborish</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qarzdorga eslatma</p>
                   </div>
                 </div>
                 <Switch
@@ -349,7 +350,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
               {/* Credits badge - shown only when credits available */}
               {smsCredits > 0 && (
-                <div className="flex items-center justify-between text-xs p-2 bg-emerald-50 text-emerald-800 rounded-lg">
+                <div className="flex items-center justify-between text-xs p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-xl">
                   <span>Mavjud:</span>
                   <span className="font-bold">{smsCredits} SMS</span>
                 </div>
@@ -357,16 +358,16 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
               {/* No-credits warning ONLY when SMS toggle is turned ON */}
               {sendSMS && smsCredits === 0 && (
-                <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs animate-in fade-in duration-200">
+                <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-amber-900 dark:text-amber-300 text-xs animate-in fade-in duration-200">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                     <span className="truncate">SMS yuborish uchun kredit yo&apos;q</span>
                   </div>
                   <a
                     href="/sms-credits"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-amber-700 font-bold hover:underline flex items-center gap-0.5 flex-shrink-0 text-xs"
+                    className="text-amber-700 dark:text-amber-400 font-bold hover:underline flex items-center gap-0.5 flex-shrink-0 text-xs"
                   >
                     <span>Sotib olish</span>
                     <ExternalLink className="w-3 h-3" />
@@ -377,8 +378,8 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
               {/* Custom message section */}
               {sendSMS && smsCredits > 0 && (
                 <>
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <p className="text-sm font-medium">O&apos;zim yozaman</p>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">O&apos;zim yozaman</p>
                     <Switch
                       checked={useCustomMessage}
                       onCheckedChange={setUseCustomMessage}
@@ -386,7 +387,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-slate-600">SMS matni</Label>
+                    <Label className="text-xs text-slate-600 dark:text-slate-400">SMS matni</Label>
                     {useCustomMessage ? (
                       <>
                         <Textarea
@@ -405,7 +406,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
                         )}
                       </>
                     ) : (
-                      <div className="p-2 bg-white rounded text-xs border leading-relaxed">
+                      <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl text-xs border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed">
                         {generateDefaultMessage()}
                       </div>
                     )}
@@ -416,25 +417,25 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
             {/* Validation hint */}
             {validationHint && (
-              <p className="text-xs text-center text-slate-600 pb-1">{validationHint}</p>
+              <p className="text-xs text-center text-slate-600 dark:text-slate-400 pb-1">{validationHint}</p>
             )}
           </div>
 
           {/* ── Footer — naturally at the bottom, NO sticky ──────── */}
-          <div className="flex gap-2 px-4 py-4 border-t bg-white">
+          <div className="flex gap-2 px-4 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
-              className="flex-1 h-11"
+              className="flex-1 h-11 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
             >
               Bekor qilish
             </Button>
             <Button
               type="submit"
               disabled={loading || !canSubmit()}
-              className="flex-1 h-11"
+              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-colors shadow-sm disabled:cursor-not-allowed"
             >
               {loading ? 'Saqlanmoqda...' : "Qo'shish"}
             </Button>

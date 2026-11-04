@@ -134,22 +134,26 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-3xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 p-6 shadow-2xl">
         <DialogHeader>
-          <DialogTitle>Qarzni Tahrirlash</DialogTitle>
-          <DialogDescription>Qarz ma'lumotlarini o'zgartiring</DialogDescription>
+          <DialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            Qarzni Tahrirlash
+          </DialogTitle>
+          <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+            Qarz ma&apos;lumotlarini o&apos;zgartiring
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="rounded-xl">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_debtor_name">
-              To'liq ism <span className="text-red-500">*</span>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_debtor_name" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              To&apos;liq ism <span className="text-red-500">*</span>
             </Label>
             <Input
               id="edit_debtor_name"
@@ -158,11 +162,12 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
               value={formData.debtor_name}
               onChange={(e) => setFormData({ ...formData, debtor_name: e.target.value })}
               disabled={loading}
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_debtor_phone">
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_debtor_phone" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Telefon raqam <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -173,12 +178,13 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
               value={formData.debtor_phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               disabled={loading}
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_amount">
-              Qarz summasi (so'm) <span className="text-red-500">*</span>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_amount" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Qarz summasi (so&apos;m) <span className="text-red-500">*</span>
             </Label>
             <Input
               id="edit_amount"
@@ -189,33 +195,39 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               disabled={loading}
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_due_date">Qaytarish muddati</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_due_date" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Qaytarish muddati
+            </Label>
             <Input
               id="edit_due_date"
               type="date"
               value={formData.due_date}
               onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
               disabled={loading}
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_folder_id">Folder</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_folder_id" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Folder
+            </Label>
             <Select
               value={formData.folder_id}
               onValueChange={(value) => setFormData({ ...formData, folder_id: value })}
               disabled={loading}
             >
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                 <SelectValue placeholder="Folder tanlang" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xl">
                 {folders.map((folder) => (
-                  <SelectItem key={folder.id} value={folder.id}>
+                  <SelectItem key={folder.id} value={folder.id} className="cursor-pointer dark:focus:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full"
@@ -229,8 +241,10 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_note">Izoh</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit_note" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Izoh
+            </Label>
             <Textarea
               id="edit_note"
               placeholder="Qo'shimcha ma'lumot..."
@@ -238,14 +252,24 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
               disabled={loading}
+              className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="rounded-xl h-10 text-xs font-semibold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
+            >
               Bekor qilish
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-10 text-xs font-bold shadow-md shadow-blue-600/20 cursor-pointer transition-colors disabled:cursor-not-allowed"
+            >
               {loading ? 'Yuklanmoqda...' : 'Saqlash'}
             </Button>
           </DialogFooter>

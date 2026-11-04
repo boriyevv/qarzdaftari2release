@@ -42,42 +42,40 @@ export function SubscriptionBanner() {
   // 1. Trial Active
   if (subscription.is_trial_active && subscription.days_remaining) {
     return (
-      <div className="w-full rounded-2xl sm:rounded-3xl border border-blue-200/80 bg-gradient-to-r from-blue-500/[0.08] via-indigo-50/40 to-white p-3 sm:p-3.5 shadow-2xs hover:border-blue-300 transition-all">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Chap tomon: Icon + Matnlar (Mukammal markazlashgan) */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100/90 text-blue-700 flex items-center justify-center flex-shrink-0 shadow-2xs">
-              <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+      <div className="w-full rounded-2xl sm:rounded-3xl border border-blue-200/80 dark:border-blue-900/60 bg-gradient-to-r from-blue-500/[0.08] via-indigo-50/40 to-white dark:from-blue-950/40 dark:via-slate-900 dark:to-slate-900 p-3.5 sm:p-4.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-800 transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          {/* Chap tomon: Icon + Matnlar */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-100/90 dark:bg-blue-950/80 text-blue-700 dark:text-blue-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs sm:text-sm font-bold text-blue-950">
+                <span className="text-xs sm:text-sm font-bold text-blue-950 dark:text-blue-100">
                   Bepul sinov: {subscription.days_remaining} kun qoldi
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200/60">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200 border border-blue-200/60 dark:border-blue-700/60">
                   Trial
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-blue-700/80 mt-0.5 truncate hidden xs:block sm:block">
+              <p className="text-[11px] sm:text-xs text-blue-700/80 dark:text-slate-300 mt-0.5 truncate hidden xs:block sm:block">
                 To&apos;liq funksiyalardan foydalaning! SMS uchun kredit sotib oling.
               </p>
             </div>
           </div>
 
           {/* O'ng tomon: Tugmalar */}
-          <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+          <div className="flex items-center gap-2.5 flex-shrink-0 self-end sm:self-auto">
             <Button
               asChild
-              size="sm"
               variant="outline"
-              className="rounded-xl border-blue-200 hover:border-blue-300 bg-white text-blue-800 hover:bg-blue-50 text-xs font-semibold h-8 px-3 shadow-2xs"
+              className="rounded-xl border-blue-200 dark:border-blue-800/80 hover:border-blue-300 dark:hover:border-blue-700 bg-white dark:bg-slate-900 text-blue-800 dark:text-blue-200 hover:bg-blue-50 dark:hover:bg-slate-800 text-xs sm:text-sm font-semibold h-9 sm:h-10 px-3.5 sm:px-4 shadow-2xs transition-all active:scale-95"
             >
               <Link href="/sms-credits">SMS kredit</Link>
             </Button>
             <Button
               asChild
-              size="sm"
-              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold h-8 px-3.5 shadow-2xs"
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold h-9 sm:h-10 px-4 sm:px-5 shadow-2xs shadow-blue-500/20 transition-all active:scale-95"
             >
               <Link href="/pricing">Tariflar</Link>
             </Button>
@@ -90,18 +88,18 @@ export function SubscriptionBanner() {
   // 2. Trial Expired
   if (subscription.status === 'expired') {
     return (
-      <div className="w-full rounded-2xl sm:rounded-3xl border border-rose-200/80 bg-gradient-to-r from-rose-500/[0.08] via-rose-50/40 to-white p-3 sm:p-3.5 shadow-2xs hover:border-rose-300 transition-all">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="w-full rounded-2xl sm:rounded-3xl border border-rose-200/80 dark:border-rose-900/60 bg-gradient-to-r from-rose-500/[0.08] via-rose-50/40 to-white dark:from-rose-950/40 dark:via-slate-900 dark:to-slate-900 p-3.5 sm:p-4.5 shadow-2xs hover:border-rose-300 dark:hover:border-rose-800 transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           {/* Chap tomon: Icon + Matnlar */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-100/90 text-rose-700 flex items-center justify-center flex-shrink-0 shadow-2xs">
-              <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-rose-100/90 dark:bg-rose-950/80 text-rose-700 dark:text-rose-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs sm:text-sm font-bold text-rose-950">
+              <span className="text-xs sm:text-sm font-bold text-rose-950 dark:text-rose-100">
                 Sinov muddati tugadi
               </span>
-              <p className="text-[11px] sm:text-xs text-rose-700/80 mt-0.5 truncate hidden xs:block sm:block">
+              <p className="text-[11px] sm:text-xs text-rose-700/80 dark:text-slate-300 mt-0.5 truncate hidden xs:block sm:block">
                 Davom ettirish uchun tarif rejasini tanlang
               </p>
             </div>
@@ -111,8 +109,7 @@ export function SubscriptionBanner() {
           <div className="flex items-center flex-shrink-0 self-end sm:self-auto">
             <Button
               asChild
-              size="sm"
-              className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs h-8 px-4 shadow-2xs"
+              className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm h-9 sm:h-10 px-4 sm:px-5 shadow-2xs shadow-rose-500/20 transition-all active:scale-95"
             >
               <Link href="/pricing">Tarif tanlash</Link>
             </Button>
@@ -128,28 +125,28 @@ export function SubscriptionBanner() {
 
     return (
       <div
-        className={`w-full rounded-2xl sm:rounded-3xl border p-2.5 sm:p-3.5 transition-all shadow-2xs ${
+        className={`w-full rounded-2xl sm:rounded-3xl border p-3.5 sm:p-4.5 transition-all shadow-2xs ${
           isPro
-            ? 'bg-gradient-to-r from-amber-500/[0.08] via-amber-50/40 to-white border-amber-200/80 hover:border-amber-300'
-            : 'bg-gradient-to-r from-emerald-500/[0.08] via-emerald-50/40 to-white border-emerald-200/80 hover:border-emerald-300'
+            ? 'bg-gradient-to-r from-amber-500/[0.08] via-amber-50/40 to-white dark:from-amber-950/40 dark:via-slate-900 dark:to-slate-900 border-amber-200/80 dark:border-amber-900/60 hover:border-amber-300 dark:hover:border-amber-800'
+            : 'bg-gradient-to-r from-emerald-500/[0.08] via-emerald-50/40 to-white dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-900 border-emerald-200/80 dark:border-emerald-900/60 hover:border-emerald-300 dark:hover:border-emerald-800'
         }`}
       >
-        <div className="flex items-center justify-between gap-2.5 sm:gap-3">
-          {/* Chap tomon: Icon + Badge + Matn (100% bitta flex qatorda, mutanosib va markazlashgan) */}
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          {/* Chap tomon: Icon + Badge + Matn */}
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs ${
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-2xs ${
                 isPro
-                  ? 'bg-amber-100/90 text-amber-700'
-                  : 'bg-emerald-100/90 text-emerald-700'
+                  ? 'bg-amber-100/90 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400'
+                  : 'bg-emerald-100/90 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400'
               }`}
             >
-              <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Crown className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
               <Badge
-                className={`font-black text-[11px] sm:text-xs uppercase px-2 sm:px-2.5 py-0.5 rounded-lg shadow-2xs text-white tracking-wide ${
+                className={`font-black text-[11px] sm:text-xs uppercase px-2.5 py-1 rounded-lg shadow-2xs text-white tracking-wide ${
                   isPro
                     ? 'bg-amber-600 hover:bg-amber-600'
                     : 'bg-emerald-600 hover:bg-emerald-600'
@@ -160,7 +157,7 @@ export function SubscriptionBanner() {
 
               <span
                 className={`text-xs sm:text-sm font-bold truncate ${
-                  isPro ? 'text-amber-950' : 'text-emerald-950'
+                  isPro ? 'text-amber-950 dark:text-amber-100' : 'text-emerald-950 dark:text-emerald-100'
                 }`}
               >
                 Faol obuna
@@ -172,12 +169,11 @@ export function SubscriptionBanner() {
           <div className="flex items-center flex-shrink-0">
             <Button
               asChild
-              size="sm"
               variant="outline"
-              className={`rounded-xl font-bold text-xs h-7.5 sm:h-8.5 px-3 sm:px-4 shadow-2xs transition-colors bg-white ${
+              className={`rounded-xl font-bold text-xs sm:text-sm h-9 sm:h-10 px-4 sm:px-5 shadow-2xs transition-all active:scale-95 bg-white dark:bg-slate-900 ${
                 isPro
-                  ? 'border-amber-200 hover:border-amber-300 text-amber-900 hover:bg-amber-50/80'
-                  : 'border-emerald-200 hover:border-emerald-300 text-emerald-900 hover:bg-emerald-50/80'
+                  ? 'border-amber-200 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-50/80 dark:hover:bg-slate-800'
+                  : 'border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-50/80 dark:hover:bg-slate-800'
               }`}
             >
               <Link href="/pricing">Boshqarish</Link>

@@ -148,7 +148,7 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               disabled={loading}
-              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-900 dark:text-slate-100"
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
@@ -162,7 +162,7 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
               value={formData.payment_date}
               onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
               disabled={loading}
-              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-900 dark:text-slate-100"
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
@@ -177,13 +177,13 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
               disabled={loading}
-              className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-900 dark:text-slate-100"
+              className="rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
             />
           </div>
 
           {/* Automatic SMS Confirmation Toggle */}
           {debt.debtor_phone && (
-            <label className="flex items-center gap-2.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/50 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800 transition-colors">
+            <label className="flex items-center gap-2.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800 transition-colors">
               <input
                 type="checkbox"
                 checked={sendSMS}
@@ -207,14 +207,14 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl h-10 text-xs font-semibold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+              className="rounded-xl h-10 text-xs font-semibold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
             >
               Bekor qilish
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 text-xs font-bold shadow-md shadow-emerald-600/20"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 text-xs font-bold shadow-md shadow-emerald-600/20 cursor-pointer transition-colors disabled:cursor-not-allowed"
             >
               {loading ? 'Yuklanmoqda...' : 'To\'lovni Saqlash'}
             </Button>

@@ -53,31 +53,31 @@ function UzumCallbackContent() {
   }, [isSuccess, isCancel])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4 font-sans text-slate-800">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 p-4 font-sans text-slate-800 dark:text-slate-100">
       <div className="max-w-xs w-full text-center space-y-4">
         {isSuccess ? (
           <>
-            <div className="w-14 h-14 mx-auto rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-base font-bold text-slate-900">To&apos;lov qabul qilindi</h2>
-              <p className="text-xs text-slate-500">Ilova yangilanmoqda, iltimos kuting...</p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">To&apos;lov qabul qilindi</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Ilova yangilanmoqda, iltimos kuting...</p>
             </div>
           </>
         ) : (
           <>
-            <div className="w-14 h-14 mx-auto rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto rounded-full bg-slate-100 dark:bg-slate-850 text-slate-500 dark:text-slate-400 flex items-center justify-center">
               <XCircle className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-base font-bold text-slate-900">To&apos;lov bekor qilindi</h2>
-              <p className="text-xs text-slate-500">Oyna yopilmoqda...</p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">To&apos;lov bekor qilindi</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Oyna yopilmoqda...</p>
             </div>
           </>
         )}
 
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-400 pt-2">
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500 pt-2">
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
           <span>Yuklanmoqda...</span>
         </div>
@@ -90,7 +90,7 @@ export default function UzumCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
           <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
         </div>
       }

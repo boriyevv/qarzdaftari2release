@@ -293,13 +293,13 @@ function SMSDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[460px] rounded-3xl p-6">
+      <DialogContent className="sm:max-w-[460px] rounded-3xl p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-600" />
+          <DialogTitle className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span>SMS eslatma yuborish</span>
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500">
+          <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
             {debt.debtor_name} ({formatPhoneDisplay(debt.debtor_phone)})
           </DialogDescription>
         </DialogHeader>
@@ -307,18 +307,18 @@ function SMSDialog({
         <div className="space-y-4 pt-2">
           {/* SMS Credits */}
           {smsCredits === 0 ? (
-            <Alert variant="destructive" className="rounded-2xl border-rose-200 bg-rose-50/70 text-rose-800">
-              <AlertCircle className="h-4 w-4 text-rose-600" />
+            <Alert variant="destructive" className="rounded-2xl border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300">
+              <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
               <AlertDescription className="text-xs">
                 SMS balansingizda kredit qolmagan.{' '}
-                <a href="/sms-credits" className="underline font-bold hover:text-rose-900">
+                <a href="/sms-credits" className="underline font-bold hover:text-rose-900 dark:hover:text-rose-200">
                   SMS sotib olish
                 </a>
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="flex items-center justify-between p-3 bg-emerald-50/80 border border-emerald-200/70 rounded-2xl">
-              <span className="text-xs font-semibold text-emerald-900">Mavjud SMS balansi:</span>
+            <div className="flex items-center justify-between p-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800 rounded-2xl">
+              <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">Mavjud SMS balansi:</span>
               <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white font-black text-xs px-2.5 py-0.5 rounded-full">
                 {smsCredits} ta
               </Badge>
@@ -327,14 +327,14 @@ function SMSDialog({
 
           {/* Message Type */}
           <div>
-            <Label className="text-xs font-bold text-slate-700">SMS turi</Label>
+            <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">SMS turi</Label>
             <div className="grid grid-cols-2 gap-2 mt-1.5">
               <Button
                 type="button"
                 variant={smsType === 'default' ? 'default' : 'outline'}
                 onClick={() => setSmsType('default')}
                 className={`h-9 text-xs font-bold rounded-xl ${
-                  smsType === 'default' ? 'bg-blue-600 text-white' : 'text-slate-600'
+                  smsType === 'default' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 Avtomatik shablon
@@ -344,7 +344,7 @@ function SMSDialog({
                 variant={smsType === 'custom' ? 'default' : 'outline'}
                 onClick={() => setSmsType('custom')}
                 className={`h-9 text-xs font-bold rounded-xl ${
-                  smsType === 'custom' ? 'bg-blue-600 text-white' : 'text-slate-600'
+                  smsType === 'custom' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 O&apos;zim yozaman
@@ -354,21 +354,21 @@ function SMSDialog({
 
           {/* Message Content */}
           <div>
-            <Label className="text-xs font-bold text-slate-700">SMS matni</Label>
+            <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">SMS matni</Label>
             {smsType === 'custom' ? (
               <Textarea
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}
                 placeholder="SMS matnini yozing..."
                 rows={4}
-                className="mt-1.5 rounded-xl text-xs font-medium"
+                className="mt-1.5 rounded-xl text-xs font-medium border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
               />
             ) : (
-              <div className="mt-1.5 p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl text-xs text-slate-700 leading-relaxed font-medium">
+              <div className="mt-1.5 p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                 {generateDefaultMessage()}
               </div>
             )}
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-1">
               {smsType === 'custom'
                 ? `${customMessage.length} ta belgi (1 ta SMS ~ 70-160 belgi)`
                 : `${generateDefaultMessage().length} ta belgi`}
@@ -385,11 +385,12 @@ function SMSDialog({
                 setCustomMessage('')
                 setSmsType('default')
               }}
-              className="flex-1 h-11 rounded-xl text-xs font-bold text-slate-600"
+              className="flex-1 h-11 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
               Bekor qilish
             </Button>
             <Button
+              type="button"
               onClick={handleSendSMS}
               disabled={
                 loading ||
@@ -453,7 +454,7 @@ function SortableDebtRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`group border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-850/60 transition-colors ${
+      className={`group border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors ${
         isDragging ? 'bg-blue-50/50 dark:bg-blue-950/40 shadow-md ring-1 ring-blue-300 dark:ring-blue-800' : ''
       }`}
     >
@@ -510,7 +511,7 @@ function SortableDebtRow({
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-mono">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
               <span>{formatPhoneDisplay(debt.debtor_phone)}</span>
               <button
                 type="button"
@@ -533,8 +534,8 @@ function SortableDebtRow({
       <td className="py-3.5 px-3 min-w-[170px]">
         <div className="space-y-1.5">
           <div className="flex items-baseline justify-between text-xs">
-            <span className="text-slate-400 dark:text-slate-500 font-medium text-[11px]">Jami:</span>
-            <span className="font-bold text-slate-700 dark:text-slate-300 font-mono">
+            <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Jami:</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">
               {formatCurrency(debt.amount)}
             </span>
           </div>
@@ -549,7 +550,7 @@ function SortableDebtRow({
             />
           </div>
 
-          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+          <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
             <span>{paidPercent}% to&apos;landi</span>
             {debt.paid_amount > 0 && (
               <span className="text-emerald-700 dark:text-emerald-400 font-semibold font-mono">
@@ -569,10 +570,10 @@ function SortableDebtRow({
           </span>
         ) : (
           <div className="space-y-0.5">
-            <div className="font-black text-sm text-slate-900 dark:text-slate-100 font-mono tracking-tight text-orange-600 dark:text-orange-400">
+            <div className="font-black text-sm font-mono tracking-tight text-orange-600 dark:text-orange-400">
               {formatCurrency(remaining)}
             </div>
-            <div className="text-[10px] font-medium text-slate-400 dark:text-slate-500">Qoldiq qarz</div>
+            <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Qoldiq qarz</div>
           </div>
         )}
       </td>
@@ -625,7 +626,7 @@ function SortableDebtRow({
             className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-all hover:scale-105"
             title="Qarzdorga qo'ng'iroq qilish"
           >
-            <Phone className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+            <Phone className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
           </a>
 
           {/* Dropdown Menu for More Actions */}
@@ -634,7 +635,7 @@ function SortableDebtRow({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-8 h-8 p-0 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-800"
+                className="w-8 h-8 p-0 rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <MoreVertical className="w-4 h-4" />
               </Button>
@@ -642,30 +643,30 @@ function SortableDebtRow({
             <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5 shadow-xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 z-50">
               <DropdownMenuItem
                 onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
-                className="rounded-xl text-xs font-semibold py-2 cursor-pointer"
+                className="rounded-xl text-xs font-semibold py-2 cursor-pointer transition-colors text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                <ExternalLink className="w-3.5 h-3.5 mr-2 text-slate-500" />
+                <ExternalLink className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-slate-400" />
                 Profilni ko&apos;rish
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => exportSingleDebtReceiptPDF(debt)}
-                className="rounded-xl text-xs font-semibold py-2 cursor-pointer text-indigo-600 dark:text-indigo-400"
+                className="rounded-xl text-xs font-semibold py-2 cursor-pointer text-indigo-600 dark:text-indigo-400 focus:text-indigo-700 dark:focus:text-indigo-300 focus:bg-indigo-50 dark:focus:bg-indigo-950/40 transition-colors"
               >
                 <Receipt className="w-3.5 h-3.5 mr-2 text-indigo-600 dark:text-indigo-400" />
                 Chek / Kvitansiya (PDF)
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onAction('edit', debt)}
-                className="rounded-xl text-xs font-semibold py-2 cursor-pointer"
+                className="rounded-xl text-xs font-semibold py-2 cursor-pointer transition-colors text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                <Edit2 className="w-3.5 h-3.5 mr-2 text-slate-500" />
+                <Edit2 className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-slate-400" />
                 Tahrirlash
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onAction('sms-custom', debt)}
-                className="rounded-xl text-xs font-semibold py-2 cursor-pointer"
+                className="rounded-xl text-xs font-semibold py-2 cursor-pointer text-blue-600 dark:text-blue-400 focus:text-blue-700 dark:focus:text-blue-300 focus:bg-blue-50 dark:focus:bg-blue-950/40 transition-colors"
               >
-                <Send className="w-3.5 h-3.5 mr-2 text-blue-500" />
+                <Send className="w-3.5 h-3.5 mr-2 text-blue-500 dark:text-blue-400" />
                 SMS (O&apos;zim yozaman)
               </DropdownMenuItem>
               {!isCashier && (
@@ -673,9 +674,9 @@ function SortableDebtRow({
                   <DropdownMenuSeparator className="dark:bg-slate-800" />
                   <DropdownMenuItem
                     onClick={() => onAction('delete', debt)}
-                    className="rounded-xl text-xs font-semibold py-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer"
+                    className="rounded-xl text-xs font-semibold py-2 text-rose-600 dark:text-rose-400 focus:text-rose-700 dark:focus:text-rose-300 focus:bg-rose-50 dark:focus:bg-rose-950/40 cursor-pointer transition-colors"
                   >
-                    <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-600" />
+                    <Trash2 className="w-3.5 h-3.5 mr-2 text-rose-600 dark:text-rose-400" />
                     O&apos;chirish
                   </DropdownMenuItem>
                 </>
@@ -723,7 +724,7 @@ function SortableDebtCard({
       ref={setNodeRef}
       style={style}
       className={`relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-4 space-y-3.5 transition-all ${
-        isDragging ? 'ring-2 ring-blue-500 shadow-lg' : ''
+        isDragging ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:border-slate-300 dark:hover:border-slate-700'
       }`}
     >
       {/* Top Header: Avatar + Name + Due Date */}
@@ -734,7 +735,7 @@ function SortableDebtCard({
             type="button"
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-slate-600 touch-none focus:outline-none"
+            className="cursor-grab active:cursor-grabbing p-1 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 touch-none focus:outline-none transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
               <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
@@ -745,7 +746,7 @@ function SortableDebtCard({
           <div
             className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${getAvatarGradient(
               debt.debtor_name
-            )} text-white flex items-center justify-center font-black text-xs shadow-xs flex-shrink-0`}
+            )} text-white flex items-center justify-center font-black text-xs shadow-xs flex-shrink-0 cursor-pointer hover:scale-105 transition-transform`}
             onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
           >
             {getInitials(debt.debtor_name)}
@@ -758,7 +759,7 @@ function SortableDebtCard({
             >
               {debt.debtor_name}
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
               {formatPhoneDisplay(debt.debtor_phone)}
             </div>
           </div>
@@ -774,26 +775,26 @@ function SortableDebtCard({
       </div>
 
       {/* Financials & Progress Bar */}
-      <div className="p-3 bg-slate-50/80 dark:bg-slate-850/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
+      <div className="p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
         <div className="flex items-baseline justify-between">
-          <span className="text-[11px] font-medium text-slate-500">Qoldiq summa:</span>
+          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Qoldiq summa:</span>
           <span
             className={`font-black text-base font-mono tracking-tight ${
-              isFullyPaid ? 'text-emerald-700' : 'text-orange-600'
+              isFullyPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'
             }`}
           >
             {formatCurrency(remaining)}
           </span>
         </div>
 
-        <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
+        <div className="w-full bg-slate-200/80 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
           <div
             className={`h-full rounded-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-blue-600'}`}
             style={{ width: `${paidPercent}%` }}
           />
         </div>
 
-        <div className="flex items-center justify-between text-[10px] text-slate-400">
+        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
           <span>Jami: {formatCurrencyShort(debt.amount)}</span>
           <span>{paidPercent}% to&apos;langan</span>
         </div>
@@ -803,7 +804,7 @@ function SortableDebtCard({
       <div className="grid grid-cols-4 gap-1.5 pt-1">
         <a
           href={`tel:${debt.debtor_phone}`}
-          className="h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1 text-xs font-bold transition-all"
+          className="h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95"
         >
           <Phone className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Tel</span>
@@ -814,7 +815,7 @@ function SortableDebtCard({
           size="sm"
           variant="outline"
           onClick={() => onAction('sms-auto', debt)}
-          className="h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white border-blue-200 dark:border-blue-900/60 font-bold text-xs"
+          className="h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 dark:hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white dark:hover:text-white border-blue-200 dark:border-blue-900/60 font-bold text-xs transition-all active:scale-95"
         >
           <MessageSquare className="w-3.5 h-3.5 mr-1" />
           SMS
@@ -824,7 +825,7 @@ function SortableDebtCard({
           type="button"
           size="sm"
           onClick={() => onAction('payment', debt)}
-          className="col-span-2 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20"
+          className="col-span-2 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95"
         >
           <Plus className="w-3.5 h-3.5 mr-1" />
           To&apos;lov
@@ -1042,13 +1043,13 @@ export function DebtsListDraggable({
               placeholder="Qarzdor ismi yoki telefoni bo'yicha qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-850 text-slate-900 dark:text-slate-100"
+              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1059,14 +1060,14 @@ export function DebtsListDraggable({
           <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             {/* Sort Select */}
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-slate-400 hidden sm:flex items-center gap-1">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
                 <ArrowUpDown className="w-3.5 h-3.5" />
                 Saralash:
               </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-850 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-colors"
               >
                 <option value="date-desc">Eng yangi qo&apos;shilganlar</option>
                 <option value="remaining-desc">Qoldiq: Kattadan kichikka</option>
@@ -1081,7 +1082,7 @@ export function DebtsListDraggable({
               type="button"
               variant="outline"
               onClick={() => setIsAutoRemindersOpen(true)}
-              className="h-10 px-3.5 rounded-2xl border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-900/40 flex items-center gap-1.5 transition-colors"
+              className="h-10 px-3.5 rounded-2xl border-amber-300 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-400 dark:hover:border-amber-700 flex items-center gap-1.5 transition-all"
               title="Yaqinlashgan qarzlar uchun avtomatik eslatmalar"
             >
               <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -1094,7 +1095,7 @@ export function DebtsListDraggable({
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-10 px-3.5 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors"
+                  className="h-10 px-3.5 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all"
                   title="Qarzlar ro'yxatini yuklab olish"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -1107,23 +1108,23 @@ export function DebtsListDraggable({
               >
                 <DropdownMenuItem
                   onClick={() => handleExport('excel')}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 dark:hover:text-emerald-400 cursor-pointer"
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 dark:hover:text-emerald-300 focus:bg-emerald-50 dark:focus:bg-emerald-950/50 focus:text-emerald-700 dark:focus:text-emerald-300 cursor-pointer transition-colors"
                 >
                   <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="font-bold">Excel (.xlsx)</p>
-                    <p className="text-[10px] text-slate-400 font-normal">Jadval va hisob-kitoblar</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Jadval va hisob-kitoblar</p>
                   </div>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onClick={() => handleExport('pdf')}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-400 cursor-pointer mt-0.5"
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-700 dark:hover:text-rose-300 focus:bg-rose-50 dark:focus:bg-rose-950/50 focus:text-rose-700 dark:focus:text-rose-300 cursor-pointer mt-0.5 transition-colors"
                 >
                   <FileText className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="font-bold">PDF Hisobot (A4)</p>
-                    <p className="text-[10px] text-slate-400 font-normal">Chop etish va hisobot uchun</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Chop etish va hisobot uchun</p>
                   </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -1132,7 +1133,7 @@ export function DebtsListDraggable({
         </div>
 
         {/* Bottom line: Filter Chips & Active Summary */}
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-1 border-t border-slate-100">
+        <div className="flex items-center justify-between flex-wrap gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             {/* 1. All */}
             <button
@@ -1140,14 +1141,16 @@ export function DebtsListDraggable({
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'all'
-                  ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-xs'
-                  : 'bg-slate-100/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700'
               }`}
             >
               <span>Barchasi</span>
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  statusFilter === 'all' ? 'bg-slate-800 dark:bg-slate-700 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                  statusFilter === 'all'
+                    ? 'bg-blue-700 text-white'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {counts.all}
@@ -1161,7 +1164,7 @@ export function DebtsListDraggable({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'active'
                   ? 'bg-orange-600 text-white shadow-xs'
-                  : 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-950/60 border border-orange-200/60 dark:border-orange-900/50'
+                  : 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200/60 dark:border-orange-900/50'
               }`}
             >
               <span>Qarzdorlar</span>
@@ -1183,7 +1186,7 @@ export function DebtsListDraggable({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'overdue'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-950/60 border border-rose-200/60 dark:border-rose-900/50'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200/60 dark:border-rose-900/50'
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
@@ -1204,7 +1207,7 @@ export function DebtsListDraggable({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'paid'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-900/50'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200/60 dark:border-emerald-900/50'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1222,14 +1225,14 @@ export function DebtsListDraggable({
           </div>
 
           {/* Active Summary Pill */}
-          <div className="text-[11px] font-semibold text-slate-500">
+          <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
             Ko&apos;rsatilmoqda:{' '}
-            <span className="text-slate-900 font-bold">{displayedDebts.length} ta</span>
+            <span className="text-slate-900 dark:text-slate-100 font-bold">{displayedDebts.length} ta</span>
             {totalFilteredRemaining > 0 && (
               <>
                 {' '}
                 • Qoldiq:{' '}
-                <span className="text-orange-600 font-bold font-mono">
+                <span className="text-orange-600 dark:text-orange-400 font-bold font-mono">
                   {formatCurrencyShort(totalFilteredRemaining)}
                 </span>
               </>
@@ -1240,7 +1243,7 @@ export function DebtsListDraggable({
 
       {/* ─── EMPTY STATES ────────────────────────────────────────────── */}
       {displayedDebts.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-slate-50/60 dark:bg-slate-850/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+        <div className="text-center py-16 px-4 bg-slate-50/60 dark:bg-slate-800/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-center text-slate-400">
             {search ? <Search className="w-7 h-7" /> : <Sparkles className="w-7 h-7 text-blue-500" />}
           </div>
@@ -1268,7 +1271,7 @@ export function DebtsListDraggable({
               variant="outline"
               size="sm"
               onClick={() => setSearch('')}
-              className="rounded-xl text-xs font-bold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+              className="rounded-xl text-xs font-bold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               Qidiruvni tozalash
             </Button>
@@ -1297,7 +1300,7 @@ export function DebtsListDraggable({
                 onDragEnd={handleDragEnd}
               >
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50/90 dark:bg-slate-850/90 border-b border-slate-200/80 dark:border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <thead className="bg-slate-50/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">
                     <tr>
                       <th className="py-3 pl-4 pr-3">Qarzdor</th>
                       <th className="py-3 px-3">Summa va Foiz</th>

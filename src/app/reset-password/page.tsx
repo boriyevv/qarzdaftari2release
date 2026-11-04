@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { supabase } from '@/lib/supabase/client'
 
 
@@ -71,26 +72,31 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4 relative">
+      {/* Top Right Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600">Qarz Daftari</h1>
-          <p className="text-slate-600 mt-2">Yangi parol o'rnating</p>
+          <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">Qarz Daftari</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Yangi parol o&apos;rnating</p>
         </div>
 
-        <Card className="shadow-xl border-slate-200">
+        <Card className="shadow-xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">Parolni Tiklash</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">Parolni Tiklash</CardTitle>
+            <CardDescription className="text-slate-500 dark:text-slate-400">
               Yangi parol kiriting
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             {success ? (
-              <Alert className="border-green-200 bg-green-50">
-                <AlertDescription className="text-green-800">
-                  ✅ Parol muvaffaqiyatli o'zgartirildi! Login sahifasiga yo'naltirilmoqda...
+              <Alert className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40">
+                <AlertDescription className="text-emerald-800 dark:text-emerald-200">
+                  ✅ Parol muvaffaqiyatli o&apos;zgartirildi! Login sahifasiga yo&apos;naltirilmoqda...
                 </AlertDescription>
               </Alert>
             ) : (
