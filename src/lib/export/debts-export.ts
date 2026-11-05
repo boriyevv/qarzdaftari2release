@@ -366,24 +366,48 @@ export function exportSingleDebtReceiptPDF(debt: ExportableDebt, storeName: stri
 
   y += 24
 
-  // Financial breakdown table
+  const formatReceiptDate = (dStr?: string | null) => {
+    if (!dStr) return '-'
+    try {
+      const d = new Date(dStr)
+      if (isNaN(d.getTime())) return dStr
+      const day = String(d.getDate()).padStart(2, '0')
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const year = d.getFullYear()
+      return `${day}.${month}.${year}`
+    } catch {
+      return dStr
+    }
+  }
+
+  // Financial breakdown table (calculated to match page width 124mm precisely)
+  const tableContentWidth = pageWidth - 24
+  const col0Width = 52
+  const col1Width = tableContentWidth - col0Width
+
   autoTable(doc, {
     startY: y,
-    head: [['Ko\'rsatkich', 'Summa']],
+    head: [['Ko\'rsatkich', 'Tafsilot / Summa']],
     body: [
       ['Jami Nasiya Summasi', formatCurrency(debt.amount)],
       ['To\'langan Summa', formatCurrency(debt.paid_amount)],
       ['Qoldiq Qarz Summasi', formatCurrency(remaining)],
-      ['Nasiya Berilgan Sana', debt.debt_date ? new Date(debt.debt_date).toLocaleDateString('uz-UZ') : '-'],
-      ['To\'lash Muddati', debt.due_date ? new Date(debt.due_date).toLocaleDateString('uz-UZ') : 'Muddatsiz'],
+      ['Nasiya Berilgan Sana', debt.debt_date ? formatReceiptDate(debt.debt_date) : '-'],
+      ['To\'lash Muddati', debt.due_date ? formatReceiptDate(debt.due_date) : 'Muddatsiz'],
       ['Izoh / Mahsulotlar', debt.note || 'Ko\'rsatilmagan'],
     ],
     theme: 'grid',
     headStyles: { fillColor: [30, 58, 138], fontSize: 9, fontStyle: 'bold' },
-    bodyStyles: { fontSize: 8.5 },
+    bodyStyles: { fontSize: 8.5, overflow: 'linebreak', cellPadding: 2.8 },
     columnStyles: {
-      0: { cellWidth: 65, fontStyle: 'bold', textColor: [51, 65, 85] },
-      1: { cellWidth: 55, halign: 'right' },
+      0: { cellWidth: col0Width, fontStyle: 'bold', textColor: [51, 65, 85] },
+      1: { cellWidth: col1Width, halign: 'right' },
+    },
+    didParseCell: (data) => {
+      // Izoh row should be left-aligned so product lists and notes wrap cleanly inside the cell
+      if (data.section === 'body' && data.row.index === 5 && data.column.index === 1) {
+        data.cell.styles.halign = 'left'
+      }
     },
     margin: { left: 12, right: 12 },
   })
