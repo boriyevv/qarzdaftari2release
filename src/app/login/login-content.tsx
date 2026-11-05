@@ -93,7 +93,7 @@ export function LoginPageContent() {
 
 			setSuccess("Muvaffaqiyatli! Kassa oynasiga yo'naltirilmoqda...")
 			setTimeout(() => {
-				window.location.href = '/dashboard'
+				window.location.href = targetRedirect
 			}, 300)
 		} catch (err) {
 			setError('Tarmoq xatosi')
@@ -128,7 +128,7 @@ export function LoginPageContent() {
 			return
 		}
 
-		window.location.href = '/dashboard'
+		window.location.href = targetRedirect
 	}
 
 	const handlePhoneChange = (value: string) => {
@@ -236,7 +236,7 @@ export function LoginPageContent() {
 			setSuccess("Muvaffaqiyatli! Yo'naltirilmoqda...")
 
 			setTimeout(() => {
-				window.location.href = '/dashboard'
+				window.location.href = targetRedirect
 			}, 300)
 		} catch (error) {
 			setError('Tarmoq xatosi')

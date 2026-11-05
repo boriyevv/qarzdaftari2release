@@ -252,6 +252,10 @@ export default function RegisterPage() {
         return
       }
 
+      if (data.user?.id && typeof window !== 'undefined') {
+        localStorage.setItem('phone_user_session', data.user.id)
+      }
+
       // Automatically navigate to dashboard after successful phone registration
       window.location.href = '/dashboard'
     } catch (error) {

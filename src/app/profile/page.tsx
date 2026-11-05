@@ -29,7 +29,7 @@ import { isSoundEnabled, setSoundEnabled, playSuccessSound } from '@/lib/sounds'
 import { CashiersManagement } from '@/components/profile/cashiers-management'
 
 export default function ProfilePage() {
-  const { user } = useUser()
+  const { user, loading: userLoading } = useUser()
   const { theme, setTheme } = useTheme()
   const [soundOn, setSoundOn] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -38,6 +38,12 @@ export default function ProfilePage() {
     setMounted(true)
     setSoundOn(isSoundEnabled())
   }, [])
+
+  useEffect(() => {
+    if (!userLoading && !user) {
+      window.location.href = '/login?redirect=/profile'
+    }
+  }, [user, userLoading])
 
   const handleToggleSound = () => {
     const next = !soundOn
@@ -50,11 +56,25 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('phone_user_session')
+      }
       await fetch('/api/auth/logout', { method: 'POST' })
       window.location.href = '/login'
     } catch (e) {
       console.error(e)
     }
+  }
+
+  if (userLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-slate-600 dark:text-slate-400 text-sm">Yuklanmoqda...</p>
+        </div>
+      </div>
+    )
   }
 
   const currentPlan = (user?.plan_type || 'FREE').toUpperCase()
