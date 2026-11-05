@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { MessageSquare, AlertCircle, ExternalLink } from 'lucide-react'
+import { MessageSquare, AlertCircle, ExternalLink, X } from 'lucide-react'
 import { playPingSound } from '@/lib/sounds'
+import { useUser } from '@/lib/contexts/user-context'
 
 import {
   Dialog,
@@ -28,10 +29,12 @@ interface AddDebtModalProps {
 }
 
 export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDebtModalProps) {
+  const { user } = useUser()
   const [loading, setLoading] = useState(false)
   const [sendSMS, setSendSMS] = useState(false)
   const [useCustomMessage, setUseCustomMessage] = useState(false)
   const [smsCredits, setSmsCredits] = useState(0)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     debtor_name: '',
@@ -51,14 +54,15 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
         amount: '',
         due_date: '',
         note: '',
-        shop_name: '',
+        shop_name: user?.store_name || '',
         custom_sms_message: '',
       })
       setSendSMS(false)
       setUseCustomMessage(false)
+      setErrorMessage(null)
       fetchSMSCredits()
     }
-  }, [open])
+  }, [open, user?.store_name])
 
   const fetchSMSCredits = async () => {
     try {
@@ -92,6 +96,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorMessage(null)
     if (!canSubmit()) return
     setLoading(true)
 
@@ -100,10 +105,16 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
         debtor_name: formData.debtor_name.trim(),
         debtor_phone: `+998${formData.debtor_phone}`,
         amount: Number(formData.amount),
-        due_date: formData.due_date || null,
-        note: formData.note.trim() || null,
       }
-      if (folderId) debtPayload.folder_id = folderId
+      if (formData.due_date) {
+        debtPayload.due_date = formData.due_date
+      }
+      if (formData.note.trim()) {
+        debtPayload.note = formData.note.trim()
+      }
+      if (folderId) {
+        debtPayload.folder_id = folderId
+      }
 
       const debtResponse = await fetch('/api/debts', {
         method: 'POST',
@@ -111,7 +122,9 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
         body: JSON.stringify(debtPayload),
       })
       const debtData = await debtResponse.json()
-      if (!debtResponse.ok) throw new Error(debtData.error || "Qarz qo'shishda xato")
+      if (!debtResponse.ok) {
+        throw new Error(debtData.error || "Qarz qo'shishda xato yuz berdi")
+      }
 
       const debtId = debtData.debt?.id || debtData.id
       let smsSent = false
@@ -138,23 +151,22 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
       }
 
       playPingSound()
-      alert(smsSent ? "✅ Qarz qo'shildi va SMS yuborildi!" : "✅ Qarz muvaffaqiyatli qo'shildi!")
       onSuccess()
       onOpenChange(false)
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Xato yuz berdi'
-      alert(msg)
+      setErrorMessage(msg)
     } finally {
       setLoading(false)
     }
   }
 
   const validationHint = !formData.debtor_name || formData.debtor_phone.length < 9 || !formData.amount
-    ? "⚠️ Barcha majburiy maydonlarni to'ldiring"
+    ? "Qarzdor ismi, telefon va summani to'ldiring"
     : sendSMS && smsCredits === 0
-    ? "⚠️ SMS ni o'chiring yoki kredit sotib oling"
+    ? "SMS yuborish uchun kredit yetarli emas. SMS ni o'chiring yoki kredit xarid qiling"
     : sendSMS && useCustomMessage && !formData.custom_sms_message.trim()
-    ? "⚠️ SMS matni bo'sh"
+    ? "SMS matni bo'sh bo'lmasligi kerak"
     : null
 
   return (
@@ -206,7 +218,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
               className="h-8 w-8 shrink-0 -mt-1 -mr-1 text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 rounded-full cursor-pointer transition-colors"
             >
               <span className="sr-only">Yopish</span>
-              ✕
+              <X className="w-4 h-4" />
             </Button>
           </DialogClose>
         </DialogHeader>
@@ -214,6 +226,14 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
         {/* ── Scrollable body + footer inside one <form> ─────────── */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1">
           <div className="flex-1 px-4 py-4 space-y-4">
+
+            {/* Server / Validation Error alert */}
+            {errorMessage && (
+              <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
             {/* Debtor Name */}
             <div className="space-y-1.5">
@@ -284,10 +304,9 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
             {/* Shop Name */}
             <div className="space-y-1.5">
-              <Label htmlFor="shop_name" className="text-sm">
+              <Label htmlFor="shop_name" className="text-sm font-medium">
                 Do&apos;kon nomi{' '}
-                <span className="text-slate-400 text-xs">(SMS uchun)</span>
-                <span className="text-red-500">*</span>
+                <span className="text-slate-400 text-xs font-normal">(SMS uchun)</span>
               </Label>
               <Input
                 id="shop_name"
@@ -300,9 +319,9 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
             {/* Due Date */}
             <div className="space-y-1.5">
-              <Label htmlFor="due_date" className="text-sm">
-                To&apos;lov muddati
-                <span className="text-red-500">*</span>
+              <Label htmlFor="due_date" className="text-sm font-medium">
+                To&apos;lov muddati{' '}
+                <span className="text-slate-400 text-xs font-normal">(ixtiyoriy)</span>
               </Label>
               <Input
                 id="due_date"
@@ -315,10 +334,10 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
             {/* Note */}
             <div className="space-y-1.5">
-              <Label htmlFor="note" className="text-sm">
-                Izoh
-                <span className="text-red-500">*</span>
-                </Label>
+              <Label htmlFor="note" className="text-sm font-medium">
+                Izoh{' '}
+                <span className="text-slate-400 text-xs font-normal">(ixtiyoriy)</span>
+              </Label>
               <Textarea
                 id="note"
                 value={formData.note}

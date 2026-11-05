@@ -14,8 +14,8 @@ export const runtime = 'nodejs'
 const createPaymentSchema = z.object({
   debt_id: z.string().uuid(),
   amount: z.number().positive('Summa musbat bo\'lishi kerak'),
-  payment_date: z.string().optional(),
-  note: z.string().optional(),
+  payment_date: z.string().nullable().optional().or(z.literal('')).transform((val) => val || undefined),
+  note: z.string().nullable().optional().or(z.literal('')).transform((val) => val || undefined),
   send_confirmation_sms: z.boolean().optional(),
 })
 

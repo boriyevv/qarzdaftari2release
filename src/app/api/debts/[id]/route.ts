@@ -53,9 +53,9 @@ const updateDebtSchema = z.object({
   debtor_name: z.string().min(2).optional(),
   debtor_phone: z.string().regex(/^\+998\d{9}$/).optional(),
   amount: z.number().positive().optional(),
-  due_date: z.string().optional(),
-  note: z.string().optional(),
-  folder_id: z.string().uuid().optional(),
+  due_date: z.string().nullable().optional().or(z.literal('')).transform((val) => val || null),
+  note: z.string().nullable().optional().or(z.literal('')).transform((val) => val || null),
+  folder_id: z.string().uuid().nullable().optional().or(z.literal('')).transform((val) => val || null),
   status: z.enum(['pending', 'paid', 'overdue', 'blacklisted']).optional(),
 })
 

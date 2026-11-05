@@ -81,13 +81,13 @@ export async function GET(request: Request) {
 
 // Validation schema for creating debt
 const createDebtSchema = z.object({
-  folder_id: z.string().uuid().optional(),
+  folder_id: z.string().uuid().nullable().optional().or(z.literal('')).transform((val) => val || undefined),
   debtor_name: z.string().min(2, 'Ism kamida 2 ta belgi'),
   debtor_phone: z.string().regex(/^\+998\d{9}$/, 'Telefon format: +998XXXXXXXXX'),
   amount: z.number().positive('Summa musbat bo\'lishi kerak'),
-  debt_date: z.string().optional(),
-  due_date: z.string().optional(),
-  note: z.string().optional(),
+  debt_date: z.string().nullable().optional().or(z.literal('')).transform((val) => val || undefined),
+  due_date: z.string().nullable().optional().or(z.literal('')).transform((val) => val || null),
+  note: z.string().nullable().optional().or(z.literal('')).transform((val) => val || null),
 })
 
 export async function POST(request: Request) {
@@ -160,13 +160,13 @@ export async function POST(request: Request) {
       .from('debts')
       .insert({
         user_id: storeOwnerId,
-        folder_id: folderId,
+        folder_id: folderId || null,
         debtor_name: result.data.debtor_name,
         debtor_phone: result.data.debtor_phone,
         amount: result.data.amount,
         paid_amount: 0,
         debt_date: result.data.debt_date || new Date().toISOString().split('T')[0],
-        due_date: result.data.due_date,
+        due_date: result.data.due_date || null,
         note: debtNote,
         status: 'pending',
       })
