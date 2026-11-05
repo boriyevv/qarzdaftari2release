@@ -88,28 +88,15 @@ export default function PricingPage() {
     refreshUser?.()
   }, [])
 
-  const handleSelectPlan = async (planType: string) => {
-    // If auth state is still loading from network, wait briefly so we don't falsely redirect
-    if (userLoading) {
-      setLoading(planType)
-      let count = 0
-      while (userLoading && count < 10) {
-        await new Promise((r) => setTimeout(r, 200))
-        count++
-      }
-      setLoading(null)
+  // Redirect unauthenticated visitors to landing page pricing section
+  useEffect(() => {
+    if (!userLoading && !user) {
+      window.location.href = '/#pricing'
     }
+  }, [user, userLoading])
 
-    if (planType === 'FREE') {
-      if (!user) {
-        window.location.href = '/register'
-      }
-      return
-    }
-    if (!user) {
-      window.location.href = `/register?plan=${planType.toLowerCase()}`
-      return
-    }
+  const handleSelectPlan = async (planType: string) => {
+    if (planType === 'FREE') return
     setSelectedPlan(planType)
     setShowProviderModal(true)
   }
@@ -172,6 +159,17 @@ export default function PricingPage() {
   // Selected plan details for modal
   const selectedPlanObj = selectedPlan ? PLANS[selectedPlan as keyof typeof PLANS] : null
   const selectedPlanPrice = selectedPlan ? getPlanPrice(selectedPlan as any, billingCycle) : 0
+
+  if (userLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-slate-600 dark:text-slate-400 text-sm">Yuklanmoqda...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <AppShell
