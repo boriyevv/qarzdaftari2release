@@ -44,13 +44,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const fetchUser = async () => {
         try {
             console.log('🔍 Fetching user...')
-            const response = await fetch('/api/auth/me')
-             console.log('📡 Response status:', response.status)
+            const headers: Record<string, string> = {}
+            if (typeof window !== 'undefined') {
+                const storedSession = localStorage.getItem('phone_user_session')
+                if (storedSession) {
+                    headers['x-phone-session'] = storedSession
+                }
+            }
+
+            const response = await fetch('/api/auth/me', { headers })
+            console.log('📡 Response status:', response.status)
 
             if (response.ok) {
                 const data = await response.json()
-                 console.log('✅ User found:', data.profile?.full_name)
+                console.log('✅ User found:', data.profile?.full_name)
                 setUser(data.profile)
+                if (data.profile?.id && typeof window !== 'undefined') {
+                    localStorage.setItem('phone_user_session', data.profile.id)
+                }
             } else {
                 console.log('❌ Not authenticated')
                 setUser(null)

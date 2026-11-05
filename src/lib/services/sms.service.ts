@@ -348,3 +348,51 @@ class SMSService {
 
 // Singleton instance
 export const smsService = new SMSService()
+
+/**
+ * Helper to fetch internal user SMS credits balance accurately
+ */
+export async function getUserSmsCredits(supabase: any, userId: string): Promise<{
+  balance: number
+  totalPurchased: number
+  totalUsed: number
+}> {
+  const { data: row } = await supabase
+    .from('sms_credits')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  const balance = row?.balance ?? 0
+  const totalPurchased = row?.total_purchased ?? balance
+  const totalUsed = row?.total_used ?? 0
+
+  return { balance, totalPurchased, totalUsed }
+}
+
+/**
+ * Helper to safely deduct SMS credits from user balance
+ */
+export async function deductUserSmsCredits(supabase: any, userId: string, creditsToDeduct: number = 1): Promise<boolean> {
+  const { data: row } = await supabase
+    .from('sms_credits')
+    .select('balance, total_used')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (!row) return false
+
+  const newBalance = Math.max(0, (row.balance || 0) - creditsToDeduct)
+  const newUsed = (row.total_used || 0) + creditsToDeduct
+
+  const { error } = await supabase
+    .from('sms_credits')
+    .update({
+      balance: newBalance,
+      total_used: newUsed,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+
+  return !error
+}

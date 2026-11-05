@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { smsService } from '@/lib/services/sms.service'
+import { smsService, getUserSmsCredits, deductUserSmsCredits } from '@/lib/services/sms.service'
 import { formatCurrency } from '@/lib/utils/currency'
 
 export const dynamic = 'force-dynamic'
@@ -73,14 +73,8 @@ export async function GET(request: NextRequest) {
 
       // Check user's cached credits
       if (!userCreditsCache.has(userId)) {
-        const { data: credits } = await adminSupabase
-          .from('sms_credits')
-          .select('credits, used_credits')
-          .eq('user_id', userId)
-
-        const total = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-        const used = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-        userCreditsCache.set(userId, Math.max(0, total - used))
+        const { balance } = await getUserSmsCredits(adminSupabase, userId)
+        userCreditsCache.set(userId, balance)
       }
 
       const availableCredits = userCreditsCache.get(userId) || 0
@@ -121,7 +115,7 @@ export async function GET(request: NextRequest) {
       try {
         const externalId = await smsService.sendSMS(debt.debtor_phone, message)
         if (externalId) {
-          await adminSupabase.rpc('deduct_sms_credit', { p_user_id: userId, p_credits: 1 })
+          await deductUserSmsCredits(adminSupabase, userId, 1)
           await adminSupabase.from('sms_usage_log').insert({
             user_id: userId,
             debt_id: debt.id,

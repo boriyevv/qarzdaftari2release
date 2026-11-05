@@ -49,7 +49,8 @@ interface SMSCreditsData {
 }
 
 export default function SMSCreditsPage() {
-	const { user } = useUser()
+	const { user, refreshUser } = useUser()
+	const [paymentSuccessMessage, setPaymentSuccessMessage] = useState(false)
 	const [credits, setCredits] = useState<SMSCreditsData | null>(null)
 	const [loading, setLoading] = useState(true)
 	const [selectedPackage, setSelectedPackage] = useState<string | null>(null)
@@ -64,6 +65,11 @@ export default function SMSCreditsPage() {
 	const [purchaseLoading, setPurchaseLoading] = useState(false)
 
 	useEffect(() => {
+		if (typeof window !== 'undefined' && window.location.search.includes('payment=success')) {
+			setPaymentSuccessMessage(true)
+			// Remove query param cleanly without reloading
+			window.history.replaceState({}, '', window.location.pathname)
+		}
 		fetchCredits()
 	}, [])
 
@@ -74,6 +80,7 @@ export default function SMSCreditsPage() {
 			if (response.ok) {
 				setCredits(data)
 			}
+			await refreshUser?.()
 		} catch (error) {
 			console.error('Failed to fetch credits:', error)
 		} finally {
@@ -149,6 +156,18 @@ export default function SMSCreditsPage() {
 			subtitle='Qarzdorlarga eslatma yuborish uchun SMS paketlar'
 		>
 			<div className='max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6'>
+				{paymentSuccessMessage && (
+					<div className='p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 rounded-2xl flex items-center justify-between shadow-xs animate-in fade-in'>
+						<div className='flex items-center gap-3'>
+							<div className='w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shrink-0'>✓</div>
+							<div>
+								<p className='font-bold text-sm'>To'lov muvaffaqiyatli qabul qilindi!</p>
+								<p className='text-xs text-emerald-700 dark:text-emerald-300'>SMS kreditlaringiz balansingizga qo'shildi.</p>
+							</div>
+						</div>
+						<button onClick={() => setPaymentSuccessMessage(false)} className='text-emerald-700 hover:text-emerald-900 font-bold text-sm px-2 py-1 cursor-pointer'>✕</button>
+					</div>
+				)}
 				{/* Current Balance */}
 				{loading ? (
 					// Ma'lumot yuklanguncha ko'rinib turadigan chiroyli skeleton
@@ -404,6 +423,7 @@ export default function SMSCreditsPage() {
 							}}
 							onSuccess={() => {
 								fetchCredits()
+								refreshUser?.()
 								setShowClickOnSiteModal(false)
 							}}
 						/>
@@ -430,6 +450,7 @@ export default function SMSCreditsPage() {
 							}}
 							onSuccess={() => {
 								fetchCredits()
+								refreshUser?.()
 								setShowPaymeModal(false)
 							}}
 						/>
@@ -454,6 +475,7 @@ export default function SMSCreditsPage() {
 							}}
 							onSuccess={() => {
 								fetchCredits()
+								refreshUser?.()
 								setShowUzumModal(false)
 							}}
 						/>

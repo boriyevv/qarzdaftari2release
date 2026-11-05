@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { smsService } from '@/lib/services/sms.service'
+import { smsService, getUserSmsCredits, deductUserSmsCredits } from '@/lib/services/sms.service'
 import { formatCurrency } from '@/lib/utils/currency'
 
 export const dynamic = 'force-dynamic'
@@ -29,14 +29,7 @@ export async function GET() {
     }
 
     // Get SMS Credits
-    const { data: credits } = await supabase
-      .from('sms_credits')
-      .select('credits, used_credits')
-      .eq('user_id', profile.id)
-
-    const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-    const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-    const remainingCredits = Math.max(0, totalCredits - usedCredits)
+    const { balance: remainingCredits } = await getUserSmsCredits(supabase, profile.id)
 
     // Fetch active open debts
     const { data: debts, error: debtsError } = await supabase
@@ -141,14 +134,8 @@ export async function POST(request: NextRequest) {
     const selectedIds: string[] | undefined = body.debt_ids
 
     // Fetch user credits
-    const { data: credits } = await supabase
-      .from('sms_credits')
-      .select('credits, used_credits')
-      .eq('user_id', profile.id)
-
-    const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-    const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-    let remainingCredits = Math.max(0, totalCredits - usedCredits)
+    const { balance: remainingCreditsFromDb } = await getUserSmsCredits(supabase, profile.id)
+    let remainingCredits = remainingCreditsFromDb
 
     if (remainingCredits < 1) {
       return NextResponse.json(
@@ -211,7 +198,7 @@ export async function POST(request: NextRequest) {
       try {
         const externalId = await smsService.sendSMS(debt.debtor_phone, message)
         if (externalId) {
-          await supabase.rpc('deduct_sms_credit', { p_user_id: profile.id, p_credits: 1 })
+          await deductUserSmsCredits(supabase, profile.id, 1)
           await supabase.from('sms_usage_log').insert({
             user_id: profile.id,
             debt_id: debt.id,

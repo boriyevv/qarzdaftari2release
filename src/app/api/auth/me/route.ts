@@ -81,10 +81,12 @@ export async function GET() {
       return prof
     }
 
-    // 1. If not authenticated via Supabase Auth, check phone_user_session cookie
+    // 1. If not authenticated via Supabase Auth, check phone_user_session cookie or x-phone-session header
     if (authError || !user) {
       const cookieStore = await cookies()
-      const phoneUserId = cookieStore.get('phone_user_session')?.value
+      const { headers } = await import('next/headers')
+      const headerStore = await headers()
+      const phoneUserId = cookieStore.get('phone_user_session')?.value || headerStore.get('x-phone-session')
 
       if (phoneUserId) {
         const { data: phoneProfile } = await adminSupabase

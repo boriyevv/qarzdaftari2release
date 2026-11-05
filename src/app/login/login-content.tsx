@@ -87,6 +87,10 @@ export function LoginPageContent() {
 				return
 			}
 
+			if (data.user?.id && typeof window !== 'undefined') {
+				localStorage.setItem('phone_user_session', data.user.id)
+			}
+
 			setSuccess("Muvaffaqiyatli! Kassa oynasiga yo'naltirilmoqda...")
 			setTimeout(() => {
 				window.location.href = '/dashboard'
@@ -223,6 +227,10 @@ export function LoginPageContent() {
 			if (!loginResponse.ok) {
 				setError(loginData.error || 'Login xatosi')
 				return
+			}
+
+			if (loginData.user?.id && typeof window !== 'undefined') {
+				localStorage.setItem('phone_user_session', loginData.user.id)
 			}
 
 			setSuccess("Muvaffaqiyatli! Yo'naltirilmoqda...")

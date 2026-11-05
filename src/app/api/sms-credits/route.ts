@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser } from '@/lib/auth/middleware'
+import { getUserSmsCredits } from '@/lib/services/sms.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,15 +22,8 @@ export async function GET(request: NextRequest) {
 
     const storeOwnerId = profile.store_owner_id || profile.id
 
-    // Get SMS credits
-    const { data: credits } = await adminSupabase
-      .from('sms_credits')
-      .select('credits, used_credits')
-      .eq('user_id', storeOwnerId)
-
-    const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-    const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-    const remainingCredits = totalCredits - usedCredits
+    // Get SMS credits balance using standard schema (balance, total_purchased, total_used)
+    const { balance, totalPurchased, totalUsed } = await getUserSmsCredits(adminSupabase, storeOwnerId)
 
     // Get recent purchases
     const { data: purchases } = await adminSupabase
@@ -48,9 +42,9 @@ export async function GET(request: NextRequest) {
       .limit(10)
 
     return NextResponse.json({
-      total_credits: totalCredits,
-      used_credits: usedCredits,
-      remaining_credits: remainingCredits,
+      total_credits: totalPurchased,
+      used_credits: totalUsed,
+      remaining_credits: balance,
       recent_purchases: purchases || [],
       usage_history: usage || [],
     })

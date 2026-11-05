@@ -57,9 +57,19 @@ export async function getCurrentUser() {
       // Ignore Supabase auth error and fallback to phone session cookie
     }
 
-    // 2. Check phone_user_session cookie (phone users)
+    // 2. Check phone_user_session cookie or x-phone-session header (phone users)
     const cookieStore = await cookies()
-    const phoneUserId = cookieStore.get('phone_user_session')?.value
+    let phoneUserId = cookieStore.get('phone_user_session')?.value
+
+    if (!phoneUserId) {
+      try {
+        const { headers } = await import('next/headers')
+        const headerStore = await headers()
+        phoneUserId = headerStore.get('x-phone-session') || undefined
+      } catch {
+        // Headers might not be available in non-request contexts
+      }
+    }
 
     if (phoneUserId) {
       const { data: profile } = await adminSupabase

@@ -88,9 +88,17 @@ export default function PricingPage() {
     refreshUser?.()
   }, [])
 
-  const handleSelectPlan = (planType: string) => {
-    // If auth state is still loading from network, prevent false redirect to login/register
-    if (userLoading) return
+  const handleSelectPlan = async (planType: string) => {
+    // If auth state is still loading from network, wait briefly so we don't falsely redirect
+    if (userLoading) {
+      setLoading(planType)
+      let count = 0
+      while (userLoading && count < 10) {
+        await new Promise((r) => setTimeout(r, 200))
+        count++
+      }
+      setLoading(null)
+    }
 
     if (planType === 'FREE') {
       if (!user) {

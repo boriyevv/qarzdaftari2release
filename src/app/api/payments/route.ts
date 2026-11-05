@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth/middleware'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { smsService } from '@/lib/services/sms.service'
+import { smsService, getUserSmsCredits, deductUserSmsCredits } from '@/lib/services/sms.service'
 import { formatCurrency } from '@/lib/utils/currency'
 
 export const dynamic = 'force-dynamic'
@@ -108,14 +108,7 @@ export async function POST(request: Request) {
     if (result.data.send_confirmation_sms && debt.debtor_phone && smsService.isConfigured()) {
       try {
         // Check remaining credits for the active store owner
-        const { data: credits } = await adminSupabase
-          .from('sms_credits')
-          .select('credits, used_credits')
-          .eq('user_id', storeOwnerId)
-
-        const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-        const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-        const remainingCredits = totalCredits - usedCredits
+        const { balance: remainingCredits } = await getUserSmsCredits(adminSupabase, storeOwnerId)
 
         if (remainingCredits >= 1) {
           const storeTitle = profile.store_name || profile.full_name || 'Qarz Daftari'
@@ -127,7 +120,7 @@ export async function POST(request: Request) {
 
           const externalId = await smsService.sendSMS(debt.debtor_phone, smsText)
           if (externalId) {
-            await adminSupabase.rpc('deduct_sms_credit', { p_user_id: storeOwnerId, p_credits: 1 })
+            await deductUserSmsCredits(adminSupabase, storeOwnerId, 1)
             await adminSupabase.from('sms_usage_log').insert({
               user_id: storeOwnerId,
               debt_id: debt.id,

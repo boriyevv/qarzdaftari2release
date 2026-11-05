@@ -1,7 +1,7 @@
 // src/app/api/sms/send/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { smsService } from '@/lib/services/sms.service'
+import { smsService, getUserSmsCredits, deductUserSmsCredits } from '@/lib/services/sms.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,14 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check internal SMS credits
-    const { data: credits } = await supabase
-      .from('sms_credits')
-      .select('credits, used_credits')
-      .eq('user_id', profile.id)
-
-    const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-    const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-    const remainingCredits = totalCredits - usedCredits
+    const { balance: remainingCredits } = await getUserSmsCredits(supabase, profile.id)
 
     if (remainingCredits < 1) {
       return NextResponse.json(
@@ -129,16 +122,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Deduct internal credit
-    const { error: deductError } = await supabase.rpc('deduct_sms_credit', {
-      p_user_id: profile.id,
-      p_credits: 1,
-    })
-
-    if (deductError) {
-      console.error('❌ Failed to deduct credit:', deductError)
-      // SMS was sent but credit not deducted - this is a problem
-      // Log it but don't fail the request
-    }
+    await deductUserSmsCredits(supabase, profile.id, 1)
 
     // Log SMS usage
     const { error: logError } = await supabase
@@ -225,14 +209,8 @@ export async function GET(request: NextRequest) {
 
     let internalCredits = 0
     if (profile) {
-      const { data: credits } = await supabase
-        .from('sms_credits')
-        .select('credits, used_credits')
-        .eq('user_id', profile.id)
-
-      const totalCredits = credits?.reduce((sum, c) => sum + c.credits, 0) || 0
-      const usedCredits = credits?.reduce((sum, c) => sum + c.used_credits, 0) || 0
-      internalCredits = totalCredits - usedCredits
+      const { balance } = await getUserSmsCredits(supabase, profile.id)
+      internalCredits = balance
     }
 
     return NextResponse.json({
