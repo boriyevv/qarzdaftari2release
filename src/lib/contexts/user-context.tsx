@@ -1,4 +1,4 @@
-﻿// src/lib/contexts/user-context.tsx
+// src/lib/contexts/user-context.tsx
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
@@ -68,7 +68,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const refreshUser = async () => {
-        setLoading(true)
+        // Keep current user in state during background refresh to prevent UI flicker/redirection
         await fetchUser()
     }
 

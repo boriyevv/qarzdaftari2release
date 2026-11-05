@@ -105,7 +105,7 @@ export async function GET() {
           const role = syncedProfile.locale_settings?.role || (syncedProfile.is_admin ? 'admin' : 'owner')
           const store_owner_id = syncedProfile.locale_settings?.store_owner_id || syncedProfile.id
           const permissions = syncedProfile.locale_settings?.permissions || ['*']
-          return NextResponse.json({
+          const response = NextResponse.json({
             profile: {
               ...syncedProfile,
               role,
@@ -113,6 +113,17 @@ export async function GET() {
               permissions,
             }
           })
+
+          // Slide phone session cookie so active users never get unexpectedly logged out
+          response.cookies.set('phone_user_session', phoneUserId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30, // 30 kun
+          })
+
+          return response
         }
       }
 

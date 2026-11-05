@@ -71,7 +71,7 @@ const FAQS = [
 ]
 
 export default function PricingPage() {
-  const { user, refreshUser } = useUser()
+  const { user, loading: userLoading, refreshUser } = useUser()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
   const [loading, setLoading] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
@@ -89,6 +89,9 @@ export default function PricingPage() {
   }, [])
 
   const handleSelectPlan = (planType: string) => {
+    // If auth state is still loading from network, prevent false redirect to login/register
+    if (userLoading) return
+
     if (planType === 'FREE') {
       if (!user) {
         window.location.href = '/register'
