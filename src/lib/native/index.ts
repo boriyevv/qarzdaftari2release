@@ -87,11 +87,14 @@ export const nativeStatusBar = {
   syncWithTheme: async (isDark: boolean) => {
     if (typeof window === 'undefined' || !Capacitor.isNativePlatform()) return
     try {
-      await StatusBar.setStyle({
-        style: isDark ? Style.Dark : Style.Light,
-      })
+      // Set background color first
       await StatusBar.setBackgroundColor({
         color: isDark ? '#0f172a' : '#ffffff',
+      })
+      // Style.Light = Light icons for dark background (#0f172a)
+      // Style.Dark = Dark icons for light background (#ffffff)
+      await StatusBar.setStyle({
+        style: isDark ? Style.Light : Style.Dark,
       })
     } catch (e) {
       console.warn('StatusBar sync error:', e)
@@ -124,9 +127,12 @@ export const nativeContacts = {
     // 1. Capacitor Native platform (Android / iOS)
     if (Capacitor.isNativePlatform()) {
       try {
-        const perm = await Contacts.requestPermissions()
-        if (perm.contacts !== 'granted' && perm.contacts !== 'limited') {
-          return null
+        const status = await Contacts.checkPermissions()
+        if (status.contacts !== 'granted') {
+          const perm = await Contacts.requestPermissions()
+          if (perm.contacts !== 'granted' && perm.contacts !== 'limited') {
+            return null
+          }
         }
 
         const res = await Contacts.pickContact({

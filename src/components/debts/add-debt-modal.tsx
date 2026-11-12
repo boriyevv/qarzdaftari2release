@@ -12,6 +12,7 @@ import { MessageSquare, AlertCircle, ExternalLink, X, Contact } from 'lucide-rea
 import { playPingSound } from '@/lib/sounds'
 import { useUser } from '@/lib/contexts/user-context'
 import { nativeContacts, nativeHaptics } from '@/lib/native'
+import { toast } from 'sonner'
 
 import {
   Dialog,
@@ -52,10 +53,13 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
           debtor_name: picked.name || prev.debtor_name,
           debtor_phone: digits.length === 9 ? digits : prev.debtor_phone,
         }))
+        toast.success(`Kontakt tanlandi: ${picked.name}`)
         nativeHaptics.notification('success').catch(() => {})
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.warn('Contact picker error:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      toast.error(`Kontakt yuklashda xatolik: ${msg}`)
     }
   }
 

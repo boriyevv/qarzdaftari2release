@@ -10,6 +10,7 @@ const config: CapacitorConfig = {
     // For local emulator/device testing, set CAPACITOR_LIVE_URL to your local IP (e.g. http://192.168.100.3:3000)
     url: process.env.CAPACITOR_LIVE_URL || 'https://debtbook.uz',
     cleartext: true,
+    errorPath: 'offline.html',
     allowNavigation: [
       'debtbook.uz',
       '*.debtbook.uz',
