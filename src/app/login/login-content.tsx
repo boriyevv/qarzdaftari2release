@@ -23,6 +23,7 @@ import { useState } from 'react'
 export function LoginPageContent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
+	const targetRedirect = searchParams.get('redirect') || searchParams.get('from') || '/dashboard'
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
 	const [success, setSuccess] = useState('')
