@@ -1,6 +1,8 @@
 // src/lib/sounds.ts
 'use client'
 
+import { nativeHaptics } from '@/lib/native'
+
 const SOUND_STORAGE_KEY = 'qd_sound_enabled'
 
 export function isSoundEnabled(): boolean {
@@ -39,6 +41,9 @@ function getAudioContext(): AudioContext | null {
  * Clean harmonic arpeggio: C5 (523Hz) -> E5 (659Hz) -> G5 (784Hz) -> C6 (1046Hz)
  */
 export function playSuccessSound(): void {
+  // Fire tactile vibration alongside audio
+  nativeHaptics.notification('success').catch(() => {})
+
   if (!isSoundEnabled()) return
   const ctx = getAudioContext()
   if (!ctx) return
@@ -76,6 +81,9 @@ export function playSuccessSound(): void {
  * Quick, crisp confirmation ping (e.g., adding partial payment or copying text)
  */
 export function playPingSound(): void {
+  // Fire subtle tactile click
+  nativeHaptics.impact('light').catch(() => {})
+
   if (!isSoundEnabled()) return
   const ctx = getAudioContext()
   if (!ctx) return

@@ -65,6 +65,7 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 
 - [x] Dark / Light mode: `next-themes` orqali SSR miltillashsiz Light / Dark / System rejimlari, Topbar va Profil sozlamalaridagi ThemeToggle, hamda Slate Premium Dark to'liq ranglar uyg'unligi joriy qilindi.
 - [x] Mobil PWA (Progressive Web App): Manifest (standalone, theme-color, icons), Service Worker, offline fallback (/offline va jonli OfflineIndicator), o'rnatish bannerlari (floating prompt, iOS Safari qo'llanma modali) hamda Sidebar va mobil Topbar'da o'rnatish tugmalari to'liq joriy qilindi.
+- [x] Native Mobil Ilovalar (Android & iOS): Capacitor 8 orqali to'liq Android Studio va Xcode loyihalari yaratildi. Native status-bar, taktil haptics vibratsiyasi, apparat "orqaga" tugmasi, va yangi qarz kiritishda telefon kontaktlaridan tanlash (`@capacitor-community/contacts`) integratsiya qilindi. `MOBILE.md` qo'llanmasi yaratildi.
 - [x] Mikro-tovushlar: Web Audio API orqali sintez qilingan yengil va zamonaviy kristallik chime ovozlari (to'lov qabul qilinganda, yangi qarz kiritilganda), sozlamalarda sinov va o'chirish/yoqish imkoni.
 
 ---

@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { MessageSquare, AlertCircle, ExternalLink, X } from 'lucide-react'
+import { MessageSquare, AlertCircle, ExternalLink, X, Contact } from 'lucide-react'
 import { playPingSound } from '@/lib/sounds'
 import { useUser } from '@/lib/contexts/user-context'
+import { nativeContacts, nativeHaptics } from '@/lib/native'
 
 import {
   Dialog,
@@ -35,6 +36,28 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
   const [useCustomMessage, setUseCustomMessage] = useState(false)
   const [smsCredits, setSmsCredits] = useState(0)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [supportsContacts, setSupportsContacts] = useState(false)
+
+  useEffect(() => {
+    setSupportsContacts(nativeContacts.isSupported())
+  }, [])
+
+  const handlePickContact = async () => {
+    try {
+      const picked = await nativeContacts.pick()
+      if (picked) {
+        const digits = picked.phone.replace(/\D/g, '').slice(-9)
+        setFormData((prev) => ({
+          ...prev,
+          debtor_name: picked.name || prev.debtor_name,
+          debtor_phone: digits.length === 9 ? digits : prev.debtor_phone,
+        }))
+        nativeHaptics.notification('success').catch(() => {})
+      }
+    } catch (err) {
+      console.warn('Contact picker error:', err)
+    }
+  }
 
   const [formData, setFormData] = useState({
     debtor_name: '',
@@ -237,9 +260,22 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
             {/* Debtor Name */}
             <div className="space-y-1.5">
-              <Label htmlFor="debtor_name" className="text-sm font-medium">
-                Qarzdor ismi <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="debtor_name" className="text-sm font-medium">
+                  Qarzdor ismi <span className="text-red-500">*</span>
+                </Label>
+                {supportsContacts && (
+                  <button
+                    type="button"
+                    onClick={handlePickContact}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors cursor-pointer bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-2.5 py-1 rounded-full border border-emerald-200/80 dark:border-emerald-800/80"
+                    title="Telefon kontaktlaridan tanlash"
+                  >
+                    <Contact className="w-3.5 h-3.5" />
+                    <span>Kontaktlardan tanlash</span>
+                  </button>
+                )}
+              </div>
               <Input
                 id="debtor_name"
                 value={formData.debtor_name}
