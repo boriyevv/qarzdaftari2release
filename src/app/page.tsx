@@ -2,6 +2,7 @@
 // Ultra-modern SaaS Landing Page for Qarz Daftari (debtbook.uz)
 'use client'
 
+import Image from 'next/image'
 import { PaymentMethodsRow } from '@/components/payments/payment-logos'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -81,8 +82,8 @@ export default function Home() {
 				<div className='max-w-7xl mx-auto flex items-center justify-between h-14'>
 					{/* Brand Mark */}
 					<Link href='/' className='flex items-center gap-3 group'>
-						<div className='w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform duration-300'>
-							<span className='font-black text-xl tracking-tighter'>Q</span>
+						<div className='w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300 flex-shrink-0'>
+							<Image src='/appleicon.png' alt='Qarz Daftari' width={36} height={36} className='w-full h-auto object-contain rounded-lg' />
 						</div>
 						<div className='flex flex-col'>
 							<span className='font-extrabold text-xl tracking-tight text-white flex items-center gap-1.5'>
@@ -1118,8 +1119,8 @@ export default function Home() {
 						{/* Col 1 */}
 						<div className='space-y-3'>
 							<div className='flex items-center gap-2'>
-								<div className='w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold'>
-									Q
+								<div className='w-8 h-8 rounded-lg bg-white p-0.5 flex items-center justify-center flex-shrink-0 shadow-sm'>
+									<Image src='/appleicon.png' alt='Qarz Daftari' width={28} height={28} className='w-full h-auto object-contain rounded-md' />
 								</div>
 								<span className='font-extrabold text-base text-white'>
 									Qarz Daftari
