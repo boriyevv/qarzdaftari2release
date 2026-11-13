@@ -13,6 +13,8 @@ import { playPingSound } from '@/lib/sounds'
 import { useUser } from '@/lib/contexts/user-context'
 import { nativeContacts, nativeHaptics } from '@/lib/native'
 import { toast } from 'sonner'
+import { formatPhoneDigits } from '@/lib/utils/phone'
+import { formatAmountInput, parseAmountInput, numberToUzbekWords, formatCurrency } from '@/lib/utils/currency'
 
 import {
   Dialog,
@@ -47,11 +49,12 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     try {
       const picked = await nativeContacts.pick()
       if (picked) {
-        const digits = picked.phone.replace(/\D/g, '').slice(-9)
+        const raw = picked.phone.replace(/\D/g, '').slice(-9)
+        const formatted = formatPhoneDigits(raw)
         setFormData((prev) => ({
           ...prev,
           debtor_name: picked.name || prev.debtor_name,
-          debtor_phone: digits.length === 9 ? digits : prev.debtor_phone,
+          debtor_phone: formatted || prev.debtor_phone,
         }))
         toast.success(`Kontakt tanlandi: ${picked.name}`)
         nativeHaptics.notification('success').catch(() => {})
@@ -105,17 +108,20 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
 
   const generateDefaultMessage = () => {
     const { debtor_name, amount, due_date, shop_name } = formData
-    if (!debtor_name || !amount) return "Ma'lumotlarni to'ldiring..."
-    const formattedAmount = new Intl.NumberFormat('uz-UZ').format(Number(amount))
+    const numAmount = parseAmountInput(amount)
+    if (!debtor_name || numAmount <= 0) return "Ma'lumotlarni to'ldiring..."
+    const formattedAmount = formatCurrency(numAmount)
     const shopText = shop_name ? ` "${shop_name}"` : ''
     const dueDateText = due_date
       ? ` To'lov muddati: ${new Date(due_date).toLocaleDateString('uz-UZ')}.`
       : ''
-    return `Hurmatli ${debtor_name}, Siz${shopText}dan ${formattedAmount} so'm qarz oldingiz.${dueDateText} Qarz Daftari.`
+    return `Hurmatli ${debtor_name}, Siz${shopText}dan ${formattedAmount} qarz oldingiz.${dueDateText} Qarz Daftari.`
   }
 
   const canSubmit = () => {
-    if (!formData.debtor_name || formData.debtor_phone.length < 9 || !formData.amount) return false
+    const rawPhone = formData.debtor_phone.replace(/\D/g, '')
+    const numAmount = parseAmountInput(formData.amount)
+    if (!formData.debtor_name.trim() || rawPhone.length < 9 || numAmount <= 0) return false
     if (sendSMS && smsCredits === 0) return false
     if (sendSMS && useCustomMessage && !formData.custom_sms_message.trim()) return false
     return true
@@ -128,10 +134,11 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     setLoading(true)
 
     try {
+      const rawDigits = formData.debtor_phone.replace(/\D/g, '').slice(0, 9)
       const debtPayload: Record<string, unknown> = {
         debtor_name: formData.debtor_name.trim(),
-        debtor_phone: `+998${formData.debtor_phone}`,
-        amount: Number(formData.amount),
+        debtor_phone: `+998${rawDigits}`,
+        amount: parseAmountInput(formData.amount),
       }
       if (formData.due_date) {
         debtPayload.due_date = formData.due_date
@@ -301,24 +308,23 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
                 State faqat prefix'dan keyingi qismni saqlaydi (max 9 raqam).
                 Submit paytida to'liq raqam birlashtirilib yuboriladi.
               */}
-              <div className="flex h-11 items-center rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                <span className="pl-3 pr-1 text-sm font-medium text-foreground select-none whitespace-nowrap">
+              <div className="flex h-11 items-center rounded-xl border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all">
+                <span className="pl-3 pr-1 text-sm font-semibold text-slate-700 dark:text-slate-300 select-none whitespace-nowrap">
                   +998
                 </span>
-                <span className="text-muted-foreground text-sm select-none">|</span>
+                <span className="text-slate-300 dark:text-slate-700 text-sm select-none">|</span>
                 <input
                   id="debtor_phone"
                   type="tel"
                   inputMode="numeric"
                   value={formData.debtor_phone}
                   onChange={(e) => {
-                    // Faqat raqamlar, max 9 ta
-                    const digits = e.target.value.replace(/\D/g, '').slice(0, 9)
-                    setFormData({ ...formData, debtor_phone: digits })
+                    const formatted = formatPhoneDigits(e.target.value)
+                    setFormData({ ...formData, debtor_phone: formatted })
                   }}
-                  placeholder="901234567"
+                  placeholder="(90) 123-45-67"
                   required
-                  className="flex-1 bg-transparent pl-1.5 pr-3 text-sm outline-none placeholder:text-muted-foreground"
+                  className="flex-1 bg-transparent pl-2 pr-3 text-sm font-medium outline-none placeholder:text-muted-foreground tracking-wide"
                 />
               </div>
             </div>
@@ -330,16 +336,24 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
               </Label>
               <Input
                 id="amount"
-                type="number"
+                type="text"
                 inputMode="numeric"
-                min="0"
-                step="1"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                placeholder="100000"
+                onChange={(e) => {
+                  const formatted = formatAmountInput(e.target.value)
+                  setFormData({ ...formData, amount: formatted })
+                }}
+                placeholder="100 000"
                 required
-                className="h-11"
+                className="h-11 font-semibold text-base tracking-wide"
               />
+              {/* Live readable amount badge (so'z bilan ifodalash) */}
+              {parseAmountInput(formData.amount) > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 animate-in fade-in duration-200">
+                  <span className="text-blue-500 shrink-0">💎</span>
+                  <span className="truncate">{numberToUzbekWords(parseAmountInput(formData.amount))}</span>
+                </div>
+              )}
             </div>
 
             {/* Shop Name */}

@@ -39,7 +39,8 @@ import {
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
-import { formatCurrency } from '@/lib/utils/currency'
+import { formatCurrency, formatAmountInput, parseAmountInput, numberToUzbekWords } from '@/lib/utils/currency'
+import { formatPhoneNumber } from '@/lib/utils/phone'
 import { exportDebtorStatementPDF, generateDebtorTelegramText } from '@/lib/export/debtor-statement'
 import { playSuccessSound } from '@/lib/sounds'
 import Link from 'next/link'
@@ -123,7 +124,7 @@ export default function DebtorProfilePage() {
   // To'lov modalini ochish (Umumiy yoki muayyan qarz uchun)
   const handleOpenPayment = (debtId: string = 'auto', defaultAmount?: number) => {
     setSelectedDebtId(debtId)
-    setPaymentAmount(defaultAmount ? defaultAmount.toString() : '')
+    setPaymentAmount(defaultAmount ? formatAmountInput(defaultAmount) : '')
     setPaymentNote('')
     setPaymentError(null)
     setPaymentSuccess(false)
@@ -133,7 +134,7 @@ export default function DebtorProfilePage() {
   // To'lovni serverga yuborish (FIFO yoki tanlangan qarz bo'yicha)
   const handleSubmitPayment = async (e: React.FormEvent) => {
     e.preventDefault()
-    const numericAmount = Number(paymentAmount)
+    const numericAmount = parseAmountInput(paymentAmount)
     if (!numericAmount || numericAmount <= 0) {
       setPaymentError('Iltimos, to\'g\'ri to\'lov summasini kiriting')
       return
@@ -397,7 +398,7 @@ export default function DebtorProfilePage() {
                 <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
                   <Phone className="w-4 h-4 text-blue-600" />
                   <a href={`tel:${data.phone}`} className="hover:underline">
-                    {data.phone || 'Telefon raqam yo\'q'}
+                    {formatPhoneNumber(data.phone)}
                   </a>
                 </div>
                 <span>•</span>
@@ -746,20 +747,27 @@ export default function DebtorProfilePage() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <label className="font-semibold text-slate-700 dark:text-slate-300">To&apos;lov summasi (so&apos;m):</label>
-                {paymentAmount && !isNaN(Number(paymentAmount)) && (
+                {parseAmountInput(paymentAmount) > 0 && (
                   <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                    {formatCurrency(Number(paymentAmount))}
+                    {formatCurrency(parseAmountInput(paymentAmount))}
                   </span>
                 )}
               </div>
               <Input
-                type="number"
-                placeholder="Masalan: 100000"
+                type="text"
+                inputMode="numeric"
+                placeholder="100 000"
                 value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-                className="h-11 rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-base font-bold focus:border-emerald-500"
+                onChange={(e) => setPaymentAmount(formatAmountInput(e.target.value))}
+                className="h-11 rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-base font-bold focus:border-emerald-500 tracking-wide"
                 required
               />
+              {parseAmountInput(paymentAmount) > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 animate-in fade-in duration-200">
+                  <span className="text-blue-500 shrink-0">💎</span>
+                  <span className="truncate">{numberToUzbekWords(parseAmountInput(paymentAmount))}</span>
+                </div>
+              )}
 
               {/* Tezkor Summa Tugmalari */}
               <div className="flex items-center gap-1.5 pt-1 flex-wrap">
@@ -767,16 +775,16 @@ export default function DebtorProfilePage() {
                   <button
                     key={amt}
                     type="button"
-                    onClick={() => setPaymentAmount(amt.toString())}
+                    onClick={() => setPaymentAmount(formatAmountInput(amt))}
                     className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                   >
-                    +{amt.toLocaleString('uz-UZ')}
+                    +{formatAmountInput(amt)}
                   </button>
                 ))}
                 {data.totalRemaining > 0 && (
                   <button
                     type="button"
-                    onClick={() => setPaymentAmount(data.totalRemaining.toString())}
+                    onClick={() => setPaymentAmount(formatAmountInput(data.totalRemaining))}
                     className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-200 dark:hover:bg-emerald-900 text-emerald-800 dark:text-emerald-300 transition-colors ml-auto cursor-pointer"
                   >
                     To&apos;liq yopish

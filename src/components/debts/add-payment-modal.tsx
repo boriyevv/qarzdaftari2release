@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { formatCurrency } from '@/lib/utils/currency'
+import { formatCurrency, formatAmountInput, parseAmountInput, numberToUzbekWords } from '@/lib/utils/currency'
 import { playSuccessSound } from '@/lib/sounds'
 import { MessageSquare, CheckCircle2 } from 'lucide-react'
 
@@ -51,7 +51,13 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
     setLoading(true)
     setError('')
 
-    const amount = parseFloat(formData.amount)
+    const amount = parseAmountInput(formData.amount)
+
+    if (amount <= 0) {
+      setError("To'lov summasi 0 dan katta bo'lishi kerak")
+      setLoading(false)
+      return
+    }
 
     if (amount > remaining) {
       setError(`To'lov summasi qoldiqdan oshib ketdi. Qoldiq: ${formatCurrency(remaining)}`)
@@ -140,16 +146,21 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
             </Label>
             <Input
               id="amount"
-              type="number"
-              placeholder="500000"
+              type="text"
+              inputMode="numeric"
+              placeholder="500 000"
               required
-              min="1"
-              max={remaining}
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, amount: formatAmountInput(e.target.value) })}
               disabled={loading}
-              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold tracking-wide"
             />
+            {parseAmountInput(formData.amount) > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 animate-in fade-in duration-200">
+                <span className="text-blue-500 shrink-0">💎</span>
+                <span className="truncate">{numberToUzbekWords(parseAmountInput(formData.amount))}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">

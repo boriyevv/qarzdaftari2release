@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { formatFullPhoneInput } from '@/lib/utils/phone'
+import { formatAmountInput, parseAmountInput, numberToUzbekWords } from '@/lib/utils/currency'
 
 interface Debt {
   id: string
@@ -67,8 +69,8 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
       fetchFolders()
       setFormData({
         debtor_name: debt.debtor_name,
-        debtor_phone: debt.debtor_phone,
-        amount: debt.amount.toString(),
+        debtor_phone: formatFullPhoneInput(debt.debtor_phone),
+        amount: formatAmountInput(debt.amount),
         due_date: debt.due_date || '',
         folder_id: debt.folder?.id || '',
         note: debt.note || '',
@@ -89,12 +91,8 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
   }
 
   const handlePhoneChange = (value: string) => {
-    let cleaned = value.replace(/\D/g, '')
-    if (!cleaned.startsWith('998') && cleaned.length > 0) {
-      cleaned = '998' + cleaned
-    }
-    const formatted = cleaned.length > 0 ? '+' + cleaned : ''
-    setFormData({ ...formData, debtor_phone: formatted.slice(0, 13) })
+    const formatted = formatFullPhoneInput(value)
+    setFormData({ ...formData, debtor_phone: formatted })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,13 +101,23 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
     setError('')
 
     try {
+      const rawDigits = formData.debtor_phone.replace(/\D/g, '')
+      const fullPhone = rawDigits.startsWith('998') ? `+${rawDigits}` : `+998${rawDigits}`
+      const numAmount = parseAmountInput(formData.amount)
+
+      if (numAmount <= 0) {
+        setError("Qarz summasi 0 dan katta bo'lishi kerak")
+        setLoading(false)
+        return
+      }
+
       const response = await fetch(`/api/debts/${debt.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          debtor_name: formData.debtor_name,
-          debtor_phone: formData.debtor_phone,
-          amount: parseFloat(formData.amount),
+          debtor_name: formData.debtor_name.trim(),
+          debtor_phone: fullPhone,
+          amount: numAmount,
           due_date: formData.due_date || undefined,
           folder_id: formData.folder_id || undefined,
           note: formData.note || undefined,
@@ -173,12 +181,12 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
             <Input
               id="edit_debtor_phone"
               type="tel"
-              placeholder="+998901234567"
+              placeholder="+998 (90) 123-45-67"
               required
               value={formData.debtor_phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               disabled={loading}
-              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 tracking-wide font-medium"
             />
           </div>
 
@@ -188,15 +196,21 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
             </Label>
             <Input
               id="edit_amount"
-              type="number"
-              placeholder="1000000"
+              type="text"
+              inputMode="numeric"
+              placeholder="1 000 000"
               required
-              min="1"
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, amount: formatAmountInput(e.target.value) })}
               disabled={loading}
-              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold tracking-wide"
             />
+            {parseAmountInput(formData.amount) > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 animate-in fade-in duration-200">
+                <span className="text-blue-500 shrink-0">💎</span>
+                <span className="truncate">{numberToUzbekWords(parseAmountInput(formData.amount))}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">

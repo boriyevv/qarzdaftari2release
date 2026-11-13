@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { OTPInput } from '@/components/auth/otp-input'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { ArrowLeft } from 'lucide-react'
+import { formatFullPhoneInput } from '@/lib/utils/phone'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -118,12 +120,15 @@ export default function RegisterPage() {
     setError('')
     setDisplayCode(null)
 
+    const rawDigits = phoneForm.phone.replace(/\D/g, '')
+    const fullPhone = rawDigits.startsWith('998') ? `+${rawDigits}` : `+998${rawDigits}`
+
     try {
       const response = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: phoneForm.phone,
+          phone: fullPhone,
           type: 'registration',
         }),
       })
@@ -161,11 +166,14 @@ export default function RegisterPage() {
     setError('')
 
     try {
+      const rawDigits = phoneForm.phone.replace(/\D/g, '')
+      const fullPhone = rawDigits.startsWith('998') ? `+${rawDigits}` : `+998${rawDigits}`
+
       const response = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: phoneForm.phone,
+          phone: fullPhone,
           code: phoneForm.otp,
           type: 'registration',
         }),
@@ -229,13 +237,16 @@ export default function RegisterPage() {
     })
 
     try {
+      const rawDigits = phoneForm.phone.replace(/\D/g, '')
+      const fullPhone = rawDigits.startsWith('998') ? `+${rawDigits}` : `+998${rawDigits}`
+
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           auth_method: 'phone',
           full_name: phoneForm.full_name,
-          phone: phoneForm.phone,
+          phone: fullPhone,
           store_name: phoneForm.store_name,
           email: phoneForm.email || undefined,
           otp_verified: true,
@@ -267,23 +278,26 @@ export default function RegisterPage() {
   }
 
   const handlePhoneChange = (value: string, formType: 'email' | 'phone') => {
-    let cleaned = value.replace(/\D/g, '')
-    if (!cleaned.startsWith('998') && cleaned.length > 0) {
-      cleaned = '998' + cleaned
-    }
-    const formatted = cleaned.length > 0 ? '+' + cleaned : ''
+    const formatted = formatFullPhoneInput(value)
 
     if (formType === 'email') {
-      setEmailForm({ ...emailForm, phone: formatted.slice(0, 13) })
+      setEmailForm({ ...emailForm, phone: formatted })
     } else {
-      setPhoneForm({ ...phoneForm, phone: formatted.slice(0, 13) })
+      setPhoneForm({ ...phoneForm, phone: formatted })
     }
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-start pt-6 sm:pt-10 pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4 relative">
-      {/* Top Right Theme Toggle */}
-      <div className="absolute top-4 right-4 z-20">
+    <div className="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-10 pb-12 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4">
+      {/* Top Bar with Home Link & Theme Toggle */}
+      <div className="w-full max-w-lg flex items-center justify-between mb-3 px-1">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Asosiy sahifa</span>
+        </Link>
         <ThemeToggle />
       </div>
 
@@ -379,7 +393,7 @@ export default function RegisterPage() {
                       <Input
                         id="email_phone"
                         type="tel"
-                        placeholder="+998901234567"
+                        placeholder="+998 (90) 123-45-67"
                         required
                         value={emailForm.phone}
                         onChange={(e) => handlePhoneChange(e.target.value, 'email')}
@@ -495,7 +509,7 @@ export default function RegisterPage() {
                         <Input
                           id="phone"
                           type="tel"
-                          placeholder="+998901234567"
+                          placeholder="+998 (90) 123-45-67"
                           required
                           value={phoneForm.phone}
                           onChange={(e) => handlePhoneChange(e.target.value, 'phone')}

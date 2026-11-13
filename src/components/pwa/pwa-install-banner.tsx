@@ -3,9 +3,10 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Download, X, Smartphone, Sparkles } from 'lucide-react'
+import { Download, X, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { IosInstallDialog } from './ios-install-dialog'
+import { isNativePlatform } from '@/lib/native'
 
 // Global event to allow any button (e.g. Sidebar / Header) to trigger installation prompt
 export function triggerPwaInstallPrompt() {
@@ -21,6 +22,11 @@ export function PwaInstallBanner() {
   const [isIos, setIsIos] = useState(false)
   const [showIosDialog, setShowIosDialog] = useState(false)
   const [showBanner, setShowBanner] = useState(false)
+
+  // Don't show PWA install prompt inside native mobile app (Capacitor)
+  if (typeof window !== 'undefined' && isNativePlatform()) {
+    return null
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -125,49 +131,44 @@ export function PwaInstallBanner() {
 
   return (
     <>
-      {/* Floating Bottom Banner */}
-      <div className="fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-[9000] animate-in fade-in slide-in-from-bottom-5 duration-300">
-        <div className="p-4 rounded-3xl bg-slate-950/95 text-white border border-white/10 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3.5">
-          {/* App Icon + Text */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20">
-              <Smartphone className="w-6 h-6 text-white" />
+      {/* Sleek, Compact Floating Bottom Banner (Web only) */}
+      <div className="fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-auto sm:right-5 sm:max-w-sm z-[9000] animate-in fade-in slide-in-from-bottom-3 duration-300">
+        <div className="py-2.5 px-3.5 rounded-2xl bg-slate-900/95 dark:bg-slate-950/95 text-white border border-slate-700/60 shadow-xl backdrop-blur-xl flex items-center justify-between gap-2.5">
+          {/* Subtle Icon + Title */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center flex-shrink-0 text-blue-400">
+              <Sparkles className="w-4 h-4" />
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm text-white tracking-tight">
-                  Qarz Daftari ilovasi
-                </span>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-blue-500/30 text-blue-300 border border-blue-400/30">
-                  PWA
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                Telefoningizga o&apos;rnatib, tezkor kiring
+              <p className="font-bold text-xs text-white truncate">
+                Qarz Daftari ilovasi
+              </p>
+              <p className="text-[10px] text-slate-400 truncate">
+                Tezkor ochish uchun o&apos;rnating
               </p>
             </div>
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <Button
               type="button"
               size="sm"
               onClick={handleInstallClick}
-              className="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition-all hover:scale-105 cursor-pointer"
+              className="h-7 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] shadow-sm transition-all cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 mr-1" />
+              <Download className="w-3 h-3 mr-1" />
               O&apos;rnatish
             </Button>
 
             <button
               type="button"
               onClick={handleDismiss}
-              className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-              title="Keyinroq"
+              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Yopish"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
