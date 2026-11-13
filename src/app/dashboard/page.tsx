@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!userLoading && !user) {
-      window.location.href = '/login'
+      window.location.replace('/login')
     }
   }, [user, userLoading])
 

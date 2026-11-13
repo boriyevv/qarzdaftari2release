@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/lib/contexts/user-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,9 +18,17 @@ import { formatFullPhoneInput } from '@/lib/utils/phone'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { user, loading: userLoading } = useUser()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('phone')
+
+  // Redirect authenticated users away from /register immediately
+  useEffect(() => {
+    if (!userLoading && user) {
+      router.replace('/dashboard')
+    }
+  }, [user, userLoading, router])
 
   // Email form
   const [emailForm, setEmailForm] = useState({
@@ -101,7 +110,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/login?registered=true')
+      router.replace('/login?registered=true')
     } catch (error) {
       setError('Tarmoq xatosi')
     } finally {
@@ -268,7 +277,7 @@ export default function RegisterPage() {
       }
 
       // Automatically navigate to dashboard after successful phone registration
-      window.location.href = '/dashboard'
+      window.location.replace('/dashboard')
     } catch (error) {
       console.error('❌ Catch error:', error)
       setError('Tarmoq xatosi')
@@ -285,6 +294,19 @@ export default function RegisterPage() {
     } else {
       setPhoneForm({ ...phoneForm, phone: formatted })
     }
+  }
+
+  if (userLoading || user) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto" />
+          <p className="mt-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+            Dashboardga yo&apos;naltirilmoqda...
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (

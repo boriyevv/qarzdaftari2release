@@ -18,19 +18,28 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
+import { useUser } from '@/lib/contexts/user-context'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function LoginPageContent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const targetRedirect = searchParams.get('redirect') || searchParams.get('from') || '/dashboard'
+	const { user, loading: userLoading } = useUser()
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
 	const [success, setSuccess] = useState('')
 	const [otpSent, setOtpSent] = useState(false)
 	const [displayCode, setDisplayCode] = useState<string | null>(null)
+
+	// Redirect authenticated users away from /login immediately
+	useEffect(() => {
+		if (!userLoading && user) {
+			router.replace(targetRedirect)
+		}
+	}, [user, userLoading, router, targetRedirect])
 
 	// Staggered bottom-up animation to fill OTP digit by digit like mobile apps
 	const animateFillOTP = (code: string) => {
@@ -96,7 +105,7 @@ export function LoginPageContent() {
 
 			setSuccess("Muvaffaqiyatli! Kassa oynasiga yo'naltirilmoqda...")
 			setTimeout(() => {
-				window.location.href = targetRedirect
+				window.location.replace(targetRedirect)
 			}, 300)
 		} catch (err) {
 			setError('Tarmoq xatosi')
@@ -131,7 +140,7 @@ export function LoginPageContent() {
 			return
 		}
 
-		window.location.href = targetRedirect
+		window.location.replace(targetRedirect)
 	}
 
 	const handlePhoneChange = (value: string) => {
@@ -241,13 +250,26 @@ export function LoginPageContent() {
 			setSuccess("Muvaffaqiyatli! Yo'naltirilmoqda...")
 
 			setTimeout(() => {
-				window.location.href = targetRedirect
+				window.location.replace(targetRedirect)
 			}, 300)
 		} catch (error) {
 			setError('Tarmoq xatosi')
 		} finally {
 			setLoading(false)
 		}
+	}
+
+	if (userLoading || user) {
+		return (
+			<div className='min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 p-4'>
+				<div className='text-center'>
+					<div className='animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto' />
+					<p className='mt-4 text-xs font-medium text-slate-500 dark:text-slate-400'>
+						Dashboardga yo&apos;naltirilmoqda...
+					</p>
+				</div>
+			</div>
+		)
 	}
 
 	return (

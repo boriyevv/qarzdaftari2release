@@ -41,7 +41,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!userLoading && !user) {
-      window.location.href = '/login?redirect=/profile'
+      window.location.replace('/login?redirect=/profile')
     }
   }, [user, userLoading])
 

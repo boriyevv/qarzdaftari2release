@@ -71,7 +71,7 @@ export function MainNav({ userPlan }: { userPlan?: string }) {
     try {
       if (typeof window !== 'undefined') localStorage.removeItem('phone_user_session')
       await fetch('/api/auth/logout', { method: 'POST' })
-      window.location.href = '/login'
+      window.location.replace('/login')
     } catch (e) {
       console.error(e)
     }

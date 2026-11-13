@@ -56,7 +56,7 @@ export default function SMSCreditsPage() {
 
 	useEffect(() => {
 		if (!userLoading && !user) {
-			window.location.href = '/login?redirect=/sms-credits'
+			window.location.replace('/login?redirect=/sms-credits')
 		}
 	}, [user, userLoading])
 	const [selectedPackage, setSelectedPackage] = useState<string | null>(null)

@@ -225,6 +225,12 @@ export function cleanPhoneNumber(raw: string): string {
   return raw.trim()
 }
 
+export function exitApp() {
+  if (typeof window !== 'undefined' && Capacitor.isNativePlatform()) {
+    App.exitApp()
+  }
+}
+
 /**
  * Android hardware back button handler
  */

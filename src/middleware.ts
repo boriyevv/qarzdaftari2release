@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
   }
   let supabaseResponse = NextResponse.next({ request })
 
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,8 +28,13 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  let isAuthenticated = false
+
   try {
-    const { error } = await supabase.auth.getUser()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (!error && user) {
+      isAuthenticated = true
+    }
     if (error && (error.status === 400 || error.code === 'refresh_token_not_found' || error.message?.includes('Refresh Token'))) {
       // Clear stale/expired Supabase auth cookies so they do not error repeatedly on every request
       request.cookies.getAll().forEach((cookie) => {
@@ -41,6 +45,30 @@ export async function middleware(request: NextRequest) {
     }
   } catch {
     // Gracefully ignore session refresh issues in middleware
+  }
+
+  // Check phone session cookie (used for phone OTP logins and registration)
+  const phoneSession = request.cookies.get('phone_user_session')?.value
+  if (phoneSession && phoneSession.trim().length > 0) {
+    isAuthenticated = true
+  }
+
+  const { pathname } = request.nextUrl
+  const isAuthRoute = pathname === '/login' || pathname === '/register'
+
+  // If user is already authenticated and attempts to visit /login or /register, redirect to /dashboard
+  if (isAuthenticated && isAuthRoute) {
+    const redirectParam = request.nextUrl.searchParams.get('redirect') || request.nextUrl.searchParams.get('from')
+    const destination = redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('/login') && !redirectParam.startsWith('/register')
+      ? redirectParam
+      : '/dashboard'
+
+    const redirectResponse = NextResponse.redirect(new URL(destination, request.url))
+    // Forward any updated cookies
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
   }
 
   return supabaseResponse

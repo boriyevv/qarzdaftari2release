@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { triggerPwaInstallPrompt } from '@/components/pwa/pwa-install-banner'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
-import { isNativePlatform } from '@/lib/native'
+import { isNativePlatform, registerBackButton, exitApp } from '@/lib/native'
 
 interface NavItem {
   label: string
@@ -128,11 +128,35 @@ export function AppShell({
     try {
       if (typeof window !== 'undefined') localStorage.removeItem('phone_user_session')
       await fetch('/api/auth/logout', { method: 'POST' })
-      window.location.href = '/login'
+      window.location.replace('/login')
     } catch (e) {
       console.error('Logout error:', e)
     }
   }
+
+  // Native Android hardware back button handler
+  useEffect(() => {
+    return registerBackButton(() => {
+      // 1. If Add Debt modal is open, close it
+      if (isAddDebtOpen) {
+        setIsAddDebtOpen(false)
+        return true
+      }
+      // 2. If mobile drawer menu is open, close it
+      if (mobileOpen) {
+        setMobileOpen(false)
+        return true
+      }
+      // 3. If on /dashboard, cleanly exit the app (never go back to login/register)
+      if (pathname === '/dashboard') {
+        exitApp()
+        return true
+      }
+      // 4. On sub-pages (analytics, profile, sms-credits, etc.), return to /dashboard
+      router.push('/dashboard')
+      return true
+    })
+  }, [pathname, isAddDebtOpen, mobileOpen, router])
 
   const handleStartTour = () => {
     if (pathname === '/dashboard') {
