@@ -16,7 +16,15 @@ export async function GET() {
     
     console.log('🔍 /api/auth/me called')
     
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    let user: any = null
+    let authError: any = null
+    try {
+      const authResult = await supabase.auth.getUser()
+      user = authResult.data?.user || null
+      authError = authResult.error
+    } catch (e: any) {
+      authError = e
+    }
     
     // Helper to auto-sync pending Uzum transactions in real time
     const syncPendingUzum = async (prof: any) => {
@@ -130,7 +138,15 @@ export async function GET() {
       }
 
       console.log('❌ No auth user or phone session')
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      const response = NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+      if (authError && (authError.status === 400 || authError.code === 'refresh_token_not_found' || authError.message?.includes('Refresh Token'))) {
+        cookieStore.getAll().forEach((c) => {
+          if (c.name.startsWith('sb-') && c.name.includes('-auth-token')) {
+            response.cookies.set(c.name, '', { maxAge: 0, path: '/' })
+          }
+        })
+      }
+      return response
     }
 
     // 2. Look up profile by auth_id

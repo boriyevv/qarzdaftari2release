@@ -29,7 +29,19 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getUser()
+  try {
+    const { error } = await supabase.auth.getUser()
+    if (error && (error.status === 400 || error.code === 'refresh_token_not_found' || error.message?.includes('Refresh Token'))) {
+      // Clear stale/expired Supabase auth cookies so they do not error repeatedly on every request
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith('sb-') && cookie.name.includes('-auth-token')) {
+          supabaseResponse.cookies.set(cookie.name, '', { maxAge: 0, path: '/' })
+        }
+      })
+    }
+  } catch {
+    // Gracefully ignore session refresh issues in middleware
+  }
 
   return supabaseResponse
 }

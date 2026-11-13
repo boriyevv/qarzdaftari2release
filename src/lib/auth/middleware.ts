@@ -30,7 +30,15 @@ export async function getCurrentUser() {
     // 1. Check Supabase Auth user (email users)
     try {
       const supabase = await createClient()
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      let user: any = null
+      let authError: any = null
+      try {
+        const authRes = await supabase.auth.getUser()
+        user = authRes.data?.user || null
+        authError = authRes.error
+      } catch (err: any) {
+        authError = err
+      }
 
       if (!authError && user) {
         // Find profile by auth_id
