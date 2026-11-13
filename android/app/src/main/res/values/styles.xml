@@ -25,6 +25,9 @@
         <item name="android:statusBarColor">#0f172a</item>
         <item name="android:windowBackground">#0f172a</item>
         <item name="android:navigationBarColor">#0f172a</item>
+        <item name="windowSplashScreenBackground">#0f172a</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
         <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
     </style>
 </resources>
