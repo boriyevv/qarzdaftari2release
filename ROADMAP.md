@@ -40,19 +40,34 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 ### 📱 Telegram Bot & Integratsiya
 
 - [ ] Do'kon egasi uchun rasmiy `@QarzDaftariBot`:
-  - Yangi qarz qo'shish (tezkor komanda orqali).
-  - Kunlik/haftalik qarzlar hisobotini Telegramga yuborish.
-- [ ] Mijozlar uchun Telegram orqali qarz eslatmasi (SMS krediti tejaladi).
+  - Yangi qarz qo'shish (tezkor Telegram komandasi orqali).
+  - Har kuni ertalab 09:00 da kunlik umumiy qarzlar va to'lovlar hisobotini Telegramga avtomatik yuborish.
+  - Telegram Mini App (TMA): Qarz Daftari'ni to'g'ridan-to'g'ri Telegram ichida 1-bosishda ochish.
+- [ ] Qarzdor mijozlar uchun bepul Telegram eslatmalari:
+  - Eskiz SMS xarajatlarini tejash maqsadida mijozga Telegram orqali qarz eslatmasi va to'lov havolasini yuborish.
 
-### 👥 Ko'p foydalanuvchilik rejim (Multi-user / Cashiers)
+### 🔒 Mobil Xavfsizlik & Biometrika (Mobile Biometrics)
 
-- [x] Katta do'konlar uchun: Sotuvchi/Kassir akkauntlarini qo'shish imkoniyati: Do'kon egasi profilida (`/profile`) "Do'kon xodimlari va Kassirlar" boshqaruv markazi (`CashiersManagement`), kassir biriktirish modali (ism, telefon, login, parol, ruxsatlar), akkauntni faolsizlantirish/yoqish va o'chirish imkoniyati, hamda login oynasida alohida "Kassir 👥 (Telefon/Login + Parol)" tezkor kirish tizimi joriy qilindi.
-- [x] Kassir huquqlarini cheklash: Kassir faqat do'kon qarzlari bilan ishlaydi, yangi qarz kiritishi va to'lov qabul qilishi mumkin; lekin qarz yozuvlarini butunlay o'chirish (DELETE ruxsati serverda qat'iy 403 bilan bloklangan - faqat do'kon egasi o'chira oladi), do'kon obunasi va tariflarini o'zgartirish cheklangan.
+- [ ] Barmoq izi (Fingerprint) va Face ID bilan ilovani qulflash:
+  - Do'kon egasi yoki kassir ilovani fondan qayta ochganda biometrik tekshiruv yoki 4 xonali PIN kod so'rash.
+  - `@capacitor-community/biometric-auth` orqali native xavfsizlik ta'minlash.
+
+### 🎨 Mobil Ilova Brendingi & Google Play / App Store Nashri
+
+- [ ] Rasmiy ikonka va Splash screen generatsiyasi:
+  - `@capacitor/assets` yordamida Qarz Daftari rasmiy logotipidan barcha Android adaptive ikonkalari (`hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) va iOS AppIcon'larini avtomatik yaratish.
+- [ ] Google Play Store uchun imzolangan Release to'plami (`.aab`):
+  - Keystore kaliti bilan imzolangan Android App Bundle (`.aab`) yig'ish va Google Play Console'ga yuklashga tayyorlash.
 
 ### 📊 Eksport va Buxgalteriya integratsiyasi
 
 - [x] Qarzlar ro'yxatini Excel (.xlsx) va chiroyli PDF hisobot/chek formatida yuklab olish: Dashboard va Qarzlar ro'yxatida filtrga moslashuvchi tezkor Excel/PDF eksport tugmalari hamda har bir qarz uchun A5 rasmiy kvitansiya generatsiyasi joriy qilindi.
-- [ ] 1C yoki boshqa savdo tizimlari bilan API orqali sinxronizatsiya.
+- [ ] 1C va tashqi savdo tizimlari (Poster, Billz, Jowi) bilan API integratsiyasi:
+  - `/profile`da xavfsiz API kalit (Secret Token) generatsiyasi orqali tashqi kassa dasturlaridan qarzlar avtomatik sinxronlanishi.
+
+### 💳 To'lov Tizimlarini Jonli Rejimga (Live Production) O'tkazish
+
+- [ ] Click, Payme va Uzum Bank rasmiy shartnomalari tasdiqlangach, `.env.production` faylidagi test kalitlarini rasmiy jonli kalitlarga almashtirish va real to'lovlarni qabul qilish.
 
 ### 🔔 Aqlli Bildirishnomalar (Smart Reminders)
 
