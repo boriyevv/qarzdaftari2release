@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatCurrency } from '@/lib/utils/currency'
+import { saveAndShareFile } from './export-helper'
 
 export interface ExportDebtItem {
   id: string
@@ -135,8 +136,17 @@ export function exportAnalyticsToExcel(options: ExportOptions) {
   ]
   XLSX.utils.book_append_sheet(wb, wsDebts, 'Barcha Qarzlar')
 
-  // Faylni yuklab olish
-  XLSX.writeFile(wb, `${cleanStoreName}_Hisobot_${dateStr}.xlsx`)
+  // Faylni yuklab olish / yuborish
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  const blob = new Blob([wbout], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  saveAndShareFile({
+    filename: `${cleanStoreName}_Hisobot_${dateStr}.xlsx`,
+    blob,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    title: 'Analitika Hisoboti (Excel)',
+  })
 }
 
 /**
@@ -315,6 +325,12 @@ export function exportAnalyticsToPDF(options: ExportOptions) {
     }
   })
 
-  // Faylni yuklab olish
-  doc.save(`${cleanStoreName}_Hisobot_${dateStr}.pdf`)
+  // Faylni yuklab olish / yuborish
+  const pdfBlob = doc.output('blob')
+  saveAndShareFile({
+    filename: `${cleanStoreName}_Hisobot_${dateStr}.pdf`,
+    blob: pdfBlob,
+    mimeType: 'application/pdf',
+    title: 'Analitika Hisoboti (PDF)',
+  })
 }

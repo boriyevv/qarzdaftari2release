@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatCurrency } from '@/lib/utils/currency'
+import { saveAndShareFile } from './export-helper'
 
 export interface ExportableDebt {
   id: string
@@ -134,7 +135,16 @@ export function exportDebtsToExcel(options: DebtsExportOptions) {
   ]
 
   XLSX.utils.book_append_sheet(wb, ws, 'Qarzlar Ro\'yxati')
-  XLSX.writeFile(wb, `Qarzlar_Royxati_${cleanStoreName}_${dateStr}.xlsx`)
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  const blob = new Blob([wbout], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  saveAndShareFile({
+    filename: `Qarzlar_Royxati_${cleanStoreName}_${dateStr}.xlsx`,
+    blob,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    title: 'Qarzlar Ro\'yxati (Excel)',
+  })
 }
 
 /**
@@ -314,7 +324,13 @@ export function exportDebtsToPDF(options: DebtsExportOptions) {
     doc.text(`Sahifa ${i} / ${totalPages}`, pageWidth - 14, pageHeight - 6, { align: 'right' })
   }
 
-  doc.save(`Qarzlar_Hisoboti_${cleanStoreName}_${dateStr}.pdf`)
+  const pdfBlob = doc.output('blob')
+  saveAndShareFile({
+    filename: `Qarzlar_Hisoboti_${cleanStoreName}_${dateStr}.pdf`,
+    blob: pdfBlob,
+    mimeType: 'application/pdf',
+    title: 'Qarzlar Hisoboti (PDF)',
+  })
 }
 
 /**
@@ -425,5 +441,11 @@ export function exportSingleDebtReceiptPDF(debt: ExportableDebt, storeName: stri
   doc.setTextColor(148, 163, 184)
   doc.text('Qarz Daftari dasturi orqali shakllantirildi (debtbook.uz)', pageWidth / 2, finalY + 12, { align: 'center' })
 
-  doc.save(`Kvitansiya_${cleanDebtor}_${debt.id.slice(0, 6)}.pdf`)
+  const receiptBlob = doc.output('blob')
+  saveAndShareFile({
+    filename: `Kvitansiya_${cleanDebtor}_${debt.id.slice(0, 6)}.pdf`,
+    blob: receiptBlob,
+    mimeType: 'application/pdf',
+    title: `Kvitansiya #${debt.id.slice(0, 6).toUpperCase()}`,
+  })
 }

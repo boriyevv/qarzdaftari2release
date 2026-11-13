@@ -849,6 +849,13 @@
   dependencies:
     tslib "^2.1.0"
 
+"@capacitor/filesystem@^8.1.5":
+  version "8.1.5"
+  resolved "https://registry.npmjs.org/@capacitor/filesystem/-/filesystem-8.1.5.tgz"
+  integrity sha512-m1RkI8L83NJeppEKyRWioK3MDp2vjlA+QfUQcF8/xRlcXNC2HYxqoyYJ+K4M0EcVovy+g+4F24S05+bhK4Vgdg==
+  dependencies:
+    "@capacitor/synapse" "^1.0.4"
+
 "@capacitor/haptics@^8.0.2":
   version "8.0.2"
   resolved "https://registry.npmjs.org/@capacitor/haptics/-/haptics-8.0.2.tgz"
@@ -864,10 +871,20 @@
   resolved "https://registry.npmjs.org/@capacitor/keyboard/-/keyboard-8.0.6.tgz"
   integrity sha512-Bbe+9V0qaT6dzEFJEK7BUWR01l2+vZE8FM5ITF/WgKtx+G6eGZ6d5+YiSMRJBAK0VGjdO59v8yiQ10Doa5KyvQ==
 
+"@capacitor/share@^8.0.3":
+  version "8.0.3"
+  resolved "https://registry.npmjs.org/@capacitor/share/-/share-8.0.3.tgz"
+  integrity sha512-gnvZBV1NPu2B8vd1UKncR56G15ueHd0aZLqgDov++t3SmTBG9Q0VrAZ1VnHn5stxlmglVaTb4RwopMgbpLzroA==
+
 "@capacitor/status-bar@^8.0.4":
   version "8.0.4"
   resolved "https://registry.npmjs.org/@capacitor/status-bar/-/status-bar-8.0.4.tgz"
   integrity sha512-ZMzBUyHBzwDUxcHadEhvOvmoPmMQGMZgaMRJu8ohELeI6IaxoVH9ZhdF/OHnY3/yykv3Glev8Tnbh4aZY/0B0w==
+
+"@capacitor/synapse@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/@capacitor/synapse/-/synapse-1.0.4.tgz"
+  integrity sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==
 
 "@dnd-kit/accessibility@^3.1.1":
   version "3.1.1"

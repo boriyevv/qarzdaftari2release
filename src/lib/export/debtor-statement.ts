@@ -2,6 +2,7 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatCurrency } from '@/lib/utils/currency'
+import { saveAndShareFile } from './export-helper'
 
 export interface StatementDebt {
   id: string
@@ -197,6 +198,12 @@ export function exportDebtorStatementPDF(options: DebtorStatementOptions) {
   doc.setTextColor(148, 163, 184)
   doc.text('Qarz Daftari avtomatlashtirilgan tizimi orqali shakllantirildi - www.qarzdaftari.uz', 14, pageHeight - 6)
 
-  // Faylni yuklab olish
-  doc.save(`${cleanName}_Akt_Sverka_${dateStr.replace(/\./g, '_')}.pdf`)
+  // Faylni yuklab olish / yuborish
+  const pdfBlob = doc.output('blob')
+  saveAndShareFile({
+    filename: `${cleanName}_Akt_Sverka_${dateStr.replace(/\./g, '_')}.pdf`,
+    blob: pdfBlob,
+    mimeType: 'application/pdf',
+    title: `${debtorName} - Akt-sverka (PDF)`,
+  })
 }
