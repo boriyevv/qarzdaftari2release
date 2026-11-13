@@ -87,10 +87,15 @@ export const nativeStatusBar = {
   syncWithTheme: async (isDark: boolean) => {
     if (typeof window === 'undefined' || !Capacitor.isNativePlatform()) return
     try {
-      // Set background color first
+      // 1. Ensure status bar has its own solid bar and does not overlay with transparent background
+      await StatusBar.setOverlaysWebView({ overlay: false })
+
+      // 2. Set solid background color
       await StatusBar.setBackgroundColor({
         color: isDark ? '#0f172a' : '#ffffff',
       })
+
+      // 3. Set high-contrast icon style
       // In Capacitor:
       // Style.Dark = Light text/icons for dark backgrounds (#0f172a)
       // Style.Light = Dark text/icons for light backgrounds (#ffffff)
