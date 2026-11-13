@@ -91,10 +91,11 @@ export const nativeStatusBar = {
       await StatusBar.setBackgroundColor({
         color: isDark ? '#0f172a' : '#ffffff',
       })
-      // Style.Light = Light icons for dark background (#0f172a)
-      // Style.Dark = Dark icons for light background (#ffffff)
+      // In Capacitor:
+      // Style.Dark = Light text/icons for dark backgrounds (#0f172a)
+      // Style.Light = Dark text/icons for light backgrounds (#ffffff)
       await StatusBar.setStyle({
-        style: isDark ? Style.Light : Style.Dark,
+        style: isDark ? Style.Dark : Style.Light,
       })
     } catch (e) {
       console.warn('StatusBar sync error:', e)
