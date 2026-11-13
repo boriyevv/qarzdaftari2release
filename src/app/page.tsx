@@ -78,7 +78,7 @@ export default function Home() {
 			</div>
 
 			{/* Floating Modern Header */}
-			<header className='sticky top-0 z-50 px-4 pt-3 pb-2 backdrop-blur-xl bg-slate-900/80 border-b border-slate-800/80 transition-all'>
+			<header className='sticky top-0 z-50 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2 backdrop-blur-xl bg-slate-900/80 border-b border-slate-800/80 transition-all'>
 				<div className='max-w-7xl mx-auto flex items-center justify-between h-14'>
 					{/* Brand Mark */}
 					<Link href='/' className='flex items-center gap-3 group'>

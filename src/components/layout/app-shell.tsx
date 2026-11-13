@@ -493,12 +493,12 @@ export function AppShell({
             ========================================================= */}
         <div
           className={`
-            flex-1 flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out pb-20 lg:pb-8
+            flex-1 flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-8
             ${isCollapsed ? 'lg:pl-20' : 'lg:pl-64'}
           `}
         >
           {/* Unified Sticky Header */}
-          <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-2xs">
+          <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-2xs pt-[env(safe-area-inset-top)]">
             <div className="px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
               {/* Left Side: Mobile Avatar / Back button + Title */}
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -628,7 +628,7 @@ export function AppShell({
         {/* =========================================================
             MOBILE BOTTOM NAVIGATION BAR
             ========================================================= */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 z-40 shadow-lg">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 z-40 shadow-lg pb-[env(safe-area-inset-bottom)]">
           <div className="grid grid-cols-5 gap-1 py-1.5 px-2 max-w-md mx-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href
