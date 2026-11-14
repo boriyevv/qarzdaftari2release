@@ -18,6 +18,7 @@ interface User {
     role?: 'owner' | 'cashier' | 'admin'
     store_owner_id?: string
     permissions?: string[]
+    locale_settings?: Record<string, any>
     sms_credits?: {
         balance: number
         total_purchased: number

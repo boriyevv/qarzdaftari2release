@@ -3,46 +3,35 @@
 
 import { useState, useEffect } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useUser } from '@/lib/contexts/user-context'
 import {
-  User,
+  Settings,
+  ShieldCheck,
+  Send,
+  Users,
   Store,
-  Phone,
-  Crown,
-  Shield,
+  Headphones,
+  Share2,
   LogOut,
+  ChevronRight,
   Sparkles,
-  Sun,
-  Moon,
-  Laptop,
-  Volume2,
-  VolumeX,
-  Play,
-  Check,
+  Info,
+  ExternalLink,
+  Shield,
+  Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
-import { isSoundEnabled, setSoundEnabled, playSuccessSound } from '@/lib/sounds'
-import { CashiersManagement } from '@/components/profile/cashiers-management'
-import { TelegramIntegration } from '@/components/profile/telegram-integration'
-import { SecurityLockSettings } from '@/components/profile/security-lock-settings'
+import { securityStorage } from '@/lib/native/biometrics'
+import { toast } from 'sonner'
+import { nativeHaptics } from '@/lib/native'
 import { DeleteAccountSection } from '@/components/profile/delete-account-section'
-
-
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser()
-  const { theme, setTheme } = useTheme()
-  const [soundOn, setSoundOn] = useState(true)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    setSoundOn(isSoundEnabled())
-  }, [])
+  const [isPinSet, setIsPinSet] = useState(false)
+  const [isLockOn, setIsLockOn] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -50,17 +39,18 @@ export default function ProfilePage() {
     }
   }, [user, userLoading])
 
-  const handleToggleSound = () => {
-    const next = !soundOn
-    setSoundOn(next)
-    setSoundEnabled(next)
-    if (next) {
-      setTimeout(() => playSuccessSound(), 50)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsPinSet(securityStorage.hasPin())
+      setIsLockOn(securityStorage.isLockEnabled())
     }
-  }
+  }, [])
 
   const handleLogout = async () => {
+    if (!confirm('Rostdan ham hisobdan chiqmoqchimisiz?')) return
+
     try {
+      await nativeHaptics.impact('medium')
       if (typeof window !== 'undefined') {
         localStorage.removeItem('phone_user_session')
       }
@@ -68,6 +58,26 @@ export default function ProfilePage() {
       window.location.href = '/login'
     } catch (e) {
       console.error(e)
+    }
+  }
+
+  const handleShareApp = async () => {
+    await nativeHaptics.impact('light')
+    const shareData = {
+      title: 'Qarz Daftari',
+      text: "Qarz Daftari — savdo va do'kon uchun qarzlar va to'lovlar hisobini yurituvchi eng qulay ilova! 🚀",
+      url: 'https://debtbook.uz',
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch {
+        // User cancelled share
+      }
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText('https://debtbook.uz')
+      toast.success('Ilova havolasi nusxalandi: debtbook.uz')
     }
   }
 
@@ -83,249 +93,300 @@ export default function ProfilePage() {
   }
 
   const currentPlan = (user?.plan_type || 'FREE').toUpperCase()
+  const userLocale = (user?.locale_settings as any) || {}
+  const telegramChatId = userLocale.telegram_chat_id
+  const reportTime = userLocale.telegram_daily_report_time || '09:00'
+  const reportEnabled = userLocale.telegram_daily_report_enabled !== false
 
   return (
     <AppShell
       title="Profil"
-      subtitle="Do'kon ma'lumotlari va hisob sozlamalari"
+      subtitle="Hisob va ilova boshqaruvi markazi"
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {/* Profile Header Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-2xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 text-white flex items-center justify-center font-black text-2xl uppercase shadow-md shadow-blue-500/20 flex-shrink-0">
-                {user?.store_name?.[0] || user?.full_name?.[0] || 'U'}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 truncate">
-                    {user?.store_name || user?.full_name || "Mening Do'konim"}
-                  </h1>
-                  <Badge
-                    className={`text-xs font-black uppercase px-2.5 py-0.5 ${
-                      currentPlan === 'PRO'
-                        ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                        : currentPlan === 'PLUS'
-                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {currentPlan}
-                  </Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Egasi: <span className="font-semibold text-slate-700 dark:text-slate-300">{user?.full_name || '-'}</span>
-                </p>
-              </div>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* User Profile Header Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 text-white flex items-center justify-center font-black text-2xl uppercase shadow-md shadow-blue-500/20 flex-shrink-0">
+              {user?.store_name?.[0] || user?.full_name?.[0] || 'U'}
             </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">
+                  {user?.store_name || user?.full_name || "Mening Do'konim"}
+                </h1>
+                <Badge
+                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                    currentPlan === 'PRO'
+                      ? 'bg-amber-500 text-white'
+                      : currentPlan === 'PLUS'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  {currentPlan}
+                </Badge>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                {user?.full_name ? `${user.full_name} • ` : ''}
+                <span className="font-mono">{user?.phone || '-'}</span>
+              </p>
+            </div>
+          </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              {currentPlan === 'FREE' && (
-                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold">
-                  <Link href="/pricing">
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5 text-yellow-300" />
-                    Tarifni oshirish
-                  </Link>
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="text-red-600 dark:text-red-400 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-300 border-red-200 dark:border-red-900/40 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
-              >
-                <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                Hisobdan chiqish
-              </Button>
+          {/* Plan Mode Banner / Quick Upgrade */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 text-xs">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span className="font-bold text-slate-800 dark:text-slate-200">
+                Tarif: {currentPlan === 'PRO' ? 'Qarz Daftari PRO' : currentPlan === 'PLUS' ? 'Qarz Daftari PLUS' : 'Sinov (Bepul)'}
+              </span>
             </div>
+            {currentPlan === 'FREE' ? (
+              <Link
+                href="/pricing"
+                className="font-extrabold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                <span>PRO ga oshirish</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            ) : (
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                Faol obuna ✓
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Appearance & Sound Preferences (New!) */}
-        <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Sun className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              Ilova ko&apos;rinishi va Tovushlar
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
-              Qurilmangizga mos rang mavzusi va to&apos;lov tasdiqlash tovushlarini sozlang
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {/* Theme Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                Mavzu (Theme)
-              </label>
-              {mounted && (
-                <div className="grid grid-cols-3 gap-2.5 max-w-md">
-                  <button
-                    type="button"
-                    onClick={() => setTheme('light')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
-                      theme === 'light'
-                        ? 'bg-blue-50/80 border-blue-500 text-blue-700 shadow-xs ring-2 ring-blue-500/20'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                    }`}
-                  >
-                    <Sun className="w-5 h-5 text-amber-500 mb-1.5" />
-                    <span>Yorug&apos;</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setTheme('dark')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
-                      theme === 'dark'
-                        ? 'bg-blue-950/50 border-blue-500 text-blue-400 shadow-xs ring-2 ring-blue-500/20'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                    }`}
-                  >
-                    <Moon className="w-5 h-5 text-indigo-400 mb-1.5" />
-                    <span>Qorong&apos;i</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setTheme('system')}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
-                      theme === 'system'
-                        ? 'bg-blue-50/80 dark:bg-blue-950/50 border-blue-500 text-blue-700 dark:text-blue-400 shadow-xs ring-2 ring-blue-500/20'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                    }`}
-                  >
-                    <Laptop className="w-5 h-5 text-slate-500 mb-1.5" />
-                    <span>Tizim</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Sound Toggle */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
+        {/* Primary Navigation Menu List (Fintech Hub) */}
+        <div className="space-y-2.5">
+          {/* 1. Settings (Theme & Sounds) */}
+          <Link
+            href="/profile/settings"
+            className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-950/50 dark:group-hover:text-blue-400 transition-colors">
+                <Settings className="w-5 h-5" />
+              </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                  {soundOn ? <Volume2 className="w-4 h-4 text-emerald-600" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
-                  <span>Mikro-tovushlar (Audio Chimes)</span>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Sozlamalar
                 </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Qarzga to&apos;lov qabul qilinganda yoqimli muvaffaqiyat ovozi yangraydi
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Ilova mavzusi (Yorug&apos;/Qorong&apos;i) va tovushlar
                 </p>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => playSuccessSound()}
-                  className="rounded-xl h-8 px-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  title="Tovushni eshitib ko'rish"
-                >
-                  <Play className="w-3 h-3 mr-1 text-blue-600" />
-                  Sinash
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleToggleSound}
-                  className={`rounded-xl h-8 px-3 text-xs font-bold transition-all ${
-                    soundOn
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-200'
-                  }`}
-                >
-                  {soundOn ? 'Yoqilgan' : "O'chirilgan"}
-                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+          </Link>
 
-        {/* Telegram Bot & Mini App Integration */}
-        <TelegramIntegration />
-
-        {/* Mobile Security & Biometric Lock (Face ID / PIN) */}
-        <SecurityLockSettings />
-
-        {/* Cashiers & Staff Management (Multi-user Mode) */}
-        <CashiersManagement />
-
-        {/* Account Details Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Store className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                Do&apos;kon ma&apos;lumotlari
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div>
-                <p className="text-xs text-slate-400">Do&apos;kon nomi</p>
-                <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">
-                  {user?.store_name || '-'}
+          {/* 2. Security & Lock (PIN & Biometrics) */}
+          <Link
+            href="/profile/security"
+            className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 dark:group-hover:bg-indigo-950/50 dark:group-hover:text-indigo-400 transition-colors">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Ilova Xavfsizligi va Qulf
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  PIN kod, Face ID va Barmoq izi himoyasi
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-slate-400">Telefon raqam</p>
-                <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">
-                  {user?.phone || '-'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Crown className="w-4 h-4 text-amber-500" />
-                Obuna holati
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div>
-                <p className="text-xs text-slate-400">Joriy tarif</p>
-                <p className="font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                  {currentPlan} reja
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {isPinSet && isLockOn ? (
+                <Badge
+                  variant="outline"
+                  className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 font-bold px-2.5 py-0.5 text-[11px] rounded-full inline-flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Himoyalangan
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="text-slate-500 dark:text-slate-400 text-[11px] px-2 py-0.5 rounded-full border-slate-200 dark:border-slate-700"
+                >
+                  O&apos;chirilgan
+                </Badge>
+              )}
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+            </div>
+          </Link>
+
+          {/* 3. Telegram Bot & Reports */}
+          <Link
+            href="/profile/telegram"
+            className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-sky-950/50 dark:group-hover:text-sky-400 transition-colors">
+                <Send className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Telegram Bot va Hisobotlar
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Kunlik hisobot vaqti va Mini App
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-slate-400">Imkoniyatlar</p>
-                <p className="font-medium text-slate-600 dark:text-slate-400 text-xs mt-0.5">
-                  {currentPlan === 'PRO'
-                    ? 'Cheksiz qarzlar, to\'liq yillik analitika, ustuvor yordam'
-                    : currentPlan === 'PLUS'
-                    ? 'Kengaytirilgan qarzlar, 1 oylik tahlillar'
-                    : 'Bepul sinov rejimi'}
+            </div>
+
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {telegramChatId ? (
+                <Badge
+                  variant="outline"
+                  className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 font-bold px-2.5 py-0.5 text-[11px] rounded-full inline-flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {reportEnabled ? reportTime : 'Ulangan'}
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="text-slate-500 dark:text-slate-400 text-[11px] px-2 py-0.5 rounded-full border-slate-200 dark:border-slate-700"
+                >
+                  Ulanmagan
+                </Badge>
+              )}
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+            </div>
+          </Link>
+
+          {/* 4. Cashiers & Staff */}
+          <Link
+            href="/profile/cashiers"
+            className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-purple-50 group-hover:text-purple-600 dark:group-hover:bg-purple-950/50 dark:group-hover:text-purple-400 transition-colors">
+                <Users className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Kassirlar va Xodimlar
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Do&apos;kon sotuvchilariga ruxsatlar berish
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+          </Link>
+
+          {/* 5. General Info & Store Details */}
+          <Link
+            href="/profile/store"
+            className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:group-hover:bg-emerald-950/50 dark:group-hover:text-emerald-400 transition-colors">
+                <Store className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Umumiy ma&apos;lumotlar
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Do&apos;kon rekvizitlari va obuna rejasi
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+          </Link>
+
+          {/* 6. Support & Contact */}
+          <a
+            href="https://t.me/debtbookuz_bot"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-teal-50 group-hover:text-teal-600 dark:group-hover:bg-teal-950/50 dark:group-hover:text-teal-400 transition-colors">
+                <Headphones className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Qo&apos;llab-quvvatlash bilan bog&apos;lanish
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Telegram admin va texnik yordam
+                </p>
+              </div>
+            </div>
+            <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors flex-shrink-0" />
+          </a>
+
+          {/* 7. Invite Friends / Share App */}
+          <button
+            type="button"
+            onClick={handleShareApp}
+            className="w-full flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-[0.99] transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-950/50 dark:group-hover:text-blue-400 transition-colors">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                  Do&apos;stlarni taklif qilish
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Ilovani boshqa do&apos;kondorlarga ulashish
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+          </button>
+
+          {/* 8. Logout (Red accent tile) */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-rose-100 dark:border-rose-950/60 shadow-2xs hover:bg-rose-50/50 dark:hover:bg-rose-950/30 active:scale-[0.99] transition-all group cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                <LogOut className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-rose-600 dark:text-rose-400 truncate">
+                  Chiqish
+                </p>
+                <p className="text-xs text-slate-400 truncate">
+                  Hisobdan xavfsiz chiqish
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-rose-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+          </button>
         </div>
 
-        {/* Security / Info Notice */}
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-blue-200/80 dark:border-blue-900/50 shadow-2xs rounded-3xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-blue-900 dark:text-blue-200 text-base font-bold flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              Xavfsizlik va Shaxsiy ma&apos;lumotlar
-            </CardTitle>
-            <CardDescription className="text-blue-700 dark:text-blue-300 text-xs">
-              Barcha qarz yozuvlari va ma&apos;lumotlaringiz shifrlangan holda xavfsiz saqlanadi
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-              Agar do&apos;koningiz ma&apos;lumotlarini o&apos;zgartirmoqchi bo&apos;lsangiz yoki savollaringiz bo&apos;lsa,
-              bizning qo&apos;llab-quvvatlash xizmati bilan istalgan vaqtda bog&apos;lanishingiz mumkin.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Footnote: Legal Links & App Version (matching bottom of screenshot) */}
+        <div className="pt-4 text-center space-y-3">
+          <div className="flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+            <Link
+              href="/profile/store"
+              className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors inline-flex items-center gap-1.5"
+            >
+              <Info className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Ommaviy oferta</span>
+            </Link>
+          </div>
 
-        {/* Account Deletion (Apple App Store Guideline 5.1.1(v) & Google Play Data Safety) */}
-        <DeleteAccountSection />
+          <p className="text-[11px] text-slate-400 dark:text-slate-600 font-mono">
+            Qarz Daftari 2.0 • 2026
+          </p>
+        </div>
       </div>
     </AppShell>
   )
