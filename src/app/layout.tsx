@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { UserProvider } from '@/lib/contexts/user-context'
+import { LanguageProvider } from '@/lib/contexts/language-context'
 import { OfflineIndicator } from '@/components/pwa/offline-indicator'
 import { PwaInstallBanner } from '@/components/pwa/pwa-install-banner'
 import { ThemeProvider } from '@/components/theme/theme-provider'
@@ -98,15 +99,17 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <UserProvider>
-            <AppLockProvider>
-              <TelegramWebAppInitializer />
-              <OfflineIndicator />
-              {children}
-              <PwaInstallBanner />
-              <Toaster position="top-center" richColors closeButton />
-            </AppLockProvider>
-          </UserProvider>
+          <LanguageProvider>
+            <UserProvider>
+              <AppLockProvider>
+                <TelegramWebAppInitializer />
+                <OfflineIndicator />
+                {children}
+                <PwaInstallBanner />
+                <Toaster position="top-center" richColors closeButton />
+              </AppLockProvider>
+            </UserProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

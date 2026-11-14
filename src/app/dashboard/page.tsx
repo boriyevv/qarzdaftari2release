@@ -3,6 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useUser } from '@/lib/contexts/user-context'
+import { useLanguage } from '@/lib/contexts/language-context'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderFilterBar } from '@/components/folders/folder-filter-bar'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
@@ -32,6 +33,7 @@ interface Debt {
 
 function DashboardContent() {
   const { user, loading: userLoading } = useUser()
+  const { dict } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
   const action = searchParams.get('action')
@@ -109,8 +111,8 @@ function DashboardContent() {
 
   return (
     <AppShell
-      title="Dashboard"
-      subtitle={user.store_name || "Do'kon boshqaruvi"}
+      title={dict.nav.dashboard}
+      subtitle={user.store_name || dict.profile.store_info}
       showAddDebtButton={true}
       onAddDebtSuccess={fetchDebts}
     >

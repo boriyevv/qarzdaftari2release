@@ -26,6 +26,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 interface AppLockContextType {
   isLocked: boolean
@@ -42,6 +43,7 @@ const AppLockContext = createContext<AppLockContextType>({
 export const useAppLock = () => useContext(AppLockContext)
 
 export function AppLockProvider({ children }: { children: React.ReactNode }) {
+  const { dict } = useLanguage()
   const [isLocked, setIsLocked] = useState(false)
   const [pin, setPin] = useState('')
   const [isShaking, setIsShaking] = useState(false)
@@ -188,7 +190,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         } else {
           await nativeHaptics.notification('error')
           setIsShaking(true)
-          setErrorMessage("Noto'g'ri PIN kod")
+          setErrorMessage(dict.lock.wrong_pin)
           setTimeout(() => {
             setIsShaking(false)
             setPin('')
@@ -223,7 +225,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
           } else {
             await nativeHaptics.notification('error')
             setIsShaking(true)
-            setErrorMessage(data.message || "Noto'g'ri tasdiq kodi")
+            setErrorMessage(data.message || dict.lock.wrong_code)
             setTimeout(() => {
               setIsShaking(false)
               setPin('')
@@ -268,7 +270,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
           await nativeHaptics.notification('success')
           playSuccessSound()
-          toast.success("Yangi PIN kod muvaffaqiyatli o'rnatildi! 🎉")
+          toast.success(dict.lock.pin_updated)
           setIsLocked(false)
           setLockMode('enter_pin')
           setPin('')
@@ -277,7 +279,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         } else {
           await nativeHaptics.notification('error')
           setIsShaking(true)
-          setErrorMessage("PIN kodlar mos kelmadi. Qaytadan kiriting")
+          setErrorMessage(dict.lock.pin_mismatch)
           setTimeout(() => {
             setIsShaking(false)
             setPin('')
@@ -324,7 +326,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      toast.success("Telegram botingizga 4 xonali tasdiq kodi yuborildi! ✈️")
+      toast.success(dict.lock.code_sent)
       playSuccessSound()
       setLockMode('enter_reset_code')
       setPin('')
@@ -346,10 +348,10 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     await nativeHaptics.impact('light')
-    toast.warning('Hisobdan chiqmoqchimisiz?', {
-      description: "Qayta kirish uchun telefon raqamingiz orqali tasdiqlash lozim bo'ladi.",
+    toast.warning(dict.profile.logout_confirm, {
+      description: dict.profile.logout_confirm_desc,
       action: {
-        label: 'Ha, chiqish',
+        label: dict.profile.logout_action,
         onClick: async () => {
           securityStorage.removePin()
           setIsLocked(false)
@@ -360,7 +362,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         },
       },
       cancel: {
-        label: 'Bekor qilish',
+        label: dict.common.cancel,
         onClick: () => {},
       },
       duration: 8000,
@@ -410,10 +412,10 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               <div className="space-y-1">
                 <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
                   <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Qarz Daftari
+                  {dict.lock.title}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Ilovani ochish uchun 4 xonali PIN kodni kiriting
+                  {dict.lock.enter_pin_desc}
                 </p>
               </div>
             )}
@@ -422,10 +424,10 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               <div className="space-y-1 animate-in fade-in">
                 <h2 className="text-xl font-bold tracking-tight text-sky-600 dark:text-sky-400 flex items-center justify-center gap-1.5">
                   <Send className="w-4 h-4" />
-                  Telegram tasdiq kodi
+                  {dict.lock.telegram_code_title}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                  Telegram botingizga yuborilgan 4 xonali tasdiq kodini kiriting
+                  {dict.lock.telegram_code_desc}
                 </p>
               </div>
             )}
@@ -434,10 +436,10 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               <div className="space-y-1 animate-in fade-in">
                 <h2 className="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
                   <KeyRound className="w-4 h-4" />
-                  Yangi PIN kod
+                  {dict.lock.set_new_pin_title}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                  O&apos;zingiz xohlagan 4 xonali yangi PIN kodni kiriting
+                  {dict.lock.set_new_pin_desc}
                 </p>
               </div>
             )}
@@ -446,10 +448,10 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               <div className="space-y-1 animate-in fade-in">
                 <h2 className="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
-                  PIN kodni tasdiqlang
+                  {dict.lock.confirm_new_pin_title}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                  Xatolik yo&apos;qligini tekshirish uchun kodni qayta kiriting
+                  {dict.lock.confirm_new_pin_desc}
                 </p>
               </div>
             )}
@@ -513,7 +515,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               >
                 <Fingerprint className="w-6 h-6" />
                 <span className="text-[10px] font-semibold mt-0.5 text-slate-500 dark:text-slate-400">
-                  {biometricName.toLowerCase().includes('face') ? 'Face ID' : 'Biometrika'}
+                  {biometricName.toLowerCase().includes('face') ? dict.lock.face_id : dict.lock.biometrics}
                 </span>
               </button>
             ) : (
@@ -521,10 +523,10 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={handleCancelReset}
                 className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-600 dark:text-slate-300 flex flex-col items-center justify-center transition-colors cursor-pointer active:scale-95"
-                title="Bekor qilish"
+                title={dict.common.cancel}
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span className="text-[9px] font-semibold mt-0.5">Bekor qilish</span>
+                <span className="text-[9px] font-semibold mt-0.5">{dict.common.cancel}</span>
               </button>
             )}
 
@@ -561,12 +563,12 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 {isSendingCode ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Kod yuborilmoqda...</span>
+                    <span>{dict.lock.code_sending}</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-3.5 h-3.5" />
-                    <span>PIN kodni unutdingizmi?</span>
+                    <span>{dict.lock.forgot_pin}</span>
                   </>
                 )}
               </button>
@@ -577,7 +579,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 className="text-[11px] text-slate-400 hover:text-rose-500 flex items-center gap-1 transition-colors cursor-pointer py-1 px-2.5 rounded-lg"
               >
                 <LogOut className="w-3 h-3" />
-                <span>Hisobdan chiqish</span>
+                <span>{dict.lock.logout}</span>
               </button>
             </div>
           ) : (
@@ -590,7 +592,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                   className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                 >
                   <RefreshCw className={`w-3 h-3 ${isSendingCode ? 'animate-spin' : ''}`} />
-                  <span>Kodni qayta yuborish</span>
+                  <span>{dict.lock.resend_code}</span>
                 </button>
               )}
 
@@ -600,7 +602,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer"
               >
                 <ArrowLeft className="w-3 h-3" />
-                <span>Bekor qilish</span>
+                <span>{dict.common.cancel}</span>
               </button>
             </div>
           )}

@@ -30,6 +30,7 @@ import {
 import { toast } from 'sonner'
 import { syncOfflineDebtsQueue } from '@/lib/services/offline-debts.service'
 import { useUser } from '@/lib/contexts/user-context'
+import { useLanguage } from '@/lib/contexts/language-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
@@ -95,6 +96,7 @@ export function AppShell({
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading: userLoading } = useUser()
+  const { dict } = useLanguage()
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
   const [mobileOpen, setMobileOpen] = useState<boolean>(false)
@@ -208,20 +210,20 @@ export function AppShell({
 
   const navItems: NavItem[] = [
     {
-      label: 'Dashboard',
+      label: dict.nav.dashboard,
       href: '/dashboard',
       icon: Home,
       tourId: 'tour-nav-dashboard',
     },
     {
-      label: 'Analytics',
+      label: dict.nav.analytics,
       href: '/analytics',
       icon: BarChart3,
       badge: currentPlan === 'FREE' ? 'Pro' : undefined,
       tourId: 'tour-nav-analytics',
     },
     {
-      label: 'SMS Kredits',
+      label: dict.nav.sms,
       href: '/sms-credits',
       icon: MessageSquare,
       tourId: 'tour-nav-sms',
@@ -230,14 +232,14 @@ export function AppShell({
       ? []
       : [
           {
-            label: 'Tariflar',
+            label: dict.nav.pricing,
             href: '/pricing',
             icon: Crown,
             tourId: 'tour-nav-pricing',
           },
         ]),
     {
-      label: 'Profil',
+      label: dict.nav.profile,
       href: '/profile',
       icon: User,
       tourId: 'tour-nav-profile',
@@ -694,7 +696,7 @@ export function AppShell({
               >
                 <Home className="w-5 h-5" />
               </div>
-              <span className="mt-0.5 truncate text-[10px]">Bosh sahifa</span>
+              <span className="mt-0.5 truncate text-[10px]">{dict.nav.dashboard}</span>
             </Link>
 
             {/* Slot 2: Analitika */}
@@ -717,7 +719,7 @@ export function AppShell({
                   <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-purple-500 ring-2 ring-white dark:ring-slate-900" />
                 )}
               </div>
-              <span className="mt-0.5 truncate text-[10px]">Analitika</span>
+              <span className="mt-0.5 truncate text-[10px]">{dict.nav.analytics}</span>
             </Link>
 
             {/* Slot 3: Elevated Center Action Button (+ Qarz) */}
@@ -730,7 +732,7 @@ export function AppShell({
                   openAddDebt()
                 }}
                 className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 text-white shadow-lg shadow-blue-500/35 ring-4 ring-white dark:ring-slate-900 transition-all duration-200 active:scale-90 hover:scale-105 cursor-pointer"
-                aria-label="Yangi qarz kiritish"
+                aria-label={dict.nav.add_debt}
               >
                 <Plus className="w-6 h-6 stroke-[2.75] transition-transform group-hover:rotate-90 duration-200" />
               </button>
@@ -753,7 +755,7 @@ export function AppShell({
               >
                 <MessageSquare className="w-5 h-5" />
               </div>
-              <span className="mt-0.5 truncate text-[10px]">SMS</span>
+              <span className="mt-0.5 truncate text-[10px]">{dict.nav.sms}</span>
             </Link>
 
             {/* Slot 5: Profil */}
@@ -773,7 +775,7 @@ export function AppShell({
               >
                 <User className="w-5 h-5" />
               </div>
-              <span className="mt-0.5 truncate text-[10px]">Profil</span>
+              <span className="mt-0.5 truncate text-[10px]">{dict.nav.profile}</span>
             </Link>
           </div>
         </nav>

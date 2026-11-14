@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { Badge } from '@/components/ui/badge'
 import { useUser } from '@/lib/contexts/user-context'
+import { useLanguage } from '@/lib/contexts/language-context'
 import {
   Settings,
   ShieldCheck,
@@ -25,6 +26,7 @@ import { nativeHaptics } from '@/lib/native'
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser()
+  const { dict } = useLanguage()
   const [isPinSet, setIsPinSet] = useState(false)
   const [isLockOn, setIsLockOn] = useState(false)
 
@@ -56,14 +58,14 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     await nativeHaptics.impact('light')
-    toast.warning('Rostdan ham hisobdan chiqmoqchimisiz?', {
-      description: "Qayta kirish uchun telefon raqamingiz orqali tasdiqlash lozim bo'ladi.",
+    toast.warning(dict.profile.logout_confirm, {
+      description: dict.profile.logout_confirm_desc,
       action: {
-        label: 'Ha, chiqish',
+        label: dict.profile.logout_action,
         onClick: executeLogout,
       },
       cancel: {
-        label: 'Bekor qilish',
+        label: dict.common.cancel,
         onClick: () => {},
       },
       duration: 8000,
@@ -74,7 +76,7 @@ export default function ProfilePage() {
     await nativeHaptics.impact('light')
     const shareData = {
       title: 'Qarz Daftari',
-      text: "Qarz Daftari — savdo va do'kon uchun qarzlar va to'lovlar hisobini yurituvchi eng qulay ilova! 🚀",
+      text: dict.profile.share_text,
       url: 'https://debtbook.uz',
     }
 
@@ -86,7 +88,7 @@ export default function ProfilePage() {
       }
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText('https://debtbook.uz')
-      toast.success('Ilova havolasi nusxalandi: debtbook.uz')
+      toast.success(dict.profile.share_copied)
     }
   }
 
@@ -109,8 +111,8 @@ export default function ProfilePage() {
 
   return (
     <AppShell
-      title="Profil"
-      subtitle="Hisob va ilova boshqaruvi markazi"
+      title={dict.profile.title}
+      subtitle={dict.profile.subtitle}
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* User Profile Header Card */}
@@ -122,7 +124,7 @@ export default function ProfilePage() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">
-                  {user?.store_name || user?.full_name || "Mening Do'konim"}
+                  {user?.store_name || user?.full_name || dict.profile.store_info}
                 </h1>
                 <Badge
                   className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
@@ -148,7 +150,7 @@ export default function ProfilePage() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-500" />
               <span className="font-bold text-slate-800 dark:text-slate-200">
-                Tarif: {currentPlan === 'PRO' ? 'Qarz Daftari PRO' : currentPlan === 'PLUS' ? 'Qarz Daftari PLUS' : 'Sinov (Bepul)'}
+                {currentPlan} {dict.nav.plan_tag}
               </span>
             </div>
             {currentPlan === 'FREE' ? (
@@ -156,12 +158,12 @@ export default function ProfilePage() {
                 href="/pricing"
                 className="font-extrabold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
               >
-                <span>PRO ga oshirish</span>
+                <span>PRO</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             ) : (
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                Faol obuna ✓
+                {dict.common.active} ✓
               </span>
             )}
           </div>
@@ -180,10 +182,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Sozlamalar
+                  {dict.profile.settings}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Ilova mavzusi (Yorug&apos;/Qorong&apos;i) va tovushlar
+                  {dict.profile.settings_desc}
                 </p>
               </div>
             </div>
@@ -201,10 +203,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Ilova Xavfsizligi va Qulf
+                  {dict.profile.security}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  PIN kod, Face ID va Barmoq izi himoyasi
+                  {dict.profile.security_desc}
                 </p>
               </div>
             </div>
@@ -216,14 +218,14 @@ export default function ProfilePage() {
                   className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 font-bold px-2.5 py-0.5 text-[11px] rounded-full inline-flex items-center gap-1.5"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Himoyalangan
+                  {dict.profile.protected}
                 </Badge>
               ) : (
                 <Badge
                   variant="outline"
                   className="text-slate-500 dark:text-slate-400 text-[11px] px-2 py-0.5 rounded-full border-slate-200 dark:border-slate-700"
                 >
-                  O&apos;chirilgan
+                  {dict.profile.not_protected}
                 </Badge>
               )}
               <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
@@ -241,10 +243,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Telegram Bot va Hisobotlar
+                  {dict.profile.telegram}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Kunlik hisobot vaqti va Mini App
+                  {dict.profile.telegram_desc}
                 </p>
               </div>
             </div>
@@ -256,14 +258,14 @@ export default function ProfilePage() {
                   className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 font-bold px-2.5 py-0.5 text-[11px] rounded-full inline-flex items-center gap-1.5"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {reportEnabled ? reportTime : 'Ulangan'}
+                  {reportEnabled ? reportTime : dict.common.active}
                 </Badge>
               ) : (
                 <Badge
                   variant="outline"
                   className="text-slate-500 dark:text-slate-400 text-[11px] px-2 py-0.5 rounded-full border-slate-200 dark:border-slate-700"
                 >
-                  Ulanmagan
+                  {dict.profile.not_connected}
                 </Badge>
               )}
               <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
@@ -281,10 +283,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Kassirlar va Xodimlar
+                  {dict.profile.cashiers}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Do&apos;kon sotuvchilariga ruxsatlar berish
+                  {dict.profile.cashiers_desc}
                 </p>
               </div>
             </div>
@@ -302,10 +304,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Umumiy ma&apos;lumotlar
+                  {dict.profile.general}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Do&apos;kon, oferta va ilova ma&apos;lumotlari
+                  {dict.profile.general_desc}
                 </p>
               </div>
             </div>
@@ -325,10 +327,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Qo&apos;llab-quvvatlash bilan bog&apos;lanish
+                  {dict.profile.support}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Telegram admin va texnik yordam
+                  {dict.profile.support_desc}
                 </p>
               </div>
             </div>
@@ -347,10 +349,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                  Do&apos;stlarni taklif qilish
+                  {dict.profile.share}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Ilovani boshqa do&apos;kondorlarga ulashish
+                  {dict.profile.share_desc}
                 </p>
               </div>
             </div>
@@ -369,10 +371,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-rose-600 dark:text-rose-400 truncate">
-                  Chiqish
+                  {dict.profile.logout}
                 </p>
                 <p className="text-xs text-slate-400 truncate">
-                  Hisobdan xavfsiz chiqish
+                  {dict.profile.logout_desc}
                 </p>
               </div>
             </div>

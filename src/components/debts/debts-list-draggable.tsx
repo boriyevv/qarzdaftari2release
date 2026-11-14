@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLanguage } from '@/lib/contexts/language-context'
 import {
   closestCenter,
   DndContext,
@@ -1311,6 +1312,7 @@ export function DebtsListDraggable({
 }: DebtsListDraggableProps) {
   const router = useRouter()
   const { user } = useUser()
+  const { dict } = useLanguage()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'overdue' | 'paid'>('all')
   const [sortBy, setSortBy] = useState<'remaining-desc' | 'remaining-asc' | 'due-asc' | 'date-desc' | 'name-asc'>('date-desc')
@@ -1526,7 +1528,7 @@ export function DebtsListDraggable({
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <Input
               type="text"
-              placeholder="Qarzdor ismi yoki telefoni bo'yicha qidirish..."
+              placeholder={dict.dashboard.search_placeholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors w-full"
