@@ -29,12 +29,23 @@ export function openExternalUrl(url: string) {
   }
 }
 
+export const isHapticsEnabled = (): boolean => {
+  if (typeof window === 'undefined') return true
+  return localStorage.getItem('qd_haptics_enabled') !== 'false'
+}
+
+export const setHapticsEnabled = (enabled: boolean): void => {
+  if (typeof window === 'undefined') return
+  localStorage.setItem('qd_haptics_enabled', enabled ? 'true' : 'false')
+}
+
 /**
  * Native Haptic Feedback with graceful web fallback
  */
 export const nativeHaptics = {
   impact: async (style: 'light' | 'medium' | 'heavy' = 'light') => {
     if (typeof window === 'undefined') return
+    if (!isHapticsEnabled()) return
     try {
       if (Capacitor.isNativePlatform()) {
         const map = {
@@ -54,6 +65,7 @@ export const nativeHaptics = {
 
   notification: async (type: 'success' | 'warning' | 'error' = 'success') => {
     if (typeof window === 'undefined') return
+    if (!isHapticsEnabled()) return
     try {
       if (Capacitor.isNativePlatform()) {
         const map = {
@@ -77,6 +89,7 @@ export const nativeHaptics = {
 
   selection: async () => {
     if (typeof window === 'undefined') return
+    if (!isHapticsEnabled()) return
     try {
       if (Capacitor.isNativePlatform()) {
         await Haptics.selectionChanged()
