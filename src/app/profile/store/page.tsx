@@ -15,6 +15,10 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
+  FileText,
+  Info,
+  ChevronRight,
+  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import { DeleteAccountSection } from '@/components/profile/delete-account-section'
@@ -43,8 +47,8 @@ export default function ProfileStorePage() {
 
   return (
     <AppShell
-      title="Do'kon va Obuna"
-      subtitle="Do'koningiz ma'lumotlari va faol tarif imkoniyatlari"
+      title="Umumiy ma'lumotlar"
+      subtitle="Do'kon rekvizitlari, faol tarif va huquqiy ma'lumotlar"
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Navigation Back Link */}
@@ -150,6 +154,85 @@ export default function ProfileStorePage() {
                 </Link>
               </Button>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Legal Documents & App Info Card */}
+        <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              Huquqiy hujjatlar va Ilova haqida
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+              Foydalanish qoidalari, maxfiylik kafolatlari va ilova versiyasi
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {/* Ommaviy oferta */}
+            <Link
+              href="/terms"
+              className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/70 transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                    Ommaviy oferta (Foydalanish shartlari)
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Xizmat ko&apos;rsatish shartnomasi va foydalanuvchi huquqlari
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            </Link>
+
+            {/* Maxfiylik siyosati */}
+            <Link
+              href="/privacy"
+              className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/70 transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                    Maxfiylik siyosati (Privacy Policy)
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Shaxsiy ma&apos;lumotlar xavfsizligi va himoyasi
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            </Link>
+
+            {/* Ilova versiyasi */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center flex-shrink-0">
+                  <Info className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                    Ilova versiyasi
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Qarz Daftari mobil va veb platformasi
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold font-mono text-slate-700 dark:text-slate-300">
+                  v2.0.0
+                </span>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

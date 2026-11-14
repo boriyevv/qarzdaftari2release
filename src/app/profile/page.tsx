@@ -291,7 +291,7 @@ export default function ProfilePage() {
                   Umumiy ma&apos;lumotlar
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Do&apos;kon rekvizitlari va obuna rejasi
+                  Do&apos;kon, oferta va ilova ma&apos;lumotlari
                 </p>
               </div>
             </div>
