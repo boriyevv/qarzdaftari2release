@@ -2,7 +2,8 @@
 'use client'
 
 import { formatCurrency, formatCurrencyShort } from '@/lib/utils/currency'
-import { Users, Wallet, ArrowDownRight, AlertTriangle, Clock, TrendingUp, Sparkles } from 'lucide-react'
+import { Users, Wallet, ArrowDownRight, AlertTriangle } from 'lucide-react'
+import { AnimatedCounter } from '@/components/ui/animated-counter'
 
 interface DashboardStatsProps {
   totalDebts: number
@@ -10,6 +11,7 @@ interface DashboardStatsProps {
   totalPaid: number
   totalRemaining: number
   overdueCount: number
+  isLoading?: boolean
 }
 
 export function DashboardStats({
@@ -18,6 +20,7 @@ export function DashboardStats({
   totalPaid,
   totalRemaining,
   overdueCount,
+  isLoading = false,
 }: DashboardStatsProps) {
   // Calculate collection rate
   const collectionRate = totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0
@@ -25,7 +28,8 @@ export function DashboardStats({
   const stats = [
     {
       title: 'Jami Qarzlar',
-      value: totalDebts,
+      numericValue: totalDebts,
+      formatter: (v: number) => Math.round(v).toLocaleString('uz-UZ'),
       subValue: 'Aktiv qarzdorlar soni',
       icon: Users,
       badge: 'Faol yozuvlar',
@@ -38,7 +42,8 @@ export function DashboardStats({
     },
     {
       title: 'Jami Summa',
-      value: totalAmount > 9999999 ? formatCurrencyShort(totalAmount) : formatCurrency(totalAmount),
+      numericValue: totalAmount,
+      formatter: (v: number) => formatCurrency(Math.round(v)),
       subValue:
         totalAmount > 9999999
           ? formatCurrency(totalAmount)
@@ -54,10 +59,8 @@ export function DashboardStats({
     },
     {
       title: 'Qoldiq Qarz',
-      value:
-        totalRemaining > 9999999
-          ? formatCurrencyShort(totalRemaining)
-          : formatCurrency(totalRemaining),
+      numericValue: totalRemaining,
+      formatter: (v: number) => formatCurrency(Math.round(v)),
       subValue:
         totalRemaining > 9999999
           ? formatCurrency(totalRemaining)
@@ -73,7 +76,8 @@ export function DashboardStats({
     },
     {
       title: "Muddati O'tgan",
-      value: overdueCount,
+      numericValue: overdueCount,
+      formatter: (v: number) => Math.round(v).toLocaleString('uz-UZ'),
       subValue: overdueCount > 0 ? "SMS eslatma jo'nating" : 'Barcha muddatlar nazoratda',
       icon: AlertTriangle,
       badge: overdueCount > 0 ? 'Diqqat talab' : 'Hammasi joyida',
@@ -136,7 +140,12 @@ export function DashboardStats({
 
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                  {stat.value}
+                  <AnimatedCounter
+                    value={stat.numericValue}
+                    formatter={stat.formatter}
+                    isLoading={isLoading}
+                    duration={1200}
+                  />
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">

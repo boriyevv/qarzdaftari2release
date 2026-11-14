@@ -129,6 +129,7 @@ function DashboardContent() {
             totalPaid={totalPaid}
             totalRemaining={totalRemaining}
             overdueCount={overdueCount}
+            isLoading={loading}
           />
         </div>
 

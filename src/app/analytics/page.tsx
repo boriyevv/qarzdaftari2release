@@ -52,6 +52,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
 import { formatCurrency, formatCurrencyShort } from '@/lib/utils/currency'
+import { AnimatedCounter } from '@/components/ui/animated-counter'
 import {
   ResponsiveContainer,
   BarChart,
@@ -553,11 +554,15 @@ export default function AnalyticsPage() {
 
                   <div className="space-y-1">
                     <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                      {formatCurrency(data.summary.totalIssued)}
+                      <AnimatedCounter
+                        value={data.summary.totalIssued}
+                        formatter={(v) => formatCurrency(Math.round(v))}
+                        duration={1200}
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
-                        {data.summary.totalDebtsCount || 0} ta qarz yozuvi
+                        <AnimatedCounter value={data.summary.totalDebtsCount || 0} duration={800} /> ta qarz yozuvi
                       </p>
                       <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800">
                         {period === 'monthly' ? '30 kunlik' : period === 'semi_annual' ? '6 oylik' : '1 yillik'}
@@ -584,7 +589,11 @@ export default function AnalyticsPage() {
 
                   <div className="space-y-1">
                     <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                      {formatCurrency(data.summary.totalReturned)}
+                      <AnimatedCounter
+                        value={data.summary.totalReturned}
+                        formatter={(v) => formatCurrency(Math.round(v))}
+                        duration={1200}
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
@@ -615,11 +624,15 @@ export default function AnalyticsPage() {
 
                   <div className="space-y-1">
                     <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                      {formatCurrency(data.summary.totalRemaining)}
+                      <AnimatedCounter
+                        value={data.summary.totalRemaining}
+                        formatter={(v) => formatCurrency(Math.round(v))}
+                        duration={1200}
+                      />
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">
-                        {data.summary.activeDebtorsCount || 0} ta qarzdorda
+                        <AnimatedCounter value={data.summary.activeDebtorsCount || 0} duration={800} /> ta qarzdorda
                       </p>
                       <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-100/80 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200/60 dark:border-amber-800">
                         Kutilmoqda
@@ -646,7 +659,7 @@ export default function AnalyticsPage() {
 
                   <div className="space-y-1">
                     <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                      {data.summary.overdueCount} ta mijoz
+                      <AnimatedCounter value={data.summary.overdueCount} duration={1000} /> ta mijoz
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">

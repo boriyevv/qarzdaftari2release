@@ -33,6 +33,7 @@ import {
 import { SMS_PACKAGES } from '@/lib/constants/plans'
 import { useUser } from '@/lib/contexts/user-context'
 import { formatCurrency } from '@/lib/utils/currency'
+import { AnimatedCounter } from '@/components/ui/animated-counter'
 import { Check, History, MessageSquare, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -209,14 +210,18 @@ export default function SMSCreditsPage() {
 									<p className='text-blue-100 text-xs font-semibold uppercase tracking-wider'>
 										Mavjud SMS balansi
 									</p>
-									<p className='text-4xl font-black mt-1'>
-										{credits.remaining_credits}
+									<p className='text-4xl font-black mt-1 tabular-nums'>
+										<AnimatedCounter value={credits.remaining_credits} duration={1000} />
 									</p>
 									<p className='text-blue-100 text-xs mt-2'>
 										Jami olingan:{' '}
-										<span className='font-bold'>{credits.total_credits}</span> |
+										<span className='font-bold tabular-nums'>
+											<AnimatedCounter value={credits.total_credits} duration={800} />
+										</span> |
 										Ishlatilgan:{' '}
-										<span className='font-bold'>{credits.used_credits}</span>
+										<span className='font-bold tabular-nums'>
+											<AnimatedCounter value={credits.used_credits} duration={800} />
+										</span>
 									</p>
 								</div>
 								<div className='w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-xs'>

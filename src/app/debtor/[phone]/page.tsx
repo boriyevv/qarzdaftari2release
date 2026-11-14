@@ -46,6 +46,7 @@ import { exportSingleDebtReceiptPDF } from '@/lib/export/debts-export'
 import { playSuccessSound } from '@/lib/sounds'
 import { toast } from 'sonner'
 import { nativeHaptics } from '@/lib/native'
+import { AnimatedCounter } from '@/components/ui/animated-counter'
 import Link from 'next/link'
 
 const getInitials = (name: string) => {
@@ -545,12 +546,16 @@ export default function DebtorProfilePage() {
 
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                  {formatCurrency(data.totalAmount)}
+                  <AnimatedCounter
+                    value={data.totalAmount}
+                    formatter={(v) => formatCurrency(Math.round(v))}
+                    duration={1100}
+                  />
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Barcha kiritilgan qarzlar</p>
                   <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-blue-100/80 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800">
-                    {data.debtCount} ta yozuv
+                    <AnimatedCounter value={data.debtCount} duration={800} /> ta yozuv
                   </span>
                 </div>
               </div>
@@ -574,7 +579,11 @@ export default function DebtorProfilePage() {
 
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                  {formatCurrency(data.totalPaid)}
+                  <AnimatedCounter
+                    value={data.totalPaid}
+                    formatter={(v) => formatCurrency(Math.round(v))}
+                    duration={1100}
+                  />
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Qaytarilgan to&apos;lovlar</p>
@@ -623,7 +632,11 @@ export default function DebtorProfilePage() {
 
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight tabular-nums">
-                  {formatCurrency(data.totalRemaining)}
+                  <AnimatedCounter
+                    value={data.totalRemaining}
+                    formatter={(v) => formatCurrency(Math.round(v))}
+                    duration={1100}
+                  />
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
