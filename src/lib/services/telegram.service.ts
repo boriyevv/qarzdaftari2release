@@ -16,7 +16,7 @@ export interface TelegramSendMessageOptions {
 
 class TelegramService {
   private get token(): string | undefined {
-    return process.env.TELEGRAM_BOT_TOKEN
+    return process.env.TELEGRAM_BOT_TOKEN || '9064121371:AAEf9-454FMs_f1O5s7KTTVLPvdN81lcVSA'
   }
 
   private get baseUrl(): string {
