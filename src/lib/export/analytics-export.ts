@@ -152,7 +152,7 @@ export function exportAnalyticsToExcel(options: ExportOptions) {
 /**
  * 📄 PDF formatida eksport qilish (Professional A4 format)
  */
-export function exportAnalyticsToPDF(options: ExportOptions) {
+export async function exportAnalyticsToPDF(options: ExportOptions): Promise<void> {
   const { storeName = "Qarz Daftari", period, summary, topDebtors, debts } = options
   const dateStr = new Date().toISOString().split('T')[0]
   const cleanStoreName = storeName.replace(/[^a-zA-Z0-9_\u0400-\u04FF]/g, '_')
@@ -327,7 +327,7 @@ export function exportAnalyticsToPDF(options: ExportOptions) {
 
   // Faylni yuklab olish / yuborish
   const pdfBlob = doc.output('blob')
-  saveAndShareFile({
+  await saveAndShareFile({
     filename: `${cleanStoreName}_Hisobot_${dateStr}.pdf`,
     blob: pdfBlob,
     mimeType: 'application/pdf',

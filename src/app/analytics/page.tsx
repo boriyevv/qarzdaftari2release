@@ -245,7 +245,7 @@ export default function AnalyticsPage() {
       if (format === 'excel') {
         exportAnalyticsToExcel(options)
       } else {
-        exportAnalyticsToPDF(options)
+        await exportAnalyticsToPDF(options)
       }
     } catch (err) {
       console.error('Export error:', err)

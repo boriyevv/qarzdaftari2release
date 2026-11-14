@@ -919,7 +919,14 @@ function SortableDebtRow({
                 Profilni ko&apos;rish
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => exportSingleDebtReceiptPDF(debt)}
+                onClick={async () => {
+                  try {
+                    await exportSingleDebtReceiptPDF(debt)
+                  } catch (err) {
+                    console.error('Receipt export error:', err)
+                    toast.error('Chekni yuklab olishda xatolik yuz berdi')
+                  }
+                }}
                 className="rounded-xl text-xs font-semibold py-2 cursor-pointer text-indigo-600 dark:text-indigo-400 focus:text-indigo-700 dark:focus:text-indigo-300 focus:bg-indigo-50 dark:focus:bg-indigo-950/40 transition-colors"
               >
                 <Receipt className="w-3.5 h-3.5 mr-2 text-indigo-600 dark:text-indigo-400" />
@@ -1326,7 +1333,7 @@ export function DebtsListDraggable({
   const [isAutoRemindersOpen, setIsAutoRemindersOpen] = useState(false)
   const [localDebts, setLocalDebts] = useState<Debt[]>(debts)
 
-  const handleExport = (format: 'excel' | 'pdf') => {
+  const handleExport = async (format: 'excel' | 'pdf') => {
     const filterNames: Record<string, string> = {
       all: 'Barcha qarzlar',
       active: 'Faol qarzdorlar',
@@ -1342,7 +1349,7 @@ export function DebtsListDraggable({
         debts: displayedDebts,
       })
     } else {
-      exportDebtsToPDF({
+      await exportDebtsToPDF({
         storeName: user?.store_name || user?.full_name || 'Qarz Daftari',
         filterLabel,
         debts: displayedDebts,

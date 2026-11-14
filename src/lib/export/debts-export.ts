@@ -150,7 +150,7 @@ export function exportDebtsToExcel(options: DebtsExportOptions) {
 /**
  * 📄 Qarzlar ro'yxatini zamonaviy A4 formatdagi PDF hisobot sifatida yuklab olish
  */
-export function exportDebtsToPDF(options: DebtsExportOptions) {
+export async function exportDebtsToPDF(options: DebtsExportOptions): Promise<void> {
   const { storeName = "Qarz Daftari", filterLabel = "Barchasi", debts } = options
   const dateStr = new Date().toLocaleDateString('uz-UZ')
   const cleanStoreName = storeName.replace(/[^a-zA-Z0-9_\u0400-\u04FF]/g, '_')
@@ -325,7 +325,7 @@ export function exportDebtsToPDF(options: DebtsExportOptions) {
   }
 
   const pdfBlob = doc.output('blob')
-  saveAndShareFile({
+  await saveAndShareFile({
     filename: `Qarzlar_Hisoboti_${cleanStoreName}_${dateStr}.pdf`,
     blob: pdfBlob,
     mimeType: 'application/pdf',
@@ -336,7 +336,7 @@ export function exportDebtsToPDF(options: DebtsExportOptions) {
 /**
  * 🧾 Bitta qarz uchun rasmiy kvitansiya / chek (A5 yoki kichik format)
  */
-export function exportSingleDebtReceiptPDF(debt: ExportableDebt, storeName: string = "Qarz Daftari") {
+export async function exportSingleDebtReceiptPDF(debt: ExportableDebt, storeName: string = "Qarz Daftari"): Promise<void> {
   const dateStr = new Date().toLocaleDateString('uz-UZ')
   const cleanDebtor = debt.debtor_name.replace(/[^a-zA-Z0-9_\u0400-\u04FF]/g, '_')
   const remaining = Math.max(0, debt.amount - debt.paid_amount)
@@ -442,7 +442,7 @@ export function exportSingleDebtReceiptPDF(debt: ExportableDebt, storeName: stri
   doc.text('Qarz Daftari dasturi orqali shakllantirildi (debtbook.uz)', pageWidth / 2, finalY + 12, { align: 'center' })
 
   const receiptBlob = doc.output('blob')
-  saveAndShareFile({
+  await saveAndShareFile({
     filename: `Kvitansiya_${cleanDebtor}_${debt.id.slice(0, 6)}.pdf`,
     blob: receiptBlob,
     mimeType: 'application/pdf',

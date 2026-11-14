@@ -292,17 +292,22 @@ export default function DebtorProfilePage() {
   }
 
   // Akt-Sverka PDF yuklab olish
-  const handleDownloadStatementPDF = () => {
+  const handleDownloadStatementPDF = async () => {
     if (!data) return
-    exportDebtorStatementPDF({
-      storeName: user?.store_name || 'Qarz Daftari',
-      debtorName: data.name,
-      debtorPhone: data.phone,
-      totalAmount: data.totalAmount,
-      totalPaid: data.totalPaid,
-      totalRemaining: data.totalRemaining,
-      debts: data.debts,
-    })
+    try {
+      await exportDebtorStatementPDF({
+        storeName: user?.store_name || 'Qarz Daftari',
+        debtorName: data.name,
+        debtorPhone: data.phone,
+        totalAmount: data.totalAmount,
+        totalPaid: data.totalPaid,
+        totalRemaining: data.totalRemaining,
+        debts: data.debts,
+      })
+    } catch (err) {
+      console.error('Statement PDF error:', err)
+      toast.error('Akt-sverkani yuklab olishda xatolik yuz berdi')
+    }
   }
 
   // Akt-Sverka matnini nusxalash
@@ -749,22 +754,26 @@ export default function DebtorProfilePage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                exportSingleDebtReceiptPDF(
-                                  {
-                                    id: debt.id,
-                                    debtor_name: data.name,
-                                    debtor_phone: data.phone,
-                                    amount: debt.amount,
-                                    paid_amount: debt.paid_amount,
-                                    status: debt.status,
-                                    due_date: debt.due_date,
-                                    debt_date: debt.created_at,
-                                    note: debt.note,
-                                  },
-                                  user?.store_name || "Qarz Daftari"
-                                )
-                                toast.success("Chek tayyorlandi!")
+                              onClick={async () => {
+                                try {
+                                  await exportSingleDebtReceiptPDF(
+                                    {
+                                      id: debt.id,
+                                      debtor_name: data.name,
+                                      debtor_phone: data.phone,
+                                      amount: debt.amount,
+                                      paid_amount: debt.paid_amount,
+                                      status: debt.status,
+                                      due_date: debt.due_date,
+                                      debt_date: debt.created_at,
+                                      note: debt.note,
+                                    },
+                                    user?.store_name || "Qarz Daftari"
+                                  )
+                                } catch (err) {
+                                  console.error('Receipt download error:', err)
+                                  toast.error('Chekni yuklab olishda xatolik yuz berdi')
+                                }
                               }}
                               className="h-8 rounded-xl px-2.5 text-xs font-semibold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                               title="PDF Chek / Kvitansiya"

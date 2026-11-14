@@ -51,7 +51,7 @@ Rahmat!`
 /**
  * 📄 Rasmiy PDF Akt-sverka hujjati (A4 formatda imzo/muhr bloki bilan)
  */
-export function exportDebtorStatementPDF(options: DebtorStatementOptions) {
+export async function exportDebtorStatementPDF(options: DebtorStatementOptions): Promise<void> {
   const { storeName = "Qarz Daftari", debtorName, debtorPhone, totalAmount, totalPaid, totalRemaining, debts } = options
   const dateStr = new Date().toLocaleDateString('uz-UZ')
   const cleanName = debtorName.replace(/[^a-zA-Z0-9_\u0400-\u04FF]/g, '_')
@@ -200,7 +200,7 @@ export function exportDebtorStatementPDF(options: DebtorStatementOptions) {
 
   // Faylni yuklab olish / yuborish
   const pdfBlob = doc.output('blob')
-  saveAndShareFile({
+  await saveAndShareFile({
     filename: `${cleanName}_Akt_Sverka_${dateStr.replace(/\./g, '_')}.pdf`,
     blob: pdfBlob,
     mimeType: 'application/pdf',
