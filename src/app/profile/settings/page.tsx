@@ -20,7 +20,6 @@ import {
   Play,
   ArrowLeft,
   Smartphone,
-  Coins,
   Globe,
   Check,
 } from 'lucide-react'
@@ -37,14 +36,11 @@ export default function ProfileSettingsPage() {
   const [mounted, setMounted] = useState(false)
   const [soundOn, setSoundOn] = useState(true)
   const [hapticsOn, setHapticsOn] = useState(true)
-  const [currency, setCurrency] = useState<'UZS' | 'USD'>('UZS')
 
   useEffect(() => {
     setMounted(true)
     setSoundOn(isSoundEnabled())
     setHapticsOn(isHapticsEnabled())
-    const savedCurrency = localStorage.getItem('qd_preferred_currency')
-    if (savedCurrency === 'USD') setCurrency('USD')
   }, [])
 
   useEffect(() => {
@@ -73,15 +69,6 @@ export default function ProfileSettingsPage() {
     } else {
       toast.info(dict.settings.haptics_disabled_toast)
     }
-  }
-
-  const handleChangeCurrency = async (curr: 'UZS' | 'USD') => {
-    setCurrency(curr)
-    localStorage.setItem('qd_preferred_currency', curr)
-    await nativeHaptics.impact('light')
-    toast.success(
-      `${dict.settings.currency_title}: ${curr === 'UZS' ? dict.settings.currency_uzs : dict.settings.currency_usd}`
-    )
   }
 
   const handleChangeLang = async (newLang: AppLanguage) => {
@@ -263,63 +250,7 @@ export default function ProfileSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* 3. Currency Settings Card */}
-        <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs overflow-hidden">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Coins className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              {dict.settings.currency_title}
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {dict.settings.currency_desc}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleChangeCurrency('UZS')}
-                className={`p-3.5 rounded-2xl border flex items-center justify-between text-left transition-all cursor-pointer ${
-                  currency === 'UZS'
-                    ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-500/80 text-amber-900 dark:text-amber-200 shadow-xs ring-2 ring-amber-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <div>
-                  <p className="text-xs font-bold">{dict.settings.currency_uzs}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{dict.settings.currency_uzs_desc}</p>
-                </div>
-                {currency === 'UZS' && (
-                  <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0">
-                    {dict.settings.active_badge}
-                  </Badge>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleChangeCurrency('USD')}
-                className={`p-3.5 rounded-2xl border flex items-center justify-between text-left transition-all cursor-pointer ${
-                  currency === 'USD'
-                    ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-500/80 text-amber-900 dark:text-amber-200 shadow-xs ring-2 ring-amber-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <div>
-                  <p className="text-xs font-bold">{dict.settings.currency_usd}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{dict.settings.currency_usd_desc}</p>
-                </div>
-                {currency === 'USD' && (
-                  <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0">
-                    {dict.settings.active_badge}
-                  </Badge>
-                )}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 4. Language Settings Card with Official Flags */}
+        {/* 3. Language Settings Card with Official Flags */}
         <Card className="rounded-3xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
