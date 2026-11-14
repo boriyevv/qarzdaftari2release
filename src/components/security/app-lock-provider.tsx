@@ -212,13 +212,13 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 z-[999999] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col items-center justify-between p-6 select-none animate-in fade-in duration-200">
           {/* Top Header */}
           <div className="w-full flex flex-col items-center text-center pt-8 sm:pt-12 space-y-4">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-blue-500/15 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-2 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-xl shadow-blue-500/20 flex items-center justify-center transition-transform hover:scale-105">
               <Image
-                src="/logo.png"
+                src="/icons/icon-512x512.png"
                 alt="Qarz Daftari"
-                width={56}
-                height={56}
-                className="w-full h-full object-contain rounded-xl"
+                width={80}
+                height={80}
+                className="w-full h-full object-contain"
                 priority
               />
             </div>
