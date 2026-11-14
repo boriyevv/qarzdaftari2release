@@ -572,7 +572,7 @@ export default function Home() {
 			<section id='features' className='relative z-10 py-24 px-4'>
 				<div className='max-w-7xl mx-auto space-y-16'>
 					<div className='text-center max-w-3xl mx-auto space-y-3'>
-						<Badge className='bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1'>
+						<Badge variant='outline' className='bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1'>
 							Kuchli Imkoniyatlar
 						</Badge>
 						<h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight'>
@@ -685,7 +685,7 @@ export default function Home() {
 			>
 				<div className='max-w-7xl mx-auto space-y-16'>
 					<div className='text-center max-w-2xl mx-auto space-y-3'>
-						<Badge className='bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-3 py-1'>
+						<Badge variant='outline' className='bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-3 py-1'>
 							Oddiy va Qulay
 						</Badge>
 						<h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight'>
@@ -745,7 +745,7 @@ export default function Home() {
 			<section id='pricing' className='relative z-10 py-24 px-4'>
 				<div className='max-w-7xl mx-auto space-y-12'>
 					<div className='text-center max-w-3xl mx-auto space-y-4'>
-						<Badge className='bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1'>
+						<Badge variant='outline' className='bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1'>
 							Shaffof Tariflar
 						</Badge>
 						<h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight'>
@@ -961,7 +961,7 @@ export default function Home() {
 			<section className='relative z-10 py-20 px-4 border-t border-slate-800/80 bg-slate-900/60'>
 				<div className='max-w-7xl mx-auto space-y-14'>
 					<div className='text-center max-w-2xl mx-auto space-y-3'>
-						<Badge className='bg-purple-600/20 text-purple-400 border border-purple-500/30 px-3 py-1'>
+						<Badge variant='outline' className='bg-purple-600/20 text-purple-400 border border-purple-500/30 px-3 py-1'>
 							Mijozlarimiz fikri
 						</Badge>
 						<h2 className='text-3xl sm:text-4xl font-extrabold text-white tracking-tight'>
@@ -1044,7 +1044,7 @@ export default function Home() {
 			<section id='faq' className='relative z-10 py-24 px-4'>
 				<div className='max-w-4xl mx-auto space-y-12'>
 					<div className='text-center space-y-3'>
-						<Badge className='bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1'>
+						<Badge variant='outline' className='bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1'>
 							Savol-Javoblar
 						</Badge>
 						<h2 className='text-3xl sm:text-4xl font-extrabold text-white tracking-tight'>
