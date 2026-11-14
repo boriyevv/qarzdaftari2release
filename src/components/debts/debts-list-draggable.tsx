@@ -2,7 +2,7 @@
 // Touch-enabled drag & drop with @dnd-kit + SMS + Quick Actions & CRM Filter Bar
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   closestCenter,
@@ -71,6 +71,10 @@ import {
 import { formatCurrency, formatCurrencyShort } from '@/lib/utils/currency'
 import { useUser } from '@/lib/contexts/user-context'
 import { exportDebtsToExcel, exportDebtsToPDF, exportSingleDebtReceiptPDF } from '@/lib/export/debts-export'
+import { toast } from 'sonner'
+import { playSuccessSound } from '@/lib/sounds'
+import { nativeHaptics } from '@/lib/native'
+import { formatTelegramDebtReminder, getTelegramShareUrl, getTelegramDirectPhoneUrl, recordReminderSent } from '@/lib/utils/telegram-reminders'
 import { AddPaymentModal } from './add-payment-modal'
 import { EditDebtModal } from './edit-debt-modal'
 import { AutoRemindersModal } from './auto-reminders-modal'
@@ -206,20 +210,33 @@ function getDueDateInfo(dueDateStr: string | null, isFullyPaid: boolean): DueDat
   }
 }
 
-// ─── SMS Dialog Component ─────────────────────────────────────────────
+// ─── Reminder & SMS Dialog Component ──────────────────────────────────
 function SMSDialog({
   debt,
   open,
   onOpenChange,
+  initialChannel = 'telegram',
+  onSent,
 }: {
   debt: Debt | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialChannel?: 'telegram' | 'sms'
+  onSent?: () => void
 }) {
+  const [channel, setChannel] = useState<'telegram' | 'sms'>(initialChannel)
   const [smsType, setSmsType] = useState<'default' | 'custom'>('default')
   const [customMessage, setCustomMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [smsCredits, setSmsCredits] = useState(0)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setChannel(initialChannel)
+      setCustomMessage('')
+    }
+  }, [open, initialChannel])
 
   useEffect(() => {
     if (open && debt) {
@@ -249,6 +266,61 @@ function SMSDialog({
     return `Hurmatli ${debt.debtor_name}, sizda ${formattedAmount} so'm qarz mavjud.${dueDateText} To'lashingizni so'raymiz. Qarz Daftari.`
   }
 
+  const generateTelegramMessage = (): string => {
+    if (!debt) return ''
+    const remainingAmount = debt.amount - debt.paid_amount
+    return formatTelegramDebtReminder({
+      debtorName: debt.debtor_name,
+      debtorPhone: debt.debtor_phone,
+      remainingAmount,
+      dueDate: debt.due_date,
+      storeName: "Qarz Daftari",
+    })
+  }
+
+  const handleSendTelegram = async () => {
+    if (!debt) return
+    if (!debt.debtor_phone) {
+      toast.info("Ushbu qarzdorning telefon raqami kiritilmagan")
+      return
+    }
+    const rawMessage = smsType === 'custom' && customMessage.trim() ? customMessage : generateTelegramMessage()
+    const cleanPhone = debt.debtor_phone.replace(/[\s-]/g, '')
+    const statementUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://debtbook.uz'}/debtor/${encodeURIComponent(cleanPhone)}`
+
+    const shareUrl = getTelegramShareUrl(rawMessage, statementUrl)
+    window.open(shareUrl, '_blank')
+
+    await recordReminderSent(debt.id)
+    playSuccessSound()
+    toast.success("Telegram eslatmasi ochildi!")
+    onSent?.()
+    onOpenChange(false)
+  }
+
+  const handleDirectTelegramChat = async () => {
+    if (!debt) return
+    if (!debt.debtor_phone) {
+      toast.info("Ushbu qarzdorning telefon raqami kiritilmagan")
+      return
+    }
+    const directUrl = getTelegramDirectPhoneUrl(debt.debtor_phone)
+    window.open(directUrl, '_blank')
+    await recordReminderSent(debt.id)
+    playSuccessSound()
+    onSent?.()
+  }
+
+  const handleCopyMessage = () => {
+    const text = channel === 'telegram'
+      ? (smsType === 'custom' && customMessage.trim() ? customMessage : generateTelegramMessage())
+      : (smsType === 'custom' && customMessage.trim() ? customMessage : generateDefaultMessage())
+    navigator.clipboard.writeText(text.replace(/<[^>]*>/g, ''))
+    setCopied(true)
+    toast.success("Eslatma matni nusxalandi!")
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const handleSendSMS = async () => {
     if (!debt) return
     setLoading(true)
@@ -256,7 +328,7 @@ function SMSDialog({
     try {
       const message = smsType === 'custom' ? customMessage : generateDefaultMessage()
       if (!message.trim()) {
-        alert('SMS matnini kiriting')
+        toast.error('SMS matnini kiriting')
         return
       }
 
@@ -274,16 +346,19 @@ function SMSDialog({
       const data = await response.json()
 
       if (response.ok) {
-        alert('SMS muvaffaqiyatli yuborildi!')
+        toast.success('SMS muvaffaqiyatli yuborildi!')
+        playSuccessSound()
+        await recordReminderSent(debt.id)
+        onSent?.()
         onOpenChange(false)
         setCustomMessage('')
         setSmsType('default')
       } else {
-        alert(data.error || 'SMS yuborishda xato')
+        toast.error(data.error || 'SMS yuborishda xato')
       }
     } catch (error) {
       console.error('SMS send error:', error)
-      alert('Xato yuz berdi')
+      toast.error('Xato yuz berdi')
     } finally {
       setLoading(false)
     }
@@ -293,121 +368,286 @@ function SMSDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[460px] rounded-3xl p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
+      <DialogContent className="sm:max-w-[480px] rounded-3xl p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span>SMS eslatma yuborish</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between gap-2">
+            <DialogTitle className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+              {channel === 'telegram' ? (
+                <div className="w-8 h-8 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                  <Send className="w-4 h-4" />
+                </div>
+              ) : (
+                <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+              )}
+              <span>Qarz Eslatmasi Yuborish</span>
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 pt-1">
             {debt.debtor_name} ({formatPhoneDisplay(debt.debtor_phone)})
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* SMS Credits */}
-          {smsCredits === 0 ? (
-            <Alert variant="destructive" className="rounded-2xl border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300">
-              <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-              <AlertDescription className="text-xs">
-                SMS balansingizda kredit qolmagan.{' '}
-                <a href="/sms-credits" className="underline font-bold hover:text-rose-900 dark:hover:text-rose-200">
-                  SMS sotib olish
-                </a>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <div className="flex items-center justify-between p-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800 rounded-2xl">
-              <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">Mavjud SMS balansi:</span>
-              <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white font-black text-xs px-2.5 py-0.5 rounded-full">
-                {smsCredits} ta
+          {/* Channel Selector Tabs */}
+          <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl">
+            <button
+              type="button"
+              onClick={() => setChannel('telegram')}
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                channel === 'telegram'
+                  ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs ring-1 ring-sky-500/20'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Send className="w-3.5 h-3.5 text-sky-500" />
+              <span>Telegram</span>
+              <Badge className="bg-emerald-600 text-white text-[9px] px-1.5 py-0 rounded-full font-black">
+                BEPUL
               </Badge>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setChannel('sms')}
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                channel === 'sms'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs ring-1 ring-blue-500/20'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+              <span>SMS</span>
+              <span className="text-[10px] text-slate-400">({smsCredits} ta)</span>
+            </button>
+          </div>
+
+          {/* TELEGRAM VIEW */}
+          {channel === 'telegram' && (
+            <div className="space-y-3.5">
+              <div className="p-3 bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/80 dark:border-sky-900/60 rounded-2xl flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-sky-500 flex-shrink-0" />
+                  <span className="font-semibold text-sky-900 dark:text-sky-200">
+                    100% Bepul eslatma (SMS balansi sarflanmaydi)
+                  </span>
+                </div>
+                <Badge variant="outline" className="text-emerald-700 dark:text-emerald-400 border-emerald-400/40 text-[10px] font-black">
+                  Cheksiz
+                </Badge>
+              </div>
+
+              {/* Message Type */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Xabar turi</Label>
+                  <button
+                    type="button"
+                    onClick={handleCopyMessage}
+                    className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    {copied ? 'Nusxalandi' : 'Nusxalash'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant={smsType === 'default' ? 'default' : 'outline'}
+                    onClick={() => setSmsType('default')}
+                    className={`h-9 text-xs font-bold rounded-xl ${
+                      smsType === 'default'
+                        ? 'bg-sky-600 hover:bg-sky-700 text-white'
+                        : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    Standart eslatma
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={smsType === 'custom' ? 'default' : 'outline'}
+                    onClick={() => setSmsType('custom')}
+                    className={`h-9 text-xs font-bold rounded-xl ${
+                      smsType === 'custom'
+                        ? 'bg-sky-600 hover:bg-sky-700 text-white'
+                        : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    O&apos;zim yozaman
+                  </Button>
+                </div>
+              </div>
+
+              {/* Message Preview */}
+              <div>
+                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Xabar matni</Label>
+                {smsType === 'custom' ? (
+                  <Textarea
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder="Telegram xabar matnini yozing..."
+                    rows={5}
+                    className="mt-1.5 rounded-xl text-xs font-medium border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+                  />
+                ) : (
+                  <div className="mt-1.5 p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-line max-h-44 overflow-y-auto">
+                    {generateTelegramMessage().replace(/<[^>]*>/g, '')}
+                  </div>
+                )}
+              </div>
+
+              {/* Telegram Actions */}
+              <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleDirectTelegramChat}
+                  className="w-full sm:w-auto h-10 px-3 rounded-xl text-xs font-semibold border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  title="Qarzdor bilan to'g'ridan-to'g'ri Telegram chatni ochish"
+                >
+                  <Send className="w-3.5 h-3.5 mr-1.5 text-sky-500" />
+                  Chatni ochish
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    onOpenChange(false)
+                    setCustomMessage('')
+                  }}
+                  className="w-full sm:w-auto flex-1 h-10 rounded-xl text-xs font-semibold border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                >
+                  Bekor qilish
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={handleSendTelegram}
+                  className="w-full sm:w-auto flex-1 h-10 rounded-xl text-xs font-bold bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20"
+                >
+                  <Send className="w-3.5 h-3.5 mr-1.5" />
+                  Telegramda yuborish
+                </Button>
+              </div>
             </div>
           )}
 
-          {/* Message Type */}
-          <div>
-            <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">SMS turi</Label>
-            <div className="grid grid-cols-2 gap-2 mt-1.5">
-              <Button
-                type="button"
-                variant={smsType === 'default' ? 'default' : 'outline'}
-                onClick={() => setSmsType('default')}
-                className={`h-9 text-xs font-bold rounded-xl ${
-                  smsType === 'default' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                Avtomatik shablon
-              </Button>
-              <Button
-                type="button"
-                variant={smsType === 'custom' ? 'default' : 'outline'}
-                onClick={() => setSmsType('custom')}
-                className={`h-9 text-xs font-bold rounded-xl ${
-                  smsType === 'custom' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                O&apos;zim yozaman
-              </Button>
-            </div>
-          </div>
+          {/* SMS VIEW */}
+          {channel === 'sms' && (
+            <div className="space-y-3.5">
+              {/* SMS Credits */}
+              {smsCredits === 0 ? (
+                <Alert variant="destructive" className="rounded-2xl border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300">
+                  <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                  <AlertDescription className="text-xs flex items-center justify-between">
+                    <span>SMS balansingizda kredit qolmagan.</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setChannel('telegram')}
+                      className="h-7 px-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold"
+                    >
+                      Telegramda bepul yuborish &rarr;
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="flex items-center justify-between p-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800 rounded-2xl">
+                  <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">Mavjud SMS balansi:</span>
+                  <Badge className="bg-emerald-600 text-white font-black text-xs px-2.5 py-0.5 rounded-full">
+                    {smsCredits} ta kredit
+                  </Badge>
+                </div>
+              )}
 
-          {/* Message Content */}
-          <div>
-            <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">SMS matni</Label>
-            {smsType === 'custom' ? (
-              <Textarea
-                value={customMessage}
-                onChange={(e) => setCustomMessage(e.target.value)}
-                placeholder="SMS matnini yozing..."
-                rows={4}
-                className="mt-1.5 rounded-xl text-xs font-medium border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
-              />
-            ) : (
-              <div className="mt-1.5 p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                {generateDefaultMessage()}
+              {/* Message Type */}
+              <div>
+                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">SMS turi</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1.5">
+                  <Button
+                    type="button"
+                    variant={smsType === 'default' ? 'default' : 'outline'}
+                    onClick={() => setSmsType('default')}
+                    className={`h-9 text-xs font-bold rounded-xl ${
+                      smsType === 'default' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    Avtomatik shablon
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={smsType === 'custom' ? 'default' : 'outline'}
+                    onClick={() => setSmsType('custom')}
+                    className={`h-9 text-xs font-bold rounded-xl ${
+                      smsType === 'custom' ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    O&apos;zim yozaman
+                  </Button>
+                </div>
               </div>
-            )}
-            <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-1">
-              {smsType === 'custom'
-                ? `${customMessage.length} ta belgi (1 ta SMS ~ 70-160 belgi)`
-                : `${generateDefaultMessage().length} ta belgi`}
-            </p>
-          </div>
 
-          {/* Actions */}
-          <div className="flex gap-2.5 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                onOpenChange(false)
-                setCustomMessage('')
-                setSmsType('default')
-              }}
-              className="flex-1 h-11 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
-            >
-              Bekor qilish
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSendSMS}
-              disabled={
-                loading ||
-                smsCredits === 0 ||
-                (smsType === 'custom' && !customMessage.trim())
-              }
-              className="flex-1 h-11 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
-            >
-              <Send className="w-3.5 h-3.5 mr-1.5" />
-              {loading ? 'Yuborilmoqda...' : 'SMS Yuborish'}
-            </Button>
-          </div>
+              {/* Message Content */}
+              <div>
+                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">SMS matni</Label>
+                {smsType === 'custom' ? (
+                  <Textarea
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder="SMS matnini yozing..."
+                    rows={4}
+                    className="mt-1.5 rounded-xl text-xs font-medium border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+                  />
+                ) : (
+                  <div className="mt-1.5 p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                    {generateDefaultMessage()}
+                  </div>
+                )}
+                <p className="text-[10px] text-slate-400 dark:text-slate-400 mt-1">
+                  {smsType === 'custom'
+                    ? `${customMessage.length} ta belgi (1 ta SMS ~ 70-160 belgi)`
+                    : `${generateDefaultMessage().length} ta belgi`}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2.5 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    onOpenChange(false)
+                    setCustomMessage('')
+                    setSmsType('default')
+                  }}
+                  className="flex-1 h-11 rounded-xl text-xs font-bold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                >
+                  Bekor qilish
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSendSMS}
+                  disabled={
+                    loading ||
+                    smsCredits === 0 ||
+                    (smsType === 'custom' && !customMessage.trim())
+                  }
+                  className="flex-1 h-11 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                  {loading ? 'Yuborilmoqda...' : 'SMS Yuborish'}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
   )
 }
+
 
 // ─── Desktop Table Row ────────────────────────────────────────────────
 function SortableDebtRow({
@@ -479,7 +719,7 @@ function SortableDebtRow({
             className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${getAvatarGradient(
               debt.debtor_name
             )} text-white flex items-center justify-center font-extrabold text-xs shadow-xs flex-shrink-0 cursor-pointer hover:scale-105 transition-transform`}
-            onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
+            onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone || debt.id)}`)}
           >
             {getInitials(debt.debtor_name)}
           </div>
@@ -488,7 +728,7 @@ function SortableDebtRow({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span
-                onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
+                onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone || debt.id)}`)}
                 className="font-bold text-slate-900 dark:text-slate-100 text-sm hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors truncate max-w-[200px]"
                 title={debt.debtor_name}
               >
@@ -512,19 +752,27 @@ function SortableDebtRow({
             </div>
 
             <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
-              <span>{formatPhoneDisplay(debt.debtor_phone)}</span>
-              <button
-                type="button"
-                onClick={handleCopyPhone}
-                className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
-                title="Raqamdan nusxa olish"
-              >
-                {copied ? (
-                  <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                ) : (
-                  <Copy className="w-3 h-3" />
-                )}
-              </button>
+              {debt.debtor_phone ? (
+                <>
+                  <span>{formatPhoneDisplay(debt.debtor_phone)}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyPhone}
+                    className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                    title="Raqamdan nusxa olish"
+                  >
+                    {copied ? (
+                      <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
+                </>
+              ) : (
+                <span className="text-[11px] text-slate-400 italic font-sans">
+                  Tel kiritilmagan
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -605,6 +853,21 @@ function SortableDebtRow({
             </Button>
           )}
 
+          {/* Quick Telegram Reminder Button (100% Free) */}
+          {!isFullyPaid && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => onAction('telegram-remind', debt)}
+              className="h-8 px-2.5 bg-sky-50/80 dark:bg-sky-950/40 hover:bg-sky-500 text-sky-700 dark:text-sky-300 hover:text-white border border-sky-200/80 dark:border-sky-900/60 rounded-xl font-bold text-xs shadow-2xs transition-all hover:scale-105"
+              title="Telegram orqali eslatma (Bepul)"
+            >
+              <Send className="w-3.5 h-3.5 mr-1 text-sky-500 hover:text-white" />
+              Telegram
+            </Button>
+          )}
+
           {/* Quick SMS Button */}
           {!isFullyPaid && (
             <Button
@@ -642,7 +905,7 @@ function SortableDebtRow({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5 shadow-xl border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 z-50">
               <DropdownMenuItem
-                onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
+                onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone || debt.id)}`)}
                 className="rounded-xl text-xs font-semibold py-2 cursor-pointer transition-colors text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <ExternalLink className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-slate-400" />
@@ -661,6 +924,13 @@ function SortableDebtRow({
               >
                 <Edit2 className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-slate-400" />
                 Tahrirlash
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onAction('telegram-remind', debt)}
+                className="rounded-xl text-xs font-semibold py-2 cursor-pointer text-sky-600 dark:text-sky-400 focus:text-sky-700 dark:focus:text-sky-300 focus:bg-sky-50 dark:focus:bg-sky-950/40 transition-colors"
+              >
+                <Send className="w-3.5 h-3.5 mr-2 text-sky-500" />
+                Telegram eslatma (Bepul)
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => onAction('sms-custom', debt)}
@@ -689,7 +959,7 @@ function SortableDebtRow({
   )
 }
 
-// ─── Mobile Sortable Debt Card ─────────────────────────────────────────
+// ─── Mobile Sortable Debt Card (with horizontal swipe actions) ──────────
 function SortableDebtCard({
   debt,
   onAction,
@@ -707,6 +977,75 @@ function SortableDebtCard({
     isDragging,
   } = useSortable({ id: debt.id })
 
+  const [swipeOffset, setSwipeOffset] = useState(0)
+  const [isSwiping, setIsSwiping] = useState(false)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+  const isHorizontalSwipe = useRef<boolean | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isDragging) return
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    }
+    isHorizontalSwipe.current = null
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || isDragging) return
+
+    const deltaX = e.touches[0].clientX - touchStartRef.current.x
+    const deltaY = e.touches[0].clientY - touchStartRef.current.y
+
+    // First threshold to establish direction
+    if (isHorizontalSwipe.current === null) {
+      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+        isHorizontalSwipe.current = Math.abs(deltaX) > Math.abs(deltaY)
+        if (isHorizontalSwipe.current) {
+          setIsSwiping(true)
+        }
+      }
+    }
+
+    if (isHorizontalSwipe.current) {
+      // Horizontal swipe active - clamp between -110 and 110 px
+      const clamped = Math.max(-110, Math.min(110, deltaX))
+      setSwipeOffset(clamped)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStartRef.current) return
+
+    const currentOffset = swipeOffset
+    setIsSwiping(false)
+    setSwipeOffset(0)
+    touchStartRef.current = null
+    isHorizontalSwipe.current = null
+
+    // Threshold check (70px)
+    if (currentOffset > 70) {
+      // Swiped right -> To'lov qo'shish
+      nativeHaptics.impact('light').catch(() => {})
+      onAction('payment', debt)
+    } else if (currentOffset < -70) {
+      // Swiped left -> Telegram eslatma
+      if (debt.debtor_phone) {
+        nativeHaptics.impact('light').catch(() => {})
+        onAction('telegram-remind', debt)
+      } else {
+        toast.info("Telegram eslatma uchun telefon raqami kiritilishi kerak")
+      }
+    }
+  }
+
+  const handleTouchCancel = () => {
+    setIsSwiping(false)
+    setSwipeOffset(0)
+    touchStartRef.current = null
+    isHorizontalSwipe.current = null
+  }
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -723,113 +1062,202 @@ function SortableDebtCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-4 space-y-3.5 transition-all ${
-        isDragging ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:border-slate-300 dark:hover:border-slate-700'
-      }`}
+      className="relative overflow-hidden rounded-2xl select-none"
     >
-      {/* Top Header: Avatar + Name + Due Date */}
-      <div className="flex items-start justify-between gap-2.5">
-        <div className="flex items-center gap-2.5 min-w-0">
-          {/* Drag Handle */}
-          <button
-            type="button"
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 touch-none focus:outline-none transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-            </svg>
-          </button>
-
-          {/* Initial Avatar */}
-          <div
-            className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${getAvatarGradient(
-              debt.debtor_name
-            )} text-white flex items-center justify-center font-black text-xs shadow-xs flex-shrink-0 cursor-pointer hover:scale-105 transition-transform`}
-            onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
-          >
-            {getInitials(debt.debtor_name)}
+      {/* Swipe Underlay Action Reveals */}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-between px-5 pointer-events-none transition-colors duration-150 ${
+          swipeOffset > 25
+            ? 'bg-emerald-600'
+            : swipeOffset < -25
+            ? 'bg-sky-500'
+            : 'bg-transparent'
+        }`}
+      >
+        {/* Left reveal: + To'lov (revealed when swiping right) */}
+        <div
+          className={`flex items-center gap-2 text-white font-bold transition-opacity duration-150 ${
+            swipeOffset > 20 ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center">
+            <Plus className="w-5 h-5 text-white stroke-[2.5]" />
           </div>
-
-          <div className="min-w-0">
-            <div
-              className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
-              onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone)}`)}
-            >
-              {debt.debtor_name}
-            </div>
-            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-              {formatPhoneDisplay(debt.debtor_phone)}
-            </div>
-          </div>
+          <span className="text-white font-extrabold text-sm tracking-tight">+ To&apos;lov</span>
         </div>
 
-        {/* Due Date Badge */}
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border flex-shrink-0 ${dueDateInfo.pillClasses}`}
+        {/* Right reveal: Telegram eslatma (revealed when swiping left) */}
+        <div
+          className={`flex items-center gap-2 text-white font-bold transition-opacity duration-150 ${
+            swipeOffset < -20 ? 'opacity-100' : 'opacity-0'
+          }`}
         >
-          <span className={`w-1 h-1 rounded-full ${dueDateInfo.badgeDot}`} />
-          <span>{dueDateInfo.text}</span>
-        </span>
+          <span className="text-white font-extrabold text-sm tracking-tight">Telegram</span>
+          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center">
+            <Send className="w-4 h-4 text-white" />
+          </div>
+        </div>
       </div>
 
-      {/* Financials & Progress Bar */}
-      <div className="p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
-        <div className="flex items-baseline justify-between">
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Qoldiq summa:</span>
+      {/* Foreground Interactive Card */}
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+          transition: isSwiping ? 'none' : 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        className={`relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs p-4 space-y-3.5 ${
+          isDragging ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:border-slate-300 dark:hover:border-slate-700'
+        }`}
+      >
+        {/* Top Header: Avatar + Name + Due Date */}
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Drag Handle */}
+            <button
+              type="button"
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-1 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 touch-none focus:outline-none transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+              </svg>
+            </button>
+
+            {/* Initial Avatar */}
+            <div
+              className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${getAvatarGradient(
+                debt.debtor_name
+              )} text-white flex items-center justify-center font-black text-xs shadow-xs flex-shrink-0 cursor-pointer hover:scale-105 transition-transform`}
+              onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone || debt.id)}`)}
+            >
+              {getInitials(debt.debtor_name)}
+            </div>
+
+            <div className="min-w-0">
+              <div
+                className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                onClick={() => router.push(`/debtor/${encodeURIComponent(debt.debtor_phone || debt.id)}`)}
+              >
+                {debt.debtor_name}
+              </div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                {debt.debtor_phone ? (
+                  formatPhoneDisplay(debt.debtor_phone)
+                ) : (
+                  <span className="text-slate-400 italic font-sans">Tel yo&apos;q</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Due Date Badge */}
           <span
-            className={`font-black text-base font-mono tracking-tight ${
-              isFullyPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'
-            }`}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border flex-shrink-0 ${dueDateInfo.pillClasses}`}
           >
-            {formatCurrency(remaining)}
+            <span className={`w-1 h-1 rounded-full ${dueDateInfo.badgeDot}`} />
+            <span>{dueDateInfo.text}</span>
           </span>
         </div>
 
-        <div className="w-full bg-slate-200/80 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
-          <div
-            className={`h-full rounded-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-blue-600'}`}
-            style={{ width: `${paidPercent}%` }}
-          />
+        {/* Financials & Progress Bar */}
+        <div className="p-3 bg-slate-50/80 dark:bg-slate-800/60 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Qoldiq summa:</span>
+            <span
+              className={`font-black text-base font-mono tracking-tight ${
+                isFullyPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'
+              }`}
+            >
+              {formatCurrency(remaining)}
+            </span>
+          </div>
+
+          <div className="w-full bg-slate-200/80 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-full rounded-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-blue-600'}`}
+              style={{ width: `${paidPercent}%` }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+            <span>Jami: {formatCurrencyShort(debt.amount)}</span>
+            <span>{paidPercent}% to&apos;langan</span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-          <span>Jami: {formatCurrencyShort(debt.amount)}</span>
-          <span>{paidPercent}% to&apos;langan</span>
+        {/* Mobile Action Bar */}
+        <div className="grid grid-cols-4 gap-1.5 pt-1">
+          {debt.debtor_phone ? (
+            <a
+              href={`tel:${debt.debtor_phone}`}
+              className="h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95"
+              title="Qo'ng'iroq"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Tel</span>
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => toast.info("Ushbu qarzdorning telefon raqami kiritilmagan")}
+              className="h-9 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 flex items-center justify-center gap-1 text-xs font-medium cursor-not-allowed"
+              title="Telefon kiritilmagan"
+            >
+              <Phone className="w-3.5 h-3.5 opacity-50" />
+              <span className="hidden sm:inline">Tel</span>
+            </button>
+          )}
+
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              if (!debt.debtor_phone) {
+                toast.info("Telegram eslatma uchun telefon raqami kiritilishi kerak")
+                return
+              }
+              onAction('telegram-remind', debt)
+            }}
+            disabled={!debt.debtor_phone}
+            className={`h-9 rounded-xl font-bold text-xs transition-all active:scale-95 px-1 ${
+              debt.debtor_phone
+                ? 'bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-500 text-sky-700 dark:text-sky-300 hover:text-white border-sky-200 dark:border-sky-900/60'
+                : 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-800'
+            }`}
+            title={debt.debtor_phone ? "Telegram (Bepul)" : "Telefon kiritilmagan"}
+          >
+            <Send className="w-3.5 h-3.5 mr-1 text-sky-500 hover:text-white" />
+            TG
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => onAction('sms-auto', debt)}
+            className="h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 dark:hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white dark:hover:text-white border-blue-200 dark:border-blue-900/60 font-bold text-xs transition-all active:scale-95 px-1"
+            title="SMS"
+          >
+            <MessageSquare className="w-3.5 h-3.5 mr-1" />
+            SMS
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => onAction('payment', debt)}
+            className="h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            To&apos;lov
+          </Button>
         </div>
-      </div>
-
-      {/* Mobile Action Bar */}
-      <div className="grid grid-cols-4 gap-1.5 pt-1">
-        <a
-          href={`tel:${debt.debtor_phone}`}
-          className="h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95"
-        >
-          <Phone className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Tel</span>
-        </a>
-
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => onAction('sms-auto', debt)}
-          className="h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 dark:hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white dark:hover:text-white border-blue-200 dark:border-blue-900/60 font-bold text-xs transition-all active:scale-95"
-        >
-          <MessageSquare className="w-3.5 h-3.5 mr-1" />
-          SMS
-        </Button>
-
-        <Button
-          type="button"
-          size="sm"
-          onClick={() => onAction('payment', debt)}
-          className="col-span-2 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95"
-        >
-          <Plus className="w-3.5 h-3.5 mr-1" />
-          To&apos;lov
-        </Button>
       </div>
     </div>
   )
@@ -852,6 +1280,7 @@ export function DebtsListDraggable({
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isSMSOpen, setIsSMSOpen] = useState(false)
   const [smsTypeToOpen, setSmsTypeToOpen] = useState<'default' | 'custom'>('default')
+  const [reminderChannel, setReminderChannel] = useState<'telegram' | 'sms'>('telegram')
   const [isAutoRemindersOpen, setIsAutoRemindersOpen] = useState(false)
   const [localDebts, setLocalDebts] = useState<Debt[]>(debts)
 
@@ -999,7 +1428,13 @@ export function DebtsListDraggable({
       case 'edit':
         setIsEditOpen(true)
         break
+      case 'telegram-remind':
+        setReminderChannel('telegram')
+        setSmsTypeToOpen('default')
+        setIsSMSOpen(true)
+        break
       case 'sms-auto':
+        setReminderChannel('sms')
         setSmsTypeToOpen('default')
         setIsSMSOpen(true)
         break
@@ -1378,6 +1813,8 @@ export function DebtsListDraggable({
             debt={selectedDebt}
             open={isSMSOpen}
             onOpenChange={setIsSMSOpen}
+            initialChannel={reminderChannel}
+            onSent={onUpdate}
           />
         </>
       )}

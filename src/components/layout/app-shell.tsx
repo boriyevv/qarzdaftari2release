@@ -25,7 +25,10 @@ import {
   Compass,
   Smartphone,
   Download,
+  WifiOff,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { syncOfflineDebtsQueue } from '@/lib/services/offline-debts.service'
 import { useUser } from '@/lib/contexts/user-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -98,6 +101,41 @@ export function AppShell({
   const [isAddDebtOpen, setIsAddDebtOpen] = useState<boolean>(false)
   const [mounted, setMounted] = useState<boolean>(false)
   const [isNative, setIsNative] = useState<boolean>(false)
+  const [isOnline, setIsOnline] = useState<boolean>(true)
+
+  // Auto-sync offline debts when connectivity is restored
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setIsOnline(navigator.onLine)
+
+    const handleOnline = () => {
+      setIsOnline(true)
+      syncOfflineDebtsQueue((count) => {
+        toast.success(`Internet tiklandi: ${count} ta saqlangan qarz serverga yuklandi!`)
+        onAddDebtSuccess?.()
+      })
+    }
+
+    const handleOffline = () => {
+      setIsOnline(false)
+      toast.info("Oflayn rejim: Yangi kiritilgan qarzlar xotirada saqlanadi")
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    if (navigator.onLine) {
+      syncOfflineDebtsQueue((count) => {
+        toast.success(`${count} ta saqlangan qarz serverga yuklandi!`)
+        onAddDebtSuccess?.()
+      })
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [onAddDebtSuccess])
 
   // Load sidebar collapsed state from localStorage
   useEffect(() => {
@@ -569,6 +607,16 @@ export function AppShell({
 
               {/* Right Side: Actions + ThemeToggle + PWA + Add Debt Button */}
               <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+                {!isOnline && (
+                  <div
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold animate-pulse"
+                    title="Internet aloqasi yo'q. Qarzlar xotirada saqlanib turadi"
+                  >
+                    <WifiOff className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Oflayn rejim</span>
+                  </div>
+                )}
+
                 <ThemeToggle />
 
                 {!isNative && (

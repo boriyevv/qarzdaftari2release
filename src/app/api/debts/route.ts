@@ -83,7 +83,13 @@ export async function GET(request: Request) {
 const createDebtSchema = z.object({
   folder_id: z.string().uuid().nullable().optional().or(z.literal('')).transform((val) => val || undefined),
   debtor_name: z.string().min(2, 'Ism kamida 2 ta belgi'),
-  debtor_phone: z.string().regex(/^\+998\d{9}$/, 'Telefon format: +998XXXXXXXXX'),
+  debtor_phone: z
+    .string()
+    .regex(/^\+998\d{9}$/, 'Telefon format: +998XXXXXXXXX')
+    .optional()
+    .or(z.literal(''))
+    .or(z.null())
+    .transform((val) => val || ''),
   amount: z.number().positive('Summa musbat bo\'lishi kerak'),
   debt_date: z.string().nullable().optional().or(z.literal('')).transform((val) => val || undefined),
   due_date: z.string().nullable().optional().or(z.literal('')).transform((val) => val || null),

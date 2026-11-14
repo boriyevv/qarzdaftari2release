@@ -37,6 +37,8 @@ import { useUser } from '@/lib/contexts/user-context'
 import { ClickOnSiteModal } from '@/components/payments/click-on-site-modal'
 import { PaymeOnSiteModal } from '@/components/payments/payme-on-site-modal'
 import { UzumPaymentModal } from '@/components/payments/uzum-payment-modal'
+import { IosPaymentDialog } from '@/components/payments/ios-payment-dialog'
+import { getPlatform } from '@/lib/native'
 import {
   PaymentMethodsRow,
   UzumBankLogo,
@@ -81,6 +83,7 @@ export default function PricingPage() {
   const [clickInitialTab, setClickInitialTab] = useState<'card' | 'invoice'>('card')
   const [showUzumModal, setShowUzumModal] = useState(false)
   const [uzumPaymentUrl, setUzumPaymentUrl] = useState<string | null>(null)
+  const [showIosModal, setShowIosModal] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   // Ensure latest user subscription status is refreshed
@@ -98,6 +101,14 @@ export default function PricingPage() {
   const handleSelectPlan = async (planType: string) => {
     if (planType === 'FREE') return
     setSelectedPlan(planType)
+
+    // For Apple iOS App Store compliance (Guideline 3.1.1):
+    // Digital subscriptions are managed via web portal for multiplatform SaaS
+    if (getPlatform() === 'ios') {
+      setShowIosModal(true)
+      return
+    }
+
     setShowProviderModal(true)
   }
 
@@ -764,6 +775,15 @@ export default function PricingPage() {
           }}
         />
       )}
+
+      {/* Apple iOS App Store Compliant Payment Dialog */}
+      <IosPaymentDialog
+        open={showIosModal}
+        onOpenChange={setShowIosModal}
+        targetUrl="https://debtbook.uz/pricing"
+        title="Obunani faollashtirish"
+        description="Apple App Store qoidalariga muvofiq, B2B korporativ xizmatlar va tarif rejalari uchun to'lovlar rasmiy veb-saytimiz orqali xavfsiz amalga oshiriladi."
+      />
     </AppShell>
   )
 }

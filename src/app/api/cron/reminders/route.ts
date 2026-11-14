@@ -1,13 +1,16 @@
 // src/app/api/cron/reminders/route.ts
-// Background CRON endpoint to auto-send reminders for debts due within 3 days or overdue
+// Background CRON endpoint to auto-send reminders and Telegram morning digests
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { smsService, getUserSmsCredits, deductUserSmsCredits } from '@/lib/services/sms.service'
+import { telegramService } from '@/lib/services/telegram.service'
 import { formatCurrency } from '@/lib/utils/currency'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://debtbook.uz'
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,122 +23,177 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized CRON trigger' }, { status: 401 })
     }
 
-    if (!smsService.isConfigured()) {
-      return NextResponse.json({ error: 'SMS service not configured' }, { status: 503 })
-    }
-
     const adminSupabase = createAdminClient()
     const now = new Date()
     now.setHours(0, 0, 0, 0)
+    const dateFormatted = now.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' })
     const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-    // 1. Fetch all active debts where due_date <= 3 days later
-    const { data: debts, error: debtsError } = await adminSupabase
-      .from('debts')
-      .select(`
-        id,
-        user_id,
-        debtor_name,
-        debtor_phone,
-        amount,
-        paid_amount,
-        due_date,
-        status,
-        users:user_id (
-          id,
-          store_name,
-          full_name,
-          plan_type
-        )
-      `)
-      .neq('status', 'paid')
-      .not('due_date', 'is', null)
-      .lte('due_date', threeDaysLater)
+    let telegramDigestsSent = 0
 
-    if (debtsError) {
-      return NextResponse.json({ error: debtsError.message }, { status: 500 })
+    // =========================================================================
+    // 1. TELEGRAM MORNING DIGESTS (Send to connected store owners at 09:00 AM)
+    // =========================================================================
+    if (telegramService.isConfigured()) {
+      try {
+        const { data: linkedUsers } = await adminSupabase
+          .from('users')
+          .select('id, full_name, store_name, locale_settings')
+          .not('locale_settings->>telegram_chat_id', 'is', null)
+
+        for (const user of linkedUsers || []) {
+          const chatId = (user.locale_settings as any)?.telegram_chat_id
+          if (!chatId) continue
+
+          const stats = await telegramService.getStoreStats(adminSupabase, user.id)
+          const storeTitle = user.store_name || user.full_name || "Do'koningiz"
+
+          const digestText = `☀️ <b>Assalomu alaykum, ${storeTitle}!</b>\n` +
+            `Xayrli tong! Bugungi Qarz Daftari holati:\n\n` +
+            `💰 <b>Jami faol qarzlar:</b>\n` +
+            `└ <b>${formatCurrency(stats.totalDebtAmount)} so'm</b> (${stats.totalDebts} ta qarz)\n\n` +
+            `⚠️ <b>Muddati o'tgan qarzlar:</b>\n` +
+            `└ <b>${formatCurrency(stats.overdueAmount)} so'm</b> (${stats.overdueCount} ta mijoz)\n\n` +
+            `⏳ <b>Bugun kutilayotgan to'lovlar:</b>\n` +
+            `└ <b>${formatCurrency(stats.dueTodayAmount)} so'm</b> (${stats.dueTodayCount} ta mijoz)\n\n` +
+            `Barakali va muvaffaqiyatli kun tilaymiz! ✨`
+
+          const res = await telegramService.sendMessage(chatId, digestText, {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: "🚀 Qarz Daftari (Ilovani ochish)",
+                    web_app: { url: `${APP_URL}/dashboard` },
+                  },
+                ],
+              ],
+            },
+          })
+
+          if (res.ok) {
+            telegramDigestsSent++
+          }
+        }
+      } catch (tgErr) {
+        console.error('[CRON] Telegram digest error:', tgErr)
+      }
     }
 
+    // =========================================================================
+    // 2. ESKIZ SMS REMINDERS (To debtors due within 3 days or overdue)
+    // =========================================================================
     let processedCount = 0
     let sentCount = 0
     let skippedCount = 0
 
-    // Cache user credits during cron run
-    const userCreditsCache = new Map<string, number>()
+    if (smsService.isConfigured()) {
+      // 1. Fetch all active debts where due_date <= 3 days later
+      const { data: debts, error: debtsError } = await adminSupabase
+        .from('debts')
+        .select(`
+          id,
+          user_id,
+          debtor_name,
+          debtor_phone,
+          amount,
+          paid_amount,
+          due_date,
+          status,
+          users:user_id (
+            id,
+            store_name,
+            full_name,
+            plan_type
+          )
+        `)
+        .neq('status', 'paid')
+        .not('due_date', 'is', null)
+        .lte('due_date', threeDaysLater)
 
-    for (const debt of (debts as any[]) || []) {
-      const remaining = debt.amount - debt.paid_amount
-      if (remaining <= 0 || !debt.debtor_phone) continue
+      if (debtsError) {
+        console.error('[CRON] debtsError:', debtsError)
+      } else {
+        // Cache user credits during cron run
+        const userCreditsCache = new Map<string, number>()
 
-      processedCount++
-      const userId = debt.user_id
+        for (const debt of (debts as any[]) || []) {
+          const remaining = debt.amount - debt.paid_amount
+          if (remaining <= 0 || !debt.debtor_phone) continue
 
-      // Check user's cached credits
-      if (!userCreditsCache.has(userId)) {
-        const { balance } = await getUserSmsCredits(adminSupabase, userId)
-        userCreditsCache.set(userId, balance)
-      }
+          processedCount++
+          const userId = debt.user_id
 
-      const availableCredits = userCreditsCache.get(userId) || 0
-      if (availableCredits < 1) {
-        skippedCount++
-        continue
-      }
+          // Check user's cached credits
+          if (!userCreditsCache.has(userId)) {
+            const { balance } = await getUserSmsCredits(adminSupabase, userId)
+            userCreditsCache.set(userId, balance)
+          }
 
-      // Check if SMS was sent in the last 24h to this debt
-      const { data: recentLogs } = await adminSupabase
-        .from('sms_usage_log')
-        .select('id')
-        .eq('debt_id', debt.id)
-        .gte('created_at', yesterday)
-        .limit(1)
+          const availableCredits = userCreditsCache.get(userId) || 0
+          if (availableCredits < 1) {
+            skippedCount++
+            continue
+          }
 
-      if (recentLogs && recentLogs.length > 0) {
-        skippedCount++
-        continue
-      }
+          // Check if SMS was sent in the last 24h to this debt
+          const { data: recentLogs } = await adminSupabase
+            .from('sms_usage_log')
+            .select('id')
+            .eq('debt_id', debt.id)
+            .gte('created_at', yesterday)
+            .limit(1)
 
-      const dueDate = new Date(debt.due_date)
-      dueDate.setHours(0, 0, 0, 0)
-      const diffTime = dueDate.getTime() - now.getTime()
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+          if (recentLogs && recentLogs.length > 0) {
+            skippedCount++
+            continue
+          }
 
-      const isOverdue = diffDays < 0
-      const formattedRem = formatCurrency(remaining)
-      const dateStr = dueDate.toLocaleDateString('uz-UZ')
-      const storeTitle = debt.users?.store_name || debt.users?.full_name || 'Qarz Daftari'
+          const dueDate = new Date(debt.due_date)
+          dueDate.setHours(0, 0, 0, 0)
+          const diffTime = dueDate.getTime() - now.getTime()
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
 
-      const message = isOverdue
-        ? `Hurmatli ${debt.debtor_name}, sizning ${formattedRem} so'm qarz to'lov muddati (${dateStr}) o'tgan. Iltimos, to'lashingizni so'raymiz. ${storeTitle}.`
-        : diffDays === 0
-        ? `Hurmatli ${debt.debtor_name}, bugun sizning ${formattedRem} so'm qarz to'lov muddatingiz. Iltimos to'lovni amalga oshiring. ${storeTitle}.`
-        : `Hurmatli ${debt.debtor_name}, ${formattedRem} so'm qarz to'lov muddati ${dateStr} sanasiga belgilangan (${diffDays} kun qoldi). ${storeTitle}.`
+          const isOverdue = diffDays < 0
+          const formattedRem = formatCurrency(remaining)
+          const dateStr = dueDate.toLocaleDateString('uz-UZ')
+          const storeTitle = debt.users?.store_name || debt.users?.full_name || 'Qarz Daftari'
 
-      try {
-        const externalId = await smsService.sendSMS(debt.debtor_phone, message)
-        if (externalId) {
-          await deductUserSmsCredits(adminSupabase, userId, 1)
-          await adminSupabase.from('sms_usage_log').insert({
-            user_id: userId,
-            debt_id: debt.id,
-            recipient_phone: debt.debtor_phone.replace(/[\s-]/g, ''),
-            message,
-            credits_used: 1,
-            status: 'sent',
-            external_id: externalId,
-          })
-          sentCount++
-          userCreditsCache.set(userId, availableCredits - 1)
+          const message = isOverdue
+            ? `Hurmatli ${debt.debtor_name}, sizning ${formattedRem} so'm qarz to'lov muddati (${dateStr}) o'tgan. Iltimos, to'lashingizni so'raymiz. ${storeTitle}.`
+            : diffDays === 0
+            ? `Hurmatli ${debt.debtor_name}, bugun sizning ${formattedRem} so'm qarz to'lov muddatingiz. Iltimos to'lovni amalga oshiring. ${storeTitle}.`
+            : `Hurmatli ${debt.debtor_name}, ${formattedRem} so'm qarz to'lov muddati ${dateStr} sanasiga belgilangan (${diffDays} kun qoldi). ${storeTitle}.`
+
+          try {
+            const externalId = await smsService.sendSMS(debt.debtor_phone, message)
+            if (externalId) {
+              await deductUserSmsCredits(adminSupabase, userId, 1)
+              await adminSupabase.from('sms_usage_log').insert({
+                user_id: userId,
+                debt_id: debt.id,
+                recipient_phone: debt.debtor_phone.replace(/[\s-]/g, ''),
+                message,
+                credits_used: 1,
+                status: 'sent',
+                external_id: externalId,
+              })
+              sentCount++
+              userCreditsCache.set(userId, availableCredits - 1)
+            }
+          } catch (err) {
+            console.error(`Cron SMS error for debt ${debt.id}:`, err)
+          }
         }
-      } catch (err) {
-        console.error(`Cron SMS error for debt ${debt.id}:`, err)
       }
     }
 
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
+      telegramDigestsSent,
       processedCount,
       sentCount,
       skippedCount,

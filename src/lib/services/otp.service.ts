@@ -3,6 +3,9 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const REVIEWER_DEMO_PHONE = process.env.REVIEWER_DEMO_PHONE || '+998901234567'
+export const REVIEWER_DEMO_OTP = process.env.REVIEWER_DEMO_OTP || '123456'
+
 interface MemoryOTP {
   code: string
   type: 'registration' | 'login' | 'password_reset'
@@ -31,7 +34,8 @@ export class OTPService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<{ code: string; error?: string }> {
-    const code = this.generateCode()
+    const isReviewer = phone === REVIEWER_DEMO_PHONE
+    const code = isReviewer ? REVIEWER_DEMO_OTP : this.generateCode()
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
 
     // Store in resilient in-memory store as fallback
@@ -132,6 +136,12 @@ export class OTPService {
     code: string,
     type: 'registration' | 'login' | 'password_reset'
   ): Promise<{ valid: boolean; error?: string }> {
+    // Reviewer bypass for Apple App Store & Google Play moderation
+    if (phone === REVIEWER_DEMO_PHONE && (code === REVIEWER_DEMO_OTP || code === '123456')) {
+      console.log('✅ Apple/Google Reviewer demo bypass verified successfully for:', phone)
+      return { valid: true }
+    }
+
     const memoryKey = `${phone}:${type}`
     const memOTP = memoryOTPStore.get(memoryKey)
 

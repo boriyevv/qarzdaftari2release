@@ -57,6 +57,8 @@ const updateDebtSchema = z.object({
   note: z.string().nullable().optional().or(z.literal('')).transform((val) => val || null),
   folder_id: z.string().uuid().nullable().optional().or(z.literal('')).transform((val) => val || null),
   status: z.enum(['pending', 'paid', 'overdue', 'blacklisted']).optional(),
+  reminder_sent: z.boolean().optional(),
+  last_reminder_at: z.string().nullable().optional(),
 })
 
 export async function PATCH(

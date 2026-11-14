@@ -39,18 +39,44 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 
 ### 📱 Telegram Bot & Integratsiya
 
-- [ ] Do'kon egasi uchun rasmiy `@QarzDaftariBot`:
-  - Yangi qarz qo'shish (tezkor Telegram komandasi orqali).
-  - Har kuni ertalab 09:00 da kunlik umumiy qarzlar va to'lovlar hisobotini Telegramga avtomatik yuborish.
-  - Telegram Mini App (TMA): Qarz Daftari'ni to'g'ridan-to'g'ri Telegram ichida 1-bosishda ochish.
-- [ ] Qarzdor mijozlar uchun bepul Telegram eslatmalari:
-  - Eskiz SMS xarajatlarini tejash maqsadida mijozga Telegram orqali qarz eslatmasi va to'lov havolasini yuborish.
+- [x] Do'kon egasi uchun rasmiy `@debtbookuz_bot` va Telegram Mini App (TMA):
+  - Rasmiy bot yaratildi (`@debtbookuz_bot`, BotFather tasdiqlandi).
+  - Vebhook xizmati (`/api/telegram/webhook`) va secret token xavfsizligi o'rnatildi.
+  - Profil (`/profile`) sahifasida 1-klikda chuqur havola (`https://t.me/debtbookuz_bot?start=link_USER_ID`) orqali Telegram chat ID ni avtomatik ulash, test xabari yuborish va ulanishni boshqarish komponenti joriy qilindi.
+  - Telegram chat menu button'i rasmiy Mini App (TMA) qilib sozlangan (`setChatMenuButton`), ilova Telegram ichida to'liq ekran (expand) va dark-slate sarlavha bilan ochiladi.
+  - Har kuni ertalab 09:00 da (Toshkent vaqti) avtomatik fonda do'kon egasiga kunlik umumiy qarzlar, kechikkan summalar va kutilayotgan to'lovlar hisobotini yuboruvchi avtopilot integratsiya qilindi.
+  - Botda interaktiv klaviatura menyusi (`📊 Bugungi hisobot`, `🚀 Qarz Daftari`, `➕ Yangi qarz`, `⚙️ Sozlamalar va Holat`) faollashtirildi.
+- [x] Qarzdor mijozlar uchun bepul Telegram eslatmalari:
+  - Eskiz SMS xarajatlarini tejash (0 so'm sarf) maqsadida mijozlarga Telegram orqali xushmuomala eslatma va to'g'ridan-to'g'ri onlayn to'lov / hisob-kitob havolasini yuboruvchi mexanizm yaratildi (`formatTelegramDebtReminder`, `getTelegramShareUrl`, `getTelegramDirectPhoneUrl`).
+  - Qarzlar ro'yxatida har bir qatorda tezkor «Telegram» tugmasi, mobil kartalarda «TG» tugmasi hamda amallar menyusida «Telegram eslatma (Bepul)» bandi qo'shildi.
+  - Eslatma modalida Telegram va SMS kanallari o'rtasida oson o'tish (100% Bepul, cheksiz eslatmalar), matnni 1-klikda nusxalash va to'g'ridan-to'g'ri chat ochish imkoni joriy qilindi.
+  - Mijoz profili (`/debtor/[phone]`) sahifasida tezkor «Telegram (Bepul)» eslatma tugmasi va SMS balansi tugaganda bepul Telegramga yo'naltirish integratsiya qilindi.
+  - Telegram orqali eslatma yuborilganda ma'lumotlar bazasida `reminder_sent = true` va `last_reminder_at` avtomatik yangilanishi va muvaffaqiyat ovozi yangrashi joriy qilindi.
 
 ### 🔒 Mobil Xavfsizlik & Biometrika (Mobile Biometrics)
 
-- [ ] Barmoq izi (Fingerprint) va Face ID bilan ilovani qulflash:
-  - Do'kon egasi yoki kassir ilovani fondan qayta ochganda biometrik tekshiruv yoki 4 xonali PIN kod so'rash.
-  - `@capacitor-community/biometric-auth` orqali native xavfsizlik ta'minlash.
+- [x] Barmoq izi (Fingerprint) va Face ID bilan ilovani qulflash:
+  - `@aparajita/capacitor-biometric-auth` rasmiy native plagin o'rnatildi va Capacitor 8 (Android & iOS) loyihalari bilan to'liq sinxronlashtirildi (`npx cap sync`).
+  - Android (`USE_BIOMETRIC`, `USE_FINGERPRINT`) va iOS (`NSFaceIDUsageDescription`) tizim ruxsatlari sozlandi.
+  - Xavfsiz SHA-256 shifrlangan 4 xonali PIN kod mexanizmi (`hashPin`, `verifyPin`) va WebAuthn fallback joriy qilindi.
+  - To'liq ekranli zamonaviy Slate Lock Overlay (`AppLockProvider`) yaratildi: animatsiyali 4 nuqta, 3x4 raqamli klaviatura, Face ID/barmoq izi tugmasi va haptic taktil titrash.
+  - Ilova fondan qayta ochilganda yoki ilova ochilganda avtomatik Face ID / barmoq izi so'rovi hamda avto-qulflash intervallari (Darhol, 1 daqiqa, 5 daqiqa) ishlab chiqildi.
+  - Profil (`/profile`) sahifasida «Ilova Xavfsizligi va Qulfi» boshqaruv kartasi (`SecurityLockSettings`) va 2 bosqichli PIN kod o'rnatish modali qo'shildi.
+
+### 🛡️ App Store & Google Play Moderatsiya Auditi (Pre-Flight Store Compliance)
+
+- [x] Apple App Store va Google Play uchun Akkauntni o'chirish (Guideline 5.1.1(v)):
+  - `/profile` sahifasiga xavfli hudud (Danger Zone) kartasi va «Hisobni o'chirish» modali (`DeleteAccountSection`) qo'shildi.
+  - Sabab tanlash, ogohlantirish va tasdiqlash bilan `/api/auth/delete-account` xavfsiz endpointi orqali hisobni faolsizlantirish, seanslarni tozalash va telefon raqamni arxivlash amalga oshirildi.
+- [x] Apple va Google moderatorlari uchun maxsus Demo Bypass tizimi:
+  - O'zbekiston tashqarisidagi reviewerlar uchun `+998901234567` va statik `123456` OTP kodi joriy qilindi (`otp.service.ts` va `reviewer-demo.service.ts`).
+  - Moderator kirishi bilan realistik namunaviy qarzlarga ega «Demo Savdo Do'koni» avtomatik taqdim etiladi.
+- [x] iOS Native ilovasida Apple to'lov siyosatiga moslashuv (Guideline 3.1.1):
+  - iOS qurilmalarida raqamli obuna va SMS sotishda Apple 30% IAP talabini aylanib o'tish uchun maxsus `IosPaymentDialog` yaratildi. To'lovlar xavfsiz tarzda tashqi Safari veb-portaliga yo'naltirildi.
+- [x] Xatoliklar va 404 himoya ekranlari (App Completeness):
+  - Kutilmagan uzilishlarda xom xatolar chiqmasligi uchun brendlangan `src/app/error.tsx` va `src/app/not-found.tsx` himoya ekranlari joriy qilindi.
+- [x] Production SMS OTP xavfsizligi:
+  - `send-otp` endpointi ishlab chiqarish rejimida OTP kodni API javobida fosh qilmaydigan qilib mustahkamlandi.
 
 ### 🎨 Mobil Ilova Brendingi & Google Play / App Store Nashri
 
@@ -82,6 +108,16 @@ Kelgusi versiyalarda amalga oshirish rejalashtirilgan takomillashtirishlar:
 - [x] Mobil PWA (Progressive Web App): Manifest (standalone, theme-color, icons), Service Worker, offline fallback (/offline va jonli OfflineIndicator), o'rnatish bannerlari (floating prompt, iOS Safari qo'llanma modali) hamda Sidebar va mobil Topbar'da o'rnatish tugmalari to'liq joriy qilindi.
 - [x] Native Mobil Ilovalar (Android & iOS): Capacitor 8 orqali to'liq Android Studio va Xcode loyihalari yaratildi. Native status-bar, taktil haptics vibratsiyasi, apparat "orqaga" tugmasi, va yangi qarz kiritishda telefon kontaktlaridan tanlash (`@capacitor-community/contacts`) integratsiya qilindi. `MOBILE.md` qo'llanmasi yaratildi.
 - [x] Mikro-tovushlar: Web Audio API orqali sintez qilingan yengil va zamonaviy kristallik chime ovozlari (to'lov qabul qilinganda, yangi qarz kiritilganda), sozlamalarda sinov va o'chirish/yoqish imkoni.
+- [x] Tezkor Kiritish & Autocomplete (Input Velocity):
+  - Telefon raqami ixtiyoriy qilindi (do'kondor mijoz telefonini bilmaganda ham tezkor qarz yoza oladi).
+  - Qarzdor ismini yozishda avtomatik taklif (Autocomplete Dropdown - mavjud qarzdorlar va ularning balansi ko'rinadi).
+  - Summa kiritishda tezkor chiplar (+10k, +50k, +100k, +500k, +1 mln) va so'z bilan jonli ifodalash ("bir yuz ellik ming so'm").
+- [x] 1-Klikda To'liq To'lov & Swipe Amallari (Touch Ergonomics):
+  - Qarzni yopishda «To'liq yopish» tugmasi (bitta bosishda butun qoldiq summani kiritadi).
+  - Mobil kartalarda sensorli Swipe (o'ngga surish: "+ To'lov", chapga surish: "Telegram eslatma") hamda taktil haptic tebranish.
+- [x] Offline-First Kiritish & Avto-Sinxronizatsiya:
+  - Internet uzilganda ham do'kondor yangi qarzlarni to'xtovsiz kiritishi uchun mahalliy navbat (`offline-debts.service.ts`).
+  - Tarmoq qayta ulanganda fonda avtomatik sinxronlanishi va sarlavhadagi jonli tarmoq ko'rsatkichi.
 
 ---
 

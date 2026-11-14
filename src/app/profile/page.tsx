@@ -27,6 +27,11 @@ import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { isSoundEnabled, setSoundEnabled, playSuccessSound } from '@/lib/sounds'
 import { CashiersManagement } from '@/components/profile/cashiers-management'
+import { TelegramIntegration } from '@/components/profile/telegram-integration'
+import { SecurityLockSettings } from '@/components/profile/security-lock-settings'
+import { DeleteAccountSection } from '@/components/profile/delete-account-section'
+
+
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser()
@@ -238,6 +243,12 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
+        {/* Telegram Bot & Mini App Integration */}
+        <TelegramIntegration />
+
+        {/* Mobile Security & Biometric Lock (Face ID / PIN) */}
+        <SecurityLockSettings />
+
         {/* Cashiers & Staff Management (Multi-user Mode) */}
         <CashiersManagement />
 
@@ -312,6 +323,9 @@ export default function ProfilePage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Account Deletion (Apple App Store Guideline 5.1.1(v) & Google Play Data Safety) */}
+        <DeleteAccountSection />
       </div>
     </AppShell>
   )

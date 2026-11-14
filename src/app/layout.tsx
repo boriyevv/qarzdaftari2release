@@ -6,6 +6,10 @@ import { UserProvider } from '@/lib/contexts/user-context'
 import { OfflineIndicator } from '@/components/pwa/offline-indicator'
 import { PwaInstallBanner } from '@/components/pwa/pwa-install-banner'
 import { ThemeProvider } from '@/components/theme/theme-provider'
+import { TelegramWebAppInitializer } from '@/components/telegram/telegram-webapp-initializer'
+import { AppLockProvider } from '@/components/security/app-lock-provider'
+
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -94,9 +98,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <UserProvider>
-            <OfflineIndicator />
-            {children}
-            <PwaInstallBanner />
+            <AppLockProvider>
+              <TelegramWebAppInitializer />
+              <OfflineIndicator />
+              {children}
+              <PwaInstallBanner />
+            </AppLockProvider>
           </UserProvider>
         </ThemeProvider>
       </body>

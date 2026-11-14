@@ -10,6 +10,8 @@ import {
 	UzumBankLogo,
 } from '@/components/payments/payment-logos'
 import { UzumPaymentModal } from '@/components/payments/uzum-payment-modal'
+import { IosPaymentDialog } from '@/components/payments/ios-payment-dialog'
+import { getPlatform } from '@/lib/native'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -68,6 +70,7 @@ export default function SMSCreditsPage() {
 	)
 	const [showUzumModal, setShowUzumModal] = useState(false)
 	const [uzumPaymentUrl, setUzumPaymentUrl] = useState<string | null>(null)
+	const [showIosModal, setShowIosModal] = useState(false)
 	const [purchaseLoading, setPurchaseLoading] = useState(false)
 
 	useEffect(() => {
@@ -96,6 +99,13 @@ export default function SMSCreditsPage() {
 
 	const handleSelectPackage = (packageId: string) => {
 		setSelectedPackage(packageId)
+
+		// For Apple iOS App Store compliance (Guideline 3.1.1):
+		if (getPlatform() === 'ios') {
+			setShowIosModal(true)
+			return
+		}
+
 		setShowProviderModal(true)
 	}
 
@@ -498,6 +508,15 @@ export default function SMSCreditsPage() {
 						/>
 					)
 				})()}
+
+			{/* Apple iOS App Store Compliant Payment Dialog */}
+			<IosPaymentDialog
+				open={showIosModal}
+				onOpenChange={setShowIosModal}
+				targetUrl="https://debtbook.uz/sms-credits"
+				title="SMS paket xaridi"
+				description="Apple App Store qoidalariga muvofiq, SMS kredit paketlari tashkilot veb-sayti orqali xavfsiz xarid qilinadi."
+			/>
 		</AppShell>
 	)
 }

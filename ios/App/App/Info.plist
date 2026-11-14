@@ -68,5 +68,7 @@
 	<true/>
 	<key>NSContactsUsageDescription</key>
 	<string>Qarzdorlarni telefon kontaktlaringizdan tezkor tanlash uchun ruxsat kerak.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Qarz Daftari ilovasi qarzlaringiz xavfsizligini ta'minlash uchun Face ID dan foydalanadi.</string>
 </dict>
 </plist>

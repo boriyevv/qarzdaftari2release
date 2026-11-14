@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { REVIEWER_DEMO_PHONE } from '@/lib/services/otp.service'
+import { ensureReviewerDemoAccount } from '@/lib/services/reviewer-demo.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -79,14 +81,19 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })
       }
 
-      if (!profile) {
+      let userProfile = profile
+      if (phone === REVIEWER_DEMO_PHONE && (!userProfile || userProfile.is_active === false)) {
+        userProfile = await ensureReviewerDemoAccount()
+      }
+
+      if (!userProfile) {
         return NextResponse.json(
           { error: "Ushbu telefon raqam bilan foydalanuvchi topilmadi. Avval ro'yxatdan o'ting." },
           { status: 404 }
         )
       }
 
-      if (profile.is_active === false) {
+      if (userProfile.is_active === false) {
         return NextResponse.json(
           { error: "Akkauntingiz vaqtincha to'xtatilgan. Do'kon ma'muriyatiga murojaat qiling." },
           { status: 403 }
@@ -95,11 +102,11 @@ export async function POST(request: Request) {
 
       const response = NextResponse.json({
         success: true,
-        profile,
+        profile: userProfile,
       })
 
       // Set secure session cookie for phone authenticated user
-      response.cookies.set('phone_user_session', profile.id, {
+      response.cookies.set('phone_user_session', userProfile.id, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

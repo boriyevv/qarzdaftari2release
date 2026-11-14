@@ -422,14 +422,26 @@ export default function DebtorProfilePage() {
                 To&apos;lov qabul qilish
               </Button>
 
-              {/* 2. SMS Eslatma */}
+              {/* 2. Telegram Eslatma (100% Bepul) */}
+              <Button
+                variant="outline"
+                onClick={handleShareToTelegram}
+                disabled={data.totalRemaining <= 0}
+                className="border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 hover:bg-sky-500 hover:text-white text-sky-700 dark:text-sky-300 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer"
+                title="Telegram orqali eslatish (100% Bepul)"
+              >
+                <Send className="w-4 h-4 mr-1.5 text-sky-500" />
+                Telegram (Bepul)
+              </Button>
+
+              {/* 3. SMS Eslatma */}
               <Button
                 variant="outline"
                 onClick={handleOpenSMS}
                 disabled={data.totalRemaining <= 0}
                 className="border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
               >
-                <Send className="w-4 h-4 mr-1.5 text-blue-600" />
+                <MessageSquare className="w-4 h-4 mr-1.5 text-blue-600" />
                 SMS Eslatma
               </Button>
 
@@ -883,15 +895,29 @@ export default function DebtorProfilePage() {
             </div>
 
             {smsCredits === 0 && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 rounded-2xl text-xs text-amber-800 dark:text-amber-300 flex items-start justify-between gap-2">
-                <span>SMS yuborish uchun balansingizda kredit mavjud emas.</span>
-                <Link
-                  href="/sms-credits"
-                  target="_blank"
-                  className="font-bold text-amber-900 dark:text-amber-400 underline flex-shrink-0"
-                >
-                  Sotib olish &rarr;
-                </Link>
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 rounded-2xl text-xs text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <span>SMS kreditingiz tugagan.</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      setSmsModalOpen(false)
+                      handleShareToTelegram()
+                    }}
+                    className="h-7 px-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs"
+                  >
+                    <Send className="w-3 h-3 mr-1" />
+                    Telegramda bepul yuborish &rarr;
+                  </Button>
+                  <Link
+                    href="/sms-credits"
+                    target="_blank"
+                    className="font-bold text-amber-900 dark:text-amber-400 underline text-xs"
+                  >
+                    Sotib olish
+                  </Link>
+                </div>
               </div>
             )}
 

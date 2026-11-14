@@ -20,6 +20,15 @@ export function getPlatform(): 'ios' | 'android' | 'web' {
   return 'web'
 }
 
+export function openExternalUrl(url: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  } catch (e) {
+    window.location.href = url
+  }
+}
+
 /**
  * Native Haptic Feedback with graceful web fallback
  */

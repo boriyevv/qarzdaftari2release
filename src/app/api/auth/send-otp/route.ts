@@ -1,9 +1,10 @@
 // src/app/api/auth/send-otp/route.ts
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { otpService } from '@/lib/services/otp.service'
+import { otpService, REVIEWER_DEMO_PHONE, REVIEWER_DEMO_OTP } from '@/lib/services/otp.service'
 import { smsService } from '@/lib/services/sms.service'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureReviewerDemoAccount } from '@/lib/services/reviewer-demo.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -30,7 +31,22 @@ export async function POST(request: Request) {
     }
 
     const { phone, type } = result.data
+    const isReviewer = phone === REVIEWER_DEMO_PHONE
     const adminSupabase = createAdminClient()
+
+    // 0. Handle Apple & Google App Store Reviewer Demo Account
+    if (isReviewer) {
+      console.log('🍏 Apple/Google App Store Reviewer demo phone detected:', phone)
+      await ensureReviewerDemoAccount()
+
+      // Return static demo OTP immediately without sending real SMS
+      return NextResponse.json({
+        success: true,
+        code: REVIEWER_DEMO_OTP,
+        smsSent: true,
+        message: 'Reviewer demo kodi tayyorlandi',
+      })
+    }
 
     // 1. If LOGIN: Check if phone number is registered
     if (type === 'login') {
@@ -113,13 +129,20 @@ export async function POST(request: Request) {
 
     console.log('📬 SMS sent status:', sent ? 'SUCCESS' : 'FAILED')
 
+    // In production without Eskiz test mode, NEVER leak OTP code in response body
+    const isDevOrTest =
+      process.env.NODE_ENV !== 'production' ||
+      process.env.ESKIZ_TEST_MODE === 'true'
+
     return NextResponse.json({
       success: true,
-      code,
+      code: isDevOrTest ? code : undefined,
       smsSent: sent,
       message: sent
         ? 'SMS kod telefoningizga yuborildi'
-        : "Eskiz to'lovisiz sinov rejimi: Kod tayyorlandi va ekranga chiqarildi",
+        : isDevOrTest
+        ? "Eskiz to'lovisiz sinov rejimi: Kod tayyorlandi va ekranga chiqarildi"
+        : 'SMS kod telefoningizga yuborildi',
     })
   } catch (error) {
     console.error('❌ Send OTP error:', error)
