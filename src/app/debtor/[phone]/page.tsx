@@ -59,12 +59,12 @@ const getInitials = (name: string) => {
 
 const getAvatarGradient = (name: string) => {
   const gradients = [
-    'from-blue-600 to-indigo-600',
-    'from-emerald-500 to-teal-600',
-    'from-violet-600 to-purple-600',
-    'from-amber-500 to-orange-600',
-    'from-rose-500 to-pink-600',
-    'from-sky-500 to-blue-600',
+    'from-blue-600 to-indigo-700',
+    'from-slate-700 to-slate-900',
+    'from-teal-600 to-emerald-700',
+    'from-indigo-600 to-violet-800',
+    'from-sky-600 to-blue-700',
+    'from-slate-800 to-indigo-900',
   ]
   const charCode = name.charCodeAt(0) || 0
   return gradients[charCode % gradients.length]

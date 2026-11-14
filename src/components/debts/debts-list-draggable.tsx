@@ -104,12 +104,12 @@ interface DebtsListDraggableProps {
 
 // ─── Deterministic Avatar Helpers ─────────────────────────────────────
 const AVATAR_GRADIENTS = [
-  'from-blue-600 to-indigo-600',
-  'from-purple-600 to-pink-600',
-  'from-emerald-600 to-teal-600',
-  'from-amber-500 to-orange-600',
-  'from-cyan-600 to-blue-700',
-  'from-rose-600 to-red-600',
+  'from-blue-600 to-indigo-700',
+  'from-slate-700 to-slate-900',
+  'from-teal-600 to-emerald-700',
+  'from-indigo-600 to-violet-800',
+  'from-sky-600 to-blue-700',
+  'from-slate-800 to-indigo-900',
 ]
 
 function getAvatarGradient(name: string): string {
@@ -818,7 +818,13 @@ function SortableDebtRow({
           </span>
         ) : (
           <div className="space-y-0.5">
-            <div className="font-black text-sm font-mono tracking-tight text-orange-600 dark:text-orange-400">
+            <div
+              className={`font-black text-sm font-mono tracking-tight ${
+                dueDateInfo.status === 'overdue'
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-slate-900 dark:text-slate-100'
+              }`}
+            >
               {formatCurrency(remaining)}
             </div>
             <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Qoldiq qarz</div>
@@ -1170,7 +1176,11 @@ function SortableDebtCard({
             <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Qoldiq summa:</span>
             <span
               className={`font-black text-base font-mono tracking-tight ${
-                isFullyPaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'
+                isFullyPaid
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : dueDateInfo.status === 'overdue'
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-slate-900 dark:text-slate-100'
               }`}
             >
               {formatCurrency(remaining)}
@@ -1179,7 +1189,13 @@ function SortableDebtCard({
 
           <div className="w-full bg-slate-200/80 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-full rounded-full ${isFullyPaid ? 'bg-emerald-500' : 'bg-blue-600'}`}
+              className={`h-full rounded-full transition-all duration-300 ${
+                isFullyPaid
+                  ? 'bg-emerald-500'
+                  : dueDateInfo.status === 'overdue'
+                  ? 'bg-rose-500'
+                  : 'bg-blue-600'
+              }`}
               style={{ width: `${paidPercent}%` }}
             />
           </div>
@@ -1537,10 +1553,10 @@ export function DebtsListDraggable({
               type="button"
               variant="outline"
               onClick={() => setIsAutoRemindersOpen(true)}
-              className="h-10 px-3 rounded-2xl border-amber-300 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-400 dark:hover:border-amber-700 flex items-center gap-1.5 transition-all shrink-0"
+              className="h-10 px-3 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all shrink-0"
               title="Yaqinlashgan qarzlar uchun avtomatik eslatmalar"
             >
-              <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <Bell className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span className="whitespace-nowrap">Avto Eslatma</span>
             </Button>
 
@@ -1596,15 +1612,15 @@ export function DebtsListDraggable({
               onClick={() => setStatusFilter('all')}
               className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'all'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700'
+                  ? 'bg-blue-600 text-white shadow-xs font-extrabold'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700/80'
               }`}
             >
               <span>Barchasi</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
                   statusFilter === 'all'
-                    ? 'bg-blue-700 text-white'
+                    ? 'bg-blue-700/90 text-white'
                     : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
@@ -1618,16 +1634,16 @@ export function DebtsListDraggable({
               onClick={() => setStatusFilter('active')}
               className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'active'
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200/60 dark:border-orange-900/50'
+                  ? 'bg-blue-600 text-white shadow-xs font-extrabold'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700/80'
               }`}
             >
               <span>Qarzdorlar</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
                   statusFilter === 'active'
-                    ? 'bg-orange-700 text-white'
-                    : 'bg-orange-200 dark:bg-orange-900/60 text-orange-800 dark:text-orange-200'
+                    ? 'bg-blue-700/90 text-white'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {counts.active}
@@ -1640,15 +1656,21 @@ export function DebtsListDraggable({
               onClick={() => setStatusFilter('overdue')}
               className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'overdue'
-                  ? 'bg-rose-600 text-white shadow-xs'
-                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200/60 dark:border-rose-900/50'
+                  ? 'bg-rose-600 text-white shadow-xs font-extrabold'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700/80'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
+              {counts.overdue > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
+              )}
               <span>Muddati o&apos;tgan</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  statusFilter === 'overdue' ? 'bg-rose-700 text-white' : 'bg-rose-200 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200'
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                  statusFilter === 'overdue'
+                    ? 'bg-rose-700 text-white'
+                    : counts.overdue > 0
+                    ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-400 font-bold'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {counts.overdue}
@@ -1661,17 +1683,17 @@ export function DebtsListDraggable({
               onClick={() => setStatusFilter('paid')}
               className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'paid'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200/60 dark:border-emerald-900/50'
+                  ? 'bg-emerald-600 text-white shadow-xs font-extrabold'
+                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700/80'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
               <span>To&apos;langanlar</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
                   statusFilter === 'paid'
                     ? 'bg-emerald-700 text-white'
-                    : 'bg-emerald-200 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {counts.paid}
