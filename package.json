@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "telegram:dev": "node scripts/test-telegram.js poll",
     "test:payments": "node scripts/test-payments.js",
     "cap:sync": "npx cap sync",
     "cap:open:android": "npx cap open android",

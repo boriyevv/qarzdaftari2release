@@ -99,6 +99,35 @@ async function main() {
     return
   }
 
+  if (command === 'poll') {
+    console.log('🔄 Starting long polling mode for localhost development...')
+    console.log('Target: http://localhost:3000/api/telegram/webhook')
+    let offset = 0
+    while (true) {
+      try {
+        const res = await fetch(`${baseUrl}/getUpdates?offset=${offset}&timeout=15`).then((r) => r.json())
+        if (res.ok && res.result && res.result.length > 0) {
+          for (const update of res.result) {
+            console.log(`📩 Received update ${update.update_id}:`, update.message ? update.message.text : 'non-message')
+            offset = update.update_id + 1
+            const hookRes = await fetch('http://localhost:3000/api/telegram/webhook', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-telegram-bot-api-secret-token': webhookSecret,
+              },
+              body: JSON.stringify(update),
+            }).then((r) => r.json()).catch((err) => ({ error: err.message }))
+            console.log('Webhook response:', hookRes)
+          }
+        }
+      } catch (err) {
+        console.error('Polling error:', err.message)
+        await new Promise((r) => setTimeout(r, 2000))
+      }
+    }
+  }
+
   // Default: Show webhook info
   const infoRes = await fetch(`${baseUrl}/getWebhookInfo`).then((r) => r.json())
   console.log('Current Webhook Info:')
