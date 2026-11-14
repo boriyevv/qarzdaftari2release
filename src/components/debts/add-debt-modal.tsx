@@ -542,7 +542,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, debtor_phone: '' })}
-                    className="pr-3 text-slate-400 hover:text-slate-600"
+                    className="pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     title="Tozalash"
                   >
                     <X className="w-3.5 h-3.5" />

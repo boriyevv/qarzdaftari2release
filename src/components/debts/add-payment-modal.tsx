@@ -194,7 +194,7 @@ export function AddPaymentModal({ debt, open, onOpenChange, onSuccess }: AddPaym
                   <button
                     type="button"
                     onClick={handleClearAmount}
-                    className="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-0.5"
+                    className="text-xs text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors flex items-center gap-0.5 cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Tozalash</span>

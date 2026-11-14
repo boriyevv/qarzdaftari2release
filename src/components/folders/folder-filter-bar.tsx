@@ -393,11 +393,11 @@ export function FolderFilterBar({
       <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
         <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Folder className="w-5 h-5 text-blue-600" />
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Papkalarni boshqarish
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               Qarzlarni guruhlash uchun papkalarni tahrirlang yoki surib tartibini o&apos;zgartiring
             </DialogDescription>
           </DialogHeader>

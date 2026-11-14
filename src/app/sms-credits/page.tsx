@@ -192,7 +192,7 @@ export default function SMSCreditsPage() {
 								<p className='text-xs text-emerald-700 dark:text-emerald-300'>SMS kreditlaringiz balansingizga qo'shildi.</p>
 							</div>
 						</div>
-						<button onClick={() => setPaymentSuccessMessage(false)} className='text-emerald-700 hover:text-emerald-900 font-bold text-sm px-2 py-1 cursor-pointer'>✕</button>
+						<button onClick={() => setPaymentSuccessMessage(false)} className='text-emerald-700 dark:text-emerald-300 hover:text-emerald-950 dark:hover:text-emerald-100 font-bold text-sm px-2 py-1 cursor-pointer transition-colors'>✕</button>
 					</div>
 				)}
 				{/* Current Balance */}

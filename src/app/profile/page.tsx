@@ -132,7 +132,7 @@ export default function ProfilePage() {
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 dark:border-red-900/40 dark:hover:bg-red-950/30 rounded-xl text-xs font-semibold"
+                className="text-red-600 dark:text-red-400 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-300 border-red-200 dark:border-red-900/40 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5 mr-1.5" />
                 Hisobdan chiqish

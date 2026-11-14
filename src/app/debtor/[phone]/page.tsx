@@ -1097,7 +1097,7 @@ export default function DebtorProfilePage() {
             <Button
               variant="outline"
               onClick={() => setSmsModalOpen(false)}
-              className="rounded-xl border-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 font-semibold text-xs h-9 px-4"
+              className="rounded-xl border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-xs h-9 px-4 cursor-pointer transition-colors"
               disabled={isSendingSMS}
             >
               Bekor qilish
@@ -1217,7 +1217,7 @@ export default function DebtorProfilePage() {
             <Button
               variant="ghost"
               onClick={() => setStatementModalOpen(false)}
-              className="rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 dark:hover:bg-slate-800 w-full"
+              className="rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 w-full transition-colors cursor-pointer"
             >
               Yopish
             </Button>
