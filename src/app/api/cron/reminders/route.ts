@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://debtbook.uz'
+const SAFE_APP_URL = APP_URL.startsWith('https://') ? APP_URL : 'https://debtbook.uz'
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
                 [
                   {
                     text: "🚀 Qarz Daftari (Ilovani ochish)",
-                    web_app: { url: `${APP_URL}/dashboard` },
+                    web_app: { url: `${SAFE_APP_URL}/dashboard` },
                   },
                 ],
               ],

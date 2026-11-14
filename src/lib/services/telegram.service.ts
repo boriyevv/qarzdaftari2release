@@ -261,17 +261,20 @@ class TelegramService {
   }
 
   /**
-   * Create standard merchant keyboard
+   * Create standard merchant keyboard (Telegram requires HTTPS for all web_app links)
    */
   getMerchantKeyboard(appUrl: string = 'https://debtbook.uz') {
+    const isHttps = typeof appUrl === 'string' && appUrl.startsWith('https://')
+    const safeUrl = isHttps ? appUrl : 'https://debtbook.uz'
+
     return {
       keyboard: [
         [
           { text: '📊 Bugungi hisobot' },
-          { text: '🚀 Qarz Daftari', web_app: { url: `${appUrl}/dashboard` } },
+          { text: '🚀 Qarz Daftari', web_app: { url: `${safeUrl}/dashboard` } },
         ],
         [
-          { text: '➕ Yangi qarz', web_app: { url: `${appUrl}/dashboard?action=new-debt` } },
+          { text: '➕ Yangi qarz', web_app: { url: `${safeUrl}/dashboard?action=new-debt` } },
           { text: '⚙️ Sozlamalar va Holat' },
         ],
       ],

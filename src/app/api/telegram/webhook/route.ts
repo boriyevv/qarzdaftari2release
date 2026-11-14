@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://debtbook.uz'
+const SAFE_APP_URL = APP_URL.startsWith('https://') ? APP_URL : 'https://debtbook.uz'
 
 export async function GET(request: NextRequest) {
   const secretKey = request.nextUrl.searchParams.get('secret')
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
 
           await telegramService.sendMessage(chatId, welcomeMsg, {
             parse_mode: 'HTML',
-            reply_markup: telegramService.getMerchantKeyboard(APP_URL),
+            reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
           })
           return NextResponse.json({ ok: true })
         } else {
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
 
         await telegramService.sendMessage(chatId, greeting, {
           parse_mode: 'HTML',
-          reply_markup: telegramService.getMerchantKeyboard(APP_URL),
+          reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
         })
       } else {
         const guestMsg = `Assalomu alaykum! 📖 <b>Qarz Daftari</b> rasmiy botiga xush kelibsiz.\n\n` +
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
           parse_mode: 'HTML',
           reply_markup: {
             inline_keyboard: [
-              [{ text: "🌐 debtbook.uz ga o'tish", url: `${APP_URL}/profile` }],
+              [{ text: "🌐 debtbook.uz ga o'tish", url: `${SAFE_APP_URL}/profile` }],
             ],
           },
         })
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
       if (!existingUser) {
         await telegramService.sendMessage(
           chatId,
-          `⚠️ Hisobingiz hali ulanmagan. Iltimos, avval <a href="${APP_URL}/profile">profilingizdan</a> Telegram botni ulang.`,
+          `⚠️ Hisobingiz hali ulanmagan. Iltimos, avval <a href="${SAFE_APP_URL}/profile">profilingizdan</a> Telegram botni ulang.`,
           { parse_mode: 'HTML' }
         )
         return NextResponse.json({ ok: true })
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
             [
               {
                 text: '🚀 Barcha qarzlarni ko\'rish',
-                web_app: { url: `${APP_URL}/dashboard` },
+                web_app: { url: `${SAFE_APP_URL}/dashboard` },
               },
             ],
           ],
@@ -244,7 +245,7 @@ export async function POST(request: NextRequest) {
         `• /hisobot yoki /status`,
         {
           parse_mode: 'HTML',
-          reply_markup: telegramService.getMerchantKeyboard(APP_URL),
+          reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
         }
       )
     }
