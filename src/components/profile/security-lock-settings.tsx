@@ -311,15 +311,15 @@ export function SecurityLockSettings() {
 
       {/* PIN SETUP MODAL */}
       <Dialog open={setupModalOpen} onOpenChange={setSetupModalOpen}>
-        <DialogContent className="sm:max-w-xs rounded-3xl p-6 bg-slate-950 text-white border border-slate-800 shadow-2xl">
+        <DialogContent className="sm:max-w-xs rounded-3xl p-6 bg-white dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-2xl">
           <DialogHeader className="text-center items-center pb-2">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
               <KeyRound className="w-6 h-6" />
             </div>
-            <DialogTitle className="text-base font-bold text-white">
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
               {step === 1 ? 'Yangi 4 xonali PIN kod' : 'PIN kodni tasdiqlang'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-400">
+            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
               {step === 1
                 ? 'Ilovani ochish uchun yangi 4 ta raqam kiriting'
                 : 'Xatolik yo\'qligini tekshirish uchun kodni qayta kiriting'}
@@ -338,8 +338,8 @@ export function SecurityLockSettings() {
                     setupError
                       ? 'bg-rose-500 ring-4 ring-rose-500/20'
                       : filled
-                      ? 'bg-indigo-500 scale-110 shadow-sm shadow-indigo-500/50'
-                      : 'border-2 border-slate-700 bg-slate-900'
+                      ? 'bg-indigo-600 dark:bg-indigo-500 scale-110 shadow-sm shadow-indigo-500/50'
+                      : 'border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900'
                   }`}
                 />
               )
@@ -347,7 +347,7 @@ export function SecurityLockSettings() {
           </div>
 
           {setupError && (
-            <p className="text-[11px] font-semibold text-rose-400 text-center pb-1">
+            <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 text-center pb-1">
               {setupError}
             </p>
           )}
@@ -359,7 +359,7 @@ export function SecurityLockSettings() {
                 key={num}
                 type="button"
                 onClick={() => handleSetupDigit(num.toString())}
-                className="h-12 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-indigo-600 border border-slate-800 font-bold text-lg text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                className="h-12 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 active:bg-indigo-600 active:text-white dark:active:bg-indigo-600 border border-slate-200 dark:border-slate-800 font-bold text-lg text-slate-900 dark:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               >
                 {num}
               </button>
@@ -368,14 +368,14 @@ export function SecurityLockSettings() {
             <button
               type="button"
               onClick={() => handleSetupDigit('0')}
-              className="h-12 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-indigo-600 border border-slate-800 font-bold text-lg text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              className="h-12 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 active:bg-indigo-600 active:text-white dark:active:bg-indigo-600 border border-slate-200 dark:border-slate-800 font-bold text-lg text-slate-900 dark:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
             >
               0
             </button>
             <button
               type="button"
               onClick={handleSetupDelete}
-              className="h-12 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              className="h-12 rounded-xl bg-slate-100/70 dark:bg-slate-900/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/80 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
             >
               <Delete className="w-5 h-5" />
             </button>

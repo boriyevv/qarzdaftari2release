@@ -2,6 +2,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import {
@@ -208,19 +209,26 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
       {/* FULL-SCREEN LOCK OVERLAY */}
       {isLocked && (
-        <div className="fixed inset-0 z-[999999] bg-slate-950 text-slate-100 flex flex-col items-center justify-between p-6 select-none animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[999999] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col items-center justify-between p-6 select-none animate-in fade-in duration-200">
           {/* Top Header */}
           <div className="w-full flex flex-col items-center text-center pt-8 sm:pt-12 space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-blue-500/25">
-              QD
+            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-blue-500/15 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-2 flex items-center justify-center">
+              <Image
+                src="/logo.png"
+                alt="Qarz Daftari"
+                width={56}
+                height={56}
+                className="w-full h-full object-contain rounded-xl"
+                priority
+              />
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-xl font-bold tracking-tight text-white flex items-center justify-center gap-1.5">
-                <Lock className="w-4 h-4 text-blue-400" />
+              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
+                <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 Qarz Daftari
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Ilovani ochish uchun 4 xonali PIN kodni kiriting
               </p>
             </div>
@@ -236,8 +244,8 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                       errorMessage
                         ? 'bg-rose-500 ring-4 ring-rose-500/30'
                         : filled
-                        ? 'bg-blue-500 scale-110 shadow-md shadow-blue-500/50'
-                        : 'border-2 border-slate-700 bg-slate-900/60'
+                        ? 'bg-blue-600 dark:bg-blue-500 scale-110 shadow-md shadow-blue-500/50'
+                        : 'border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60'
                     }`}
                   />
                 )
@@ -245,7 +253,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
             </div>
 
             {errorMessage && (
-              <p className="text-xs font-semibold text-rose-400 animate-in fade-in">
+              <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 animate-in fade-in">
                 {errorMessage}
               </p>
             )}
@@ -258,7 +266,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 key={num}
                 type="button"
                 onClick={() => handleDigit(num.toString())}
-                className="h-16 rounded-2xl bg-slate-900/90 hover:bg-slate-800 active:bg-blue-600 border border-slate-800 text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95"
+                className="h-16 rounded-2xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-blue-600 active:text-white dark:active:bg-blue-600 dark:active:text-white border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95"
               >
                 {num}
               </button>
@@ -269,11 +277,11 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={triggerBiometrics}
               disabled={!canUseBiometrics && !securityStorage.isBiometricsEnabled()}
-              className="h-16 rounded-2xl bg-slate-900/50 hover:bg-slate-800 border border-slate-800/80 text-blue-400 flex flex-col items-center justify-center transition-colors cursor-pointer active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+              className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-blue-600 dark:text-blue-400 flex flex-col items-center justify-center transition-colors cursor-pointer active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
               title={biometricName}
             >
               <Fingerprint className="w-6 h-6" />
-              <span className="text-[9px] font-semibold mt-0.5 text-slate-400 truncate max-w-[70px]">
+              <span className="text-[9px] font-semibold mt-0.5 text-slate-500 dark:text-slate-400 truncate max-w-[70px]">
                 {biometricName}
               </span>
             </button>
@@ -282,7 +290,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => handleDigit('0')}
-              className="h-16 rounded-2xl bg-slate-900/90 hover:bg-slate-800 active:bg-blue-600 border border-slate-800 text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95"
+              className="h-16 rounded-2xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-blue-600 active:text-white dark:active:bg-blue-600 dark:active:text-white border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95"
             >
               0
             </button>
@@ -291,7 +299,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={handleDelete}
-              className="h-16 rounded-2xl bg-slate-900/50 hover:bg-slate-800 border border-slate-800/80 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
             >
               <Delete className="w-6 h-6" />
             </button>
@@ -302,7 +310,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="text-xs text-slate-500 hover:text-rose-400 flex items-center gap-1.5 transition-colors cursor-pointer py-2 px-3 rounded-xl"
+              className="text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1.5 transition-colors cursor-pointer py-2 px-3 rounded-xl"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>PIN kodni unutdingizmi? Hisobdan chiqish</span>
