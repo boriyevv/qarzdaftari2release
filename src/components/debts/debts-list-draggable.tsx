@@ -1115,7 +1115,7 @@ function SortableDebtCard({
       >
         {/* Top Header: Avatar + Name + Due Date */}
         <div className="flex items-start justify-between gap-2.5">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {/* Drag Handle */}
             <button
               type="button"
@@ -1191,7 +1191,7 @@ function SortableDebtCard({
         </div>
 
         {/* Mobile Action Bar */}
-        <div className="grid grid-cols-4 gap-1.5 pt-1">
+        <div className="grid grid-cols-4 gap-2 pt-2">
           {debt.debtor_phone ? (
             <a
               href={`tel:${debt.debtor_phone}`}
@@ -1467,18 +1467,18 @@ export function DebtsListDraggable({
   return (
     <div className="space-y-4">
       {/* ─── CRM TOOLBAR: Search, Status Chips & Sort ─────────────────── */}
-      <div className="flex flex-col gap-3">
-        {/* Top line: Search input + Sort Dropdown */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="flex flex-col gap-2.5">
+        {/* Top line: Search input + Controls */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <Input
               type="text"
               placeholder="Qarzdor ismi yoki telefoni bo'yicha qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors w-full"
             />
             {search && (
               <button
@@ -1491,24 +1491,20 @@ export function DebtsListDraggable({
             )}
           </div>
 
-          {/* Controls: Sort + Export */}
-          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+          {/* Controls: Sort + Auto Reminders + Export */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none shrink-0">
             {/* Sort Select */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 hidden sm:flex items-center gap-1">
-                <ArrowUpDown className="w-3.5 h-3.5" />
-                Saralash:
-              </span>
+            <div className="flex-1 sm:flex-none min-w-[130px]">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="h-10 px-3 pr-8 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-colors"
+                className="h-10 w-full px-3 pr-7 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-colors"
               >
-                <option value="date-desc">Eng yangi qo&apos;shilganlar</option>
-                <option value="remaining-desc">Qoldiq: Kattadan kichikka</option>
-                <option value="remaining-asc">Qoldiq: Kichikdan kattaga</option>
-                <option value="due-asc">Muddat: Eng yaqin</option>
-                <option value="name-asc">Qarzdor ismi (A-Z)</option>
+                <option value="date-desc">Eng yangilar</option>
+                <option value="remaining-desc">Qoldiq: Ko&apos;p</option>
+                <option value="remaining-asc">Qoldiq: Kam</option>
+                <option value="due-asc">Muddati yaqin</option>
+                <option value="name-asc">Ism (A-Z)</option>
               </select>
             </div>
 
@@ -1517,11 +1513,11 @@ export function DebtsListDraggable({
               type="button"
               variant="outline"
               onClick={() => setIsAutoRemindersOpen(true)}
-              className="h-10 px-3.5 rounded-2xl border-amber-300 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-400 dark:hover:border-amber-700 flex items-center gap-1.5 transition-all"
+              className="h-10 px-3 rounded-2xl border-amber-300 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-400 dark:hover:border-amber-700 flex items-center gap-1.5 transition-all shrink-0"
               title="Yaqinlashgan qarzlar uchun avtomatik eslatmalar"
             >
-              <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>Avto Eslatma</span>
+              <Bell className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="whitespace-nowrap">Avto Eslatma</span>
             </Button>
 
             {/* Export Dropdown Button */}
@@ -1530,11 +1526,11 @@ export function DebtsListDraggable({
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-10 px-3.5 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all"
+                  className="h-10 px-3 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all shrink-0"
                   title="Qarzlar ro'yxatini yuklab olish"
                 >
-                  <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span>Eksport</span>
+                  <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span className="whitespace-nowrap">Eksport</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -1568,13 +1564,13 @@ export function DebtsListDraggable({
         </div>
 
         {/* Bottom line: Filter Chips & Active Summary */}
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-1.5 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
+        <div className="flex items-center justify-between flex-wrap gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pr-4 pb-1 sm:pb-0 scrollbar-none">
             {/* 1. All */}
             <button
               type="button"
               onClick={() => setStatusFilter('all')}
-              className={`h-8 px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'all'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200/80 dark:border-slate-700'
@@ -1596,7 +1592,7 @@ export function DebtsListDraggable({
             <button
               type="button"
               onClick={() => setStatusFilter('active')}
-              className={`h-8 px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'active'
                   ? 'bg-orange-600 text-white shadow-xs'
                   : 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200/60 dark:border-orange-900/50'
@@ -1618,7 +1614,7 @@ export function DebtsListDraggable({
             <button
               type="button"
               onClick={() => setStatusFilter('overdue')}
-              className={`h-8 px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'overdue'
                   ? 'bg-rose-600 text-white shadow-xs'
                   : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200/60 dark:border-rose-900/50'
@@ -1639,7 +1635,7 @@ export function DebtsListDraggable({
             <button
               type="button"
               onClick={() => setStatusFilter('paid')}
-              className={`h-8 px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'paid'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200/60 dark:border-emerald-900/50'

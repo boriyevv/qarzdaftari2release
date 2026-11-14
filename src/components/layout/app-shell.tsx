@@ -35,7 +35,7 @@ import { Button } from '@/components/ui/button'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { triggerPwaInstallPrompt } from '@/components/pwa/pwa-install-banner'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
-import { isNativePlatform, registerBackButton, exitApp } from '@/lib/native'
+import { isNativePlatform, registerBackButton, exitApp, nativeHaptics } from '@/lib/native'
 
 interface NavItem {
   label: string
@@ -531,7 +531,7 @@ export function AppShell({
             ========================================================= */}
         <div
           className={`
-            flex-1 flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-8
+            flex-1 flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out pb-[calc(5.75rem+env(safe-area-inset-bottom))] lg:pb-8
             ${isCollapsed ? 'lg:pl-20' : 'lg:pl-64'}
           `}
         >
@@ -637,11 +637,10 @@ export function AppShell({
                   <Button
                     id="tour-add-debt"
                     onClick={() => setIsAddDebtOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
+                    className="hidden sm:inline-flex bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4 shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
                   >
-                    <Plus className="w-4 h-4 sm:mr-1.5 stroke-[2.5]" />
-                    <span className="hidden sm:inline">Yangi Qarz</span>
-                    <span className="sm:hidden">Qarz</span>
+                    <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+                    <span>Yangi Qarz</span>
                   </Button>
                 )}
 
@@ -674,37 +673,108 @@ export function AppShell({
         </div>
 
         {/* =========================================================
-            MOBILE BOTTOM NAVIGATION BAR
+            MOBILE BOTTOM NAVIGATION DOCK (WITH ELEVATED CENTER ACTION)
             ========================================================= */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 z-40 shadow-lg pb-[env(safe-area-inset-bottom)]">
-          <div className="grid grid-cols-5 gap-1 py-1.5 px-2 max-w-md mx-auto">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  id={item.tourId ? `${item.tourId}-mobile` : undefined}
-                  href={item.href}
-                  className={`
-                    flex flex-col items-center justify-center py-1 px-1 rounded-xl text-[10px] font-semibold transition-colors
-                    ${
-                      isActive
-                        ? 'text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/40 font-bold'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-                    }
-                  `}
-                >
-                  <div className="relative">
-                    <Icon className="w-5 h-5" />
-                    {item.badge && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-purple-500" />
-                    )}
-                  </div>
-                  <span className="mt-1 truncate max-w-full text-[10px]">{item.label}</span>
-                </Link>
-              )
-            })}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800 z-40 shadow-xl pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-1.5">
+          <div className="grid grid-cols-5 items-center px-2 max-w-md mx-auto relative">
+            {/* Slot 1: Bosh sahifa */}
+            <Link
+              id="tour-nav-dashboard-mobile"
+              href="/dashboard"
+              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+                pathname === '/dashboard'
+                  ? 'text-blue-600 dark:text-blue-400 font-extrabold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <div
+                className={`p-1 rounded-xl transition-all ${
+                  pathname === '/dashboard' ? 'bg-blue-50 dark:bg-blue-950/60 scale-105' : ''
+                }`}
+              >
+                <Home className="w-5 h-5" />
+              </div>
+              <span className="mt-0.5 truncate text-[10px]">Bosh sahifa</span>
+            </Link>
+
+            {/* Slot 2: Analitika */}
+            <Link
+              id="tour-nav-analytics-mobile"
+              href="/analytics"
+              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+                pathname === '/analytics'
+                  ? 'text-blue-600 dark:text-blue-400 font-extrabold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <div
+                className={`p-1 rounded-xl transition-all relative ${
+                  pathname === '/analytics' ? 'bg-blue-50 dark:bg-blue-950/60 scale-105' : ''
+                }`}
+              >
+                <BarChart3 className="w-5 h-5" />
+                {currentPlan === 'FREE' && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-purple-500 ring-2 ring-white dark:ring-slate-900" />
+                )}
+              </div>
+              <span className="mt-0.5 truncate text-[10px]">Analitika</span>
+            </Link>
+
+            {/* Slot 3: Elevated Center Action Button (+ Qarz) */}
+            <div className="flex items-center justify-center -mt-5">
+              <button
+                type="button"
+                id="tour-add-debt-mobile"
+                onClick={() => {
+                  nativeHaptics.impact('medium').catch(() => {})
+                  openAddDebt()
+                }}
+                className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 text-white shadow-lg shadow-blue-500/35 ring-4 ring-white dark:ring-slate-900 transition-all duration-200 active:scale-90 hover:scale-105 cursor-pointer"
+                aria-label="Yangi qarz kiritish"
+              >
+                <Plus className="w-6 h-6 stroke-[2.75] transition-transform group-hover:rotate-90 duration-200" />
+              </button>
+            </div>
+
+            {/* Slot 4: SMS */}
+            <Link
+              id="tour-nav-sms-mobile"
+              href="/sms-credits"
+              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+                pathname === '/sms-credits'
+                  ? 'text-blue-600 dark:text-blue-400 font-extrabold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <div
+                className={`p-1 rounded-xl transition-all ${
+                  pathname === '/sms-credits' ? 'bg-blue-50 dark:bg-blue-950/60 scale-105' : ''
+                }`}
+              >
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <span className="mt-0.5 truncate text-[10px]">SMS</span>
+            </Link>
+
+            {/* Slot 5: Profil */}
+            <Link
+              id="tour-nav-profile-mobile"
+              href="/profile"
+              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+                pathname === '/profile'
+                  ? 'text-blue-600 dark:text-blue-400 font-extrabold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <div
+                className={`p-1 rounded-xl transition-all ${
+                  pathname === '/profile' ? 'bg-blue-50 dark:bg-blue-950/60 scale-105' : ''
+                }`}
+              >
+                <User className="w-5 h-5" />
+              </div>
+              <span className="mt-0.5 truncate text-[10px]">Profil</span>
+            </Link>
           </div>
         </nav>
 

@@ -42,8 +42,33 @@ import { useUser } from '@/lib/contexts/user-context'
 import { formatCurrency, formatAmountInput, parseAmountInput, numberToUzbekWords } from '@/lib/utils/currency'
 import { formatPhoneNumber } from '@/lib/utils/phone'
 import { exportDebtorStatementPDF, generateDebtorTelegramText } from '@/lib/export/debtor-statement'
+import { exportSingleDebtReceiptPDF } from '@/lib/export/debts-export'
 import { playSuccessSound } from '@/lib/sounds'
+import { toast } from 'sonner'
+import { nativeHaptics } from '@/lib/native'
 import Link from 'next/link'
+
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0].toUpperCase())
+    .join('')
+}
+
+const getAvatarGradient = (name: string) => {
+  const gradients = [
+    'from-blue-600 to-indigo-600',
+    'from-emerald-500 to-teal-600',
+    'from-violet-600 to-purple-600',
+    'from-amber-500 to-orange-600',
+    'from-rose-500 to-pink-600',
+    'from-sky-500 to-blue-600',
+  ]
+  const charCode = name.charCodeAt(0) || 0
+  return gradients[charCode % gradients.length]
+}
 
 interface Debt {
   id: string
@@ -371,42 +396,72 @@ export default function DebtorProfilePage() {
         {/* 1. Qarzdor Asosiy Profili va 4 ta Tezkor Amal */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-            <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                  {data.name}
-                </h1>
-                <Badge
-                  variant="outline"
-                  className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
-                    data.totalRemaining === 0
-                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                      : hasOverdueDebt
-                      ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
-                      : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                  }`}
-                >
-                  {data.totalRemaining === 0
-                    ? "Barcha qarzlar to'langan"
-                    : hasOverdueDebt
-                    ? 'Kechikkan qarzlari bor'
-                    : 'Qarzdorlik mavjud'}
-                </Badge>
+            <div className="flex items-center gap-4">
+              <div
+                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr ${getAvatarGradient(
+                  data.name
+                )} text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md shadow-blue-500/15 flex-shrink-0`}
+              >
+                {getInitials(data.name)}
               </div>
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                    {data.name}
+                  </h1>
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                      data.totalRemaining === 0
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                        : hasOverdueDebt
+                        ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                        : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                    }`}
+                  >
+                    {data.totalRemaining === 0
+                      ? "Barcha qarzlar to'langan"
+                      : hasOverdueDebt
+                      ? 'Kechikkan qarzlari bor'
+                      : 'Qarzdorlik mavjud'}
+                  </Badge>
 
-              <div className="flex items-center gap-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 flex-wrap">
-                <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
-                  <Phone className="w-4 h-4 text-blue-600" />
-                  <a href={`tel:${data.phone}`} className="hover:underline">
-                    {formatPhoneNumber(data.phone)}
-                  </a>
+                  {/* Trust Rating Badge */}
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      collectionRate >= 75
+                        ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                        : collectionRate >= 40
+                        ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                        : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    {collectionRate >= 75
+                      ? '⭐️ Ajoyib intizom'
+                      : collectionRate >= 40
+                      ? '⚖️ O\'rtacha intizom'
+                      : '⚠️ Nazorat talab'}
+                  </span>
                 </div>
-                <span>•</span>
-                <span>{data.debtCount} ta umumiy yozuv</span>
-                <span>•</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  {data.debts.filter((d) => d.amount - d.paid_amount > 0).length} ta ochiq qarz
-                </span>
+
+                <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex-wrap">
+                  {data.phone ? (
+                    <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+                      <Phone className="w-3.5 h-3.5 text-blue-600" />
+                      <a href={`tel:${data.phone}`} className="hover:underline font-mono">
+                        {formatPhoneNumber(data.phone)}
+                      </a>
+                    </div>
+                  ) : (
+                    <span className="text-slate-400 italic">Telefon raqam kiritilmagan</span>
+                  )}
+                  <span>•</span>
+                  <span>{data.debtCount} ta umumiy yozuv</span>
+                  <span>•</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {data.debts.filter((d) => d.amount - d.paid_amount > 0).length} ta ochiq qarz
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -416,7 +471,7 @@ export default function DebtorProfilePage() {
               <Button
                 onClick={() => handleOpenPayment('auto')}
                 disabled={data.totalRemaining <= 0}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl h-10 px-4 text-xs sm:text-sm shadow-xs transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl h-10 px-4 text-xs sm:text-sm shadow-xs transition-colors cursor-pointer active:scale-95"
               >
                 <CreditCard className="w-4 h-4 mr-1.5" />
                 To&apos;lov qabul qilish
@@ -427,7 +482,7 @@ export default function DebtorProfilePage() {
                 variant="outline"
                 onClick={handleShareToTelegram}
                 disabled={data.totalRemaining <= 0}
-                className="border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 hover:bg-sky-500 hover:text-white text-sky-700 dark:text-sky-300 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer"
+                className="border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 hover:bg-sky-500 hover:text-white text-sky-700 dark:text-sky-300 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm shadow-2xs transition-colors cursor-pointer active:scale-95"
                 title="Telegram orqali eslatish (100% Bepul)"
               >
                 <Send className="w-4 h-4 mr-1.5 text-sky-500" />
@@ -439,18 +494,18 @@ export default function DebtorProfilePage() {
                 variant="outline"
                 onClick={handleOpenSMS}
                 disabled={data.totalRemaining <= 0}
-                className="border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
+                className="border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:text-blue-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs cursor-pointer active:scale-95"
               >
                 <MessageSquare className="w-4 h-4 mr-1.5 text-blue-600" />
                 SMS Eslatma
               </Button>
 
-              {/* 3. Qo'ng'iroq qilish */}
+              {/* 4. Qo'ng'iroq qilish */}
               {data.phone && (
                 <a href={`tel:${data.phone}`}>
                   <Button
                     variant="outline"
-                    className="border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:text-emerald-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
+                    className="border-slate-200 dark:border-slate-700 hover:border-emerald-300 hover:text-emerald-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs cursor-pointer active:scale-95"
                   >
                     <Phone className="w-4 h-4 mr-1.5 text-emerald-600" />
                     Qo&apos;ng&apos;iroq
@@ -458,11 +513,11 @@ export default function DebtorProfilePage() {
                 </a>
               )}
 
-              {/* 4. Akt-Sverka (Mijoz hisobot varaqasi) */}
+              {/* 5. Akt-Sverka (Mijoz hisobot varaqasi) */}
               <Button
                 variant="outline"
                 onClick={() => setStatementModalOpen(true)}
-                className="border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs"
+                className="border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600 font-bold rounded-2xl h-10 px-3.5 text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs cursor-pointer active:scale-95"
               >
                 <FileText className="w-4 h-4 mr-1.5 text-indigo-600" />
                 Akt-sverka
@@ -591,15 +646,16 @@ export default function DebtorProfilePage() {
           </div>
         </div>
 
-        {/* 3. Qarzlar Tarixi va Alohida Qarzlar bo'yicha To'lov */}
+        {/* 3. Qarzlar Tarixi — Interaktiv Vaqt Chizig'i (Fintech Timeline) */}
         <Card className="border-slate-200/80 dark:border-slate-800 shadow-2xs rounded-3xl overflow-hidden bg-white dark:bg-slate-900">
           <CardHeader className="bg-slate-50/70 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-800 pb-4 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-                Qarzlar tarixi
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-600" />
+                Qarzlar tarixi va To&apos;lovlar
               </CardTitle>
               <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
-                Ushbu qarzdor bo&apos;yicha kiritilgan barcha operatsiyalar ro&apos;yxati
+                Ushbu qarzdor bo&apos;yicha kiritilgan barcha operatsiyalar xronologiyasi
               </CardDescription>
             </div>
           </CardHeader>
@@ -609,104 +665,168 @@ export default function DebtorProfilePage() {
                 Qarzlar tarixi mavjud emas
               </p>
             ) : (
-              data.debts.map((debt) => {
-                const remaining = Math.max(0, debt.amount - debt.paid_amount)
-                const isPaid = debt.status === 'paid' || (debt.amount > 0 && debt.paid_amount >= debt.amount)
-                const isOverdue = !isPaid && debt.due_date && new Date(debt.due_date) < new Date()
+              <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-2.5 sm:before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+                {data.debts.map((debt, index) => {
+                  const remaining = Math.max(0, debt.amount - debt.paid_amount)
+                  const isPaid = debt.status === 'paid' || (debt.amount > 0 && debt.paid_amount >= debt.amount)
+                  const isOverdue = !isPaid && debt.due_date && new Date(debt.due_date) < new Date()
+                  const percent = debt.amount > 0 ? Math.min(100, Math.round((debt.paid_amount / debt.amount) * 100)) : 0
 
-                return (
-                  <div
-                    key={debt.id}
-                    className="border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 rounded-2xl p-4 sm:p-5 space-y-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/80 transition-all shadow-2xs"
-                  >
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-slate-400" />
-                          <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-semibold">
-                            Berilgan sana: {formatDate(debt.created_at)}
-                          </span>
-                        </div>
-                        {debt.due_date && (
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
-                            To&apos;lash muddati:{' '}
-                            <span
-                              className={`font-semibold ${
-                                isOverdue ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-300'
+                  return (
+                    <div key={debt.id} className="relative group">
+                      {/* Timeline Node Icon */}
+                      <div
+                        className={`absolute -left-6 sm:-left-8 top-3 w-5 h-5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white ring-4 ring-white dark:ring-slate-900 ${
+                          isPaid
+                            ? 'bg-emerald-500'
+                            : isOverdue
+                            ? 'bg-rose-500 animate-pulse'
+                            : 'bg-blue-600'
+                        }`}
+                      >
+                        {isPaid ? (
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        ) : isOverdue ? (
+                          <AlertTriangle className="w-3 h-3 stroke-[2.5]" />
+                        ) : (
+                          <Calendar className="w-3 h-3" />
+                        )}
+                      </div>
+
+                      {/* Timeline Content Card */}
+                      <div className="border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 rounded-2xl p-4 sm:p-5 space-y-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/80 transition-all shadow-2xs">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-2 flex-wrap">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-bold">
+                                {formatDate(debt.created_at)}
+                              </span>
+                              <span className="text-[11px] text-slate-400 font-mono">#{index + 1}</span>
+                            </div>
+                            {debt.due_date && (
+                              <div className="text-xs text-slate-500 dark:text-slate-400">
+                                To&apos;lash muddati:{' '}
+                                <span
+                                  className={`font-semibold ${
+                                    isOverdue ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-300'
+                                  }`}
+                                >
+                                  {formatDate(debt.due_date)} {isOverdue && '(Kechikkan!)'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                                isPaid
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                  : isOverdue
+                                  ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                                  : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                               }`}
                             >
-                              {formatDate(debt.due_date)} {isOverdue && '(Kechikkan)'}
-                            </span>
+                              {isPaid ? "To'langan" : isOverdue ? "Muddati o'tgan" : 'Kutilmoqda'}
+                            </Badge>
+
+                            {/* PDF Kvitansiya tugmasi */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                exportSingleDebtReceiptPDF(
+                                  {
+                                    id: debt.id,
+                                    debtor_name: data.name,
+                                    debtor_phone: data.phone,
+                                    amount: debt.amount,
+                                    paid_amount: debt.paid_amount,
+                                    status: debt.status,
+                                    due_date: debt.due_date,
+                                    debt_date: debt.created_at,
+                                    note: debt.note,
+                                  },
+                                  user?.store_name || "Qarz Daftari"
+                                )
+                                toast.success("Chek tayyorlandi!")
+                              }}
+                              className="h-8 rounded-xl px-2.5 text-xs font-semibold border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                              title="PDF Chek / Kvitansiya"
+                            >
+                              <FileText className="w-3.5 h-3.5 mr-1 text-slate-500" />
+                              Chek
+                            </Button>
+
+                            {/* Qarz kartasi ichidagi tezkor to'lov tugmasi */}
+                            {remaining > 0 && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleOpenPayment(debt.id, remaining)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-8 px-3 text-xs shadow-2xs cursor-pointer active:scale-95 transition-all"
+                              >
+                                <Plus className="w-3.5 h-3.5 mr-1" />
+                                To&apos;lash
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Amounts Grid */}
+                        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm pt-1 bg-slate-50/70 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                          <div>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs">Jami qarz</p>
+                            <p className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                              {formatCurrency(debt.amount)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs">To&apos;langan</p>
+                            <p className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                              {formatCurrency(debt.paid_amount)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs">Qoldiq</p>
+                            <p
+                              className={`font-bold font-mono ${
+                                remaining > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'
+                              }`}
+                            >
+                              {formatCurrency(remaining)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                            <span>To&apos;lov darajasi</span>
+                            <span className="font-bold">{percent}%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-200/60 dark:border-slate-700">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                isPaid ? 'bg-emerald-500' : 'bg-blue-600'
+                              }`}
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Note */}
+                        {debt.note && (
+                          <div className="text-xs text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800 rounded-xl p-2.5">
+                            <span className="font-bold text-slate-700 dark:text-slate-200">Izoh:</span> {debt.note}
                           </div>
                         )}
                       </div>
-
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
-                            isPaid
-                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                              : isOverdue
-                              ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
-                              : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                          }`}
-                        >
-                          {isPaid ? "To'langan" : isOverdue ? 'Muddati o\'tgan' : 'Ochiq qarz'}
-                        </Badge>
-
-                        {/* Qarz kartasi ichidagi tezkor to'lov tugmasi */}
-                        {remaining > 0 && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleOpenPayment(debt.id, remaining)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-7 px-3 text-xs shadow-2xs cursor-pointer"
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            To&apos;lash
-                          </Button>
-                        )}
-                      </div>
                     </div>
-
-                    {/* Amounts */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm pt-1">
-                      <div>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">Asl qarz</p>
-                        <p className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(debt.amount)}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">To&apos;langan</p>
-                        <p className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(debt.paid_amount)}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">Qoldiq</p>
-                        <p className={`font-bold ${remaining > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}`}>
-                          {formatCurrency(remaining)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200/60 dark:border-slate-700">
-                      <div
-                        className="bg-emerald-500 h-2 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min((debt.paid_amount / debt.amount) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
-
-                    {/* Note */}
-                    {debt.note && (
-                      <div className="text-xs text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800 rounded-xl p-2.5">
-                        <span className="font-bold text-slate-700 dark:text-slate-200">Izoh:</span> {debt.note}
-                      </div>
-                    )}
-                  </div>
-                )
-              })
+                  )
+                })}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -781,27 +901,45 @@ export default function DebtorProfilePage() {
                 </div>
               )}
 
-              {/* Tezkor Summa Tugmalari */}
-              <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-                {[50000, 100000, 200000, 500000].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setPaymentAmount(formatAmountInput(amt))}
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-                  >
-                    +{formatAmountInput(amt)}
-                  </button>
-                ))}
-                {data.totalRemaining > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setPaymentAmount(formatAmountInput(data.totalRemaining))}
-                    className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-200 dark:hover:bg-emerald-900 text-emerald-800 dark:text-emerald-300 transition-colors ml-auto cursor-pointer"
-                  >
-                    To&apos;liq yopish
-                  </button>
-                )}
+              {/* Tezkor Summa Qo'shish Chiplari */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  <span>Tezkor qo&apos;shish:</span>
+                  {parseAmountInput(paymentAmount) > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentAmount('')}
+                      className="text-slate-400 hover:text-rose-500 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Tozalash
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[10000, 50000, 100000, 500000, 1000000].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => {
+                        const current = parseAmountInput(paymentAmount)
+                        setPaymentAmount(formatAmountInput(current + amt))
+                      }}
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 dark:hover:text-emerald-300 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer active:scale-95"
+                    >
+                      +{amt >= 1000000 ? `${amt / 1000000} mln` : `${amt / 1000}k`}
+                    </button>
+                  ))}
+                  {data.totalRemaining > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentAmount(formatAmountInput(data.totalRemaining))}
+                      className="text-[11px] font-bold px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors ml-auto cursor-pointer active:scale-95"
+                    >
+                      To&apos;liq yopish
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

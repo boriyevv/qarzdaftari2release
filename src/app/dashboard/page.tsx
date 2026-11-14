@@ -116,7 +116,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Horizontal Folder Filter Bar */}
-        <div id="tour-folders" className="pt-2">
+        <div id="tour-folders" className="pt-2 sm:pt-3">
           <FolderFilterBar
             activeFolder={activeFolder}
             onFolderChange={handleFolderChange}
@@ -166,18 +166,6 @@ export default function DashboardPage() {
             />
           )}
         </div>
-      </div>
-
-      {/* Mobile Floating Action Button (FAB) */}
-      <div className="lg:hidden fixed bottom-20 right-5 z-40">
-        <button
-          id="tour-add-debt-mobile"
-          onClick={() => setIsAddDebtOpen(true)}
-          className="h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center"
-          aria-label="Yangi qarz qo'shish"
-        >
-          <Plus className="w-7 h-7 stroke-[2.5]" />
-        </button>
       </div>
 
       {/* Add Debt Modal */}
