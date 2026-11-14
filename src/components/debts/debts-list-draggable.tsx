@@ -1190,73 +1190,97 @@ function SortableDebtCard({
           </div>
         </div>
 
-        {/* Mobile Action Bar */}
-        <div className="grid grid-cols-4 gap-2 pt-2">
-          {debt.debtor_phone ? (
-            <a
-              href={`tel:${debt.debtor_phone}`}
-              className="h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95"
-              title="Qo'ng'iroq"
+        {/* Mobile Action Bar: Quick Communication Icons + Prominent Payment CTA */}
+        <div className="flex items-center gap-2 pt-1.5">
+          {/* Quick Communication Actions: Phone, Telegram, SMS */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Phone */}
+            {debt.debtor_phone ? (
+              <a
+                href={`tel:${debt.debtor_phone}`}
+                className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-center transition-all active:scale-90"
+                title="Qo'ng'iroq qilish"
+                aria-label="Qo'ng'iroq"
+              >
+                <Phone className="w-4 h-4" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => toast.info("Ushbu qarzdorning telefon raqami kiritilmagan")}
+                className="w-9 h-9 rounded-xl bg-slate-100/50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 border border-slate-200/40 dark:border-slate-800/50 flex items-center justify-center cursor-not-allowed opacity-60"
+                title="Telefon kiritilmagan"
+                aria-label="Telefon kiritilmagan"
+              >
+                <Phone className="w-4 h-4 opacity-50" />
+              </button>
+            )}
+
+            {/* Telegram */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!debt.debtor_phone) {
+                  toast.info("Telegram eslatma uchun telefon raqami kiritilishi kerak")
+                  return
+                }
+                onAction('telegram-remind', debt)
+              }}
+              disabled={!debt.debtor_phone}
+              className={`w-9 h-9 rounded-xl transition-all active:scale-90 flex items-center justify-center border ${
+                debt.debtor_phone
+                  ? 'bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-500 text-sky-600 dark:text-sky-400 hover:text-white border-sky-200 dark:border-sky-900/60 shadow-2xs'
+                  : 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-400'
+              }`}
+              title={debt.debtor_phone ? "Telegram orqali eslatma (Bepul)" : "Telefon kiritilmagan"}
+              aria-label="Telegram"
             >
-              <Phone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Tel</span>
-            </a>
+              <Send className="w-3.5 h-3.5" />
+            </button>
+
+            {/* SMS */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!debt.debtor_phone) {
+                  toast.info("SMS yuborish uchun telefon raqami kiritilishi kerak")
+                  return
+                }
+                onAction('sms-auto', debt)
+              }}
+              disabled={!debt.debtor_phone}
+              className={`w-9 h-9 rounded-xl transition-all active:scale-90 flex items-center justify-center border ${
+                debt.debtor_phone
+                  ? 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border-blue-200 dark:border-blue-900/60 shadow-2xs'
+                  : 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-400'
+              }`}
+              title={debt.debtor_phone ? "SMS xabar yuborish" : "Telefon kiritilmagan"}
+              aria-label="SMS"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Primary Action Button: Prominent + To'lov olish */}
+          {isFullyPaid ? (
+            <button
+              type="button"
+              onClick={() => onAction('payment', debt)}
+              className="flex-1 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>To&apos;langan</span>
+            </button>
           ) : (
             <button
               type="button"
-              onClick={() => toast.info("Ushbu qarzdorning telefon raqami kiritilmagan")}
-              className="h-9 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 flex items-center justify-center gap-1 text-xs font-medium cursor-not-allowed"
-              title="Telefon kiritilmagan"
+              onClick={() => onAction('payment', debt)}
+              className="flex-1 h-9 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white font-extrabold text-xs shadow-sm shadow-emerald-600/30 flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
             >
-              <Phone className="w-3.5 h-3.5 opacity-50" />
-              <span className="hidden sm:inline">Tel</span>
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>To&apos;lov olish</span>
             </button>
           )}
-
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (!debt.debtor_phone) {
-                toast.info("Telegram eslatma uchun telefon raqami kiritilishi kerak")
-                return
-              }
-              onAction('telegram-remind', debt)
-            }}
-            disabled={!debt.debtor_phone}
-            className={`h-9 rounded-xl font-bold text-xs transition-all active:scale-95 px-1 ${
-              debt.debtor_phone
-                ? 'bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-500 text-sky-700 dark:text-sky-300 hover:text-white border-sky-200 dark:border-sky-900/60'
-                : 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-800'
-            }`}
-            title={debt.debtor_phone ? "Telegram (Bepul)" : "Telefon kiritilmagan"}
-          >
-            <Send className="w-3.5 h-3.5 mr-1 text-sky-500 hover:text-white" />
-            TG
-          </Button>
-
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => onAction('sms-auto', debt)}
-            className="h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 dark:hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white dark:hover:text-white border-blue-200 dark:border-blue-900/60 font-bold text-xs transition-all active:scale-95 px-1"
-            title="SMS"
-          >
-            <MessageSquare className="w-3.5 h-3.5 mr-1" />
-            SMS
-          </Button>
-
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => onAction('payment', debt)}
-            className="h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" />
-            To&apos;lov
-          </Button>
         </div>
       </div>
     </div>
