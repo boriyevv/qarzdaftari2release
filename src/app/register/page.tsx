@@ -88,6 +88,11 @@ export default function RegisterPage() {
       return
     }
 
+    const rawEmailPhone = (emailForm.phone || '').replace(/\D/g, '')
+    const cleanEmailPhone = rawEmailPhone.length >= 9
+      ? (rawEmailPhone.startsWith('998') ? `+${rawEmailPhone}` : `+998${rawEmailPhone}`)
+      : undefined
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -96,7 +101,7 @@ export default function RegisterPage() {
           auth_method: 'email',
           full_name: emailForm.full_name,
           email: emailForm.email,
-          phone: emailForm.phone || undefined,
+          phone: cleanEmailPhone,
           username: emailForm.username,
           store_name: emailForm.store_name,
           password: emailForm.password,
@@ -120,17 +125,17 @@ export default function RegisterPage() {
 
   // Send OTP
   const handleSendOTP = async () => {
-    if (!phoneForm.phone || !/^\+998\d{9}$/.test(phoneForm.phone)) {
-      setError('Telefon raqam noto\'g\'ri')
+    const rawDigits = (phoneForm.phone || '').replace(/\D/g, '')
+    const fullPhone = rawDigits.startsWith('998') ? `+${rawDigits}` : `+998${rawDigits}`
+
+    if (!/^\+998\d{9}$/.test(fullPhone)) {
+      setError("Telefon raqamini to'liq kiriting (masalan: 90 123 45 67)")
       return
     }
 
     setLoading(true)
     setError('')
     setDisplayCode(null)
-
-    const rawDigits = phoneForm.phone.replace(/\D/g, '')
-    const fullPhone = rawDigits.startsWith('998') ? `+${rawDigits}` : `+998${rawDigits}`
 
     try {
       const response = await fetch('/api/auth/send-otp', {
