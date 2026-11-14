@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { AppShell } from '@/components/layout/app-shell'
 import { useUser } from '@/lib/contexts/user-context'
 import { SecurityLockSettings } from '@/components/profile/security-lock-settings'
@@ -9,6 +10,7 @@ import { ArrowLeft, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfileSecurityPage() {
+  const router = useRouter()
   const { user, loading: userLoading } = useUser()
 
   useEffect(() => {
@@ -32,6 +34,8 @@ export default function ProfileSecurityPage() {
     <AppShell
       title="Ilova Xavfsizligi"
       subtitle="PIN kod va Biometrik (Face ID / Barmoq izi) himoyasi"
+      showBack={true}
+      onBack={() => router.push('/profile')}
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Navigation Back Link */}

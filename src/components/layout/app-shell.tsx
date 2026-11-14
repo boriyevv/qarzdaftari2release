@@ -1,7 +1,7 @@
 // src/components/layout/app-shell.tsx
 'use client'
 
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -174,29 +174,109 @@ export function AppShell({
     }
   }
 
+  // Intelligent hierarchical back navigation handler
+  const handleNavigateBack = useCallback(() => {
+    // 1. If Add Debt modal is open, close it
+    if (isAddDebtOpen) {
+      setIsAddDebtOpen(false)
+      return true
+    }
+    // 2. If mobile drawer menu is open, close it
+    if (mobileOpen) {
+      setMobileOpen(false)
+      return true
+    }
+    // 3. Custom onBack handler if provided
+    if (onBack) {
+      onBack()
+      return true
+    }
+    // 4. If on /dashboard, cleanly exit the app on native
+    if (pathname === '/dashboard') {
+      exitApp()
+      return true
+    }
+    // 5. Nested Profile Sub-pages:
+    // If on /profile/security/pin -> return to /profile/security
+    if (pathname === '/profile/security/pin') {
+      router.push('/profile/security')
+      return true
+    }
+    // If on any /profile/* sub-page -> return to /profile
+    if (pathname.startsWith('/profile/')) {
+      router.push('/profile')
+      return true
+    }
+    // 6. Debtor details: /debtor/[phone] -> return to /dashboard
+    if (pathname.startsWith('/debtor/')) {
+      router.push('/dashboard')
+      return true
+    }
+    // 7. Main tabs (/profile, /analytics, /sms-credits) -> return to /dashboard
+    if (pathname === '/profile' || pathname === '/analytics' || pathname === '/sms-credits') {
+      router.push('/dashboard')
+      return true
+    }
+    // 8. Fallback: try history.back if available, else /dashboard
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/dashboard')
+    }
+    return true
+  }, [isAddDebtOpen, mobileOpen, onBack, pathname, router])
+
   // Native Android hardware back button handler
   useEffect(() => {
     return registerBackButton(() => {
-      // 1. If Add Debt modal is open, close it
-      if (isAddDebtOpen) {
-        setIsAddDebtOpen(false)
-        return true
-      }
-      // 2. If mobile drawer menu is open, close it
-      if (mobileOpen) {
-        setMobileOpen(false)
-        return true
-      }
-      // 3. If on /dashboard, cleanly exit the app (never go back to login/register)
-      if (pathname === '/dashboard') {
-        exitApp()
-        return true
-      }
-      // 4. On sub-pages (analytics, profile, sms-credits, etc.), return to /dashboard
-      router.push('/dashboard')
-      return true
+      return handleNavigateBack()
     })
-  }, [pathname, isAddDebtOpen, mobileOpen, router])
+  }, [handleNavigateBack])
+
+  // Mobile edge-swipe back gesture (iOS Safari PWA & Android gesture support)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (pathname === '/dashboard') return
+
+    let startX = 0
+    let startY = 0
+    let isEdgeSwipe = false
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      // Only capture if swipe starts within 35px from the left edge of the screen
+      if (touch && touch.clientX <= 35) {
+        startX = touch.clientX
+        startY = touch.clientY
+        isEdgeSwipe = true
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isEdgeSwipe) return
+      isEdgeSwipe = false
+
+      const touch = e.changedTouches[0]
+      if (!touch) return
+
+      const deltaX = touch.clientX - startX
+      const deltaY = Math.abs(touch.clientY - startY)
+
+      // Swipe right by at least 65px with minimal vertical movement (< 45px)
+      if (deltaX > 65 && deltaY < 45) {
+        nativeHaptics.impact('light')
+        handleNavigateBack()
+      }
+    }
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [pathname, handleNavigateBack])
 
   const handleStartTour = () => {
     if (pathname === '/dashboard') {
@@ -542,11 +622,11 @@ export function AppShell({
             <div className="px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
               {/* Left Side: Mobile Avatar / Back button + Title */}
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                {/* Back button (if on subpage like debtor/[phone]) */}
-                {showBack ? (
+                {/* Back button (shown on subpages or when showBack is set) */}
+                {(showBack || pathname.startsWith('/profile/') || pathname.startsWith('/debtor/') || pathname === '/terms' || pathname === '/privacy') ? (
                   <button
-                    onClick={onBack ? onBack : () => router.back()}
-                    className="p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                    onClick={handleNavigateBack}
+                    className="p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-95"
                     title="Orqaga"
                   >
                     <ArrowLeft className="w-4 h-4 text-slate-700 dark:text-slate-300" />
