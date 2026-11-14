@@ -80,6 +80,9 @@ export async function POST(request: NextRequest) {
 
       if (data === 'menu:report_time') {
         await telegramService.answerCallbackQuery(cb.id)
+        const userLocale = (existingUser.locale_settings as any) || {}
+        const reportEnabled = userLocale.telegram_daily_report_enabled !== false
+
         const timeKeyboard = {
           inline_keyboard: [
             [
@@ -93,18 +96,32 @@ export async function POST(request: NextRequest) {
               { text: '🌃 21:00', callback_data: 'set_time:21:00' },
             ],
             [
+              {
+                text: reportEnabled ? '🔕 Hisobotni o\'chirish' : '🔔 Hisobotni yoqish',
+                callback_data: 'toggle:report_enabled',
+              },
+            ],
+            [
               { text: '◀️ Orqaga', callback_data: 'menu:status' },
             ],
           ],
         }
 
-        await telegramService.sendMessage(
-          cbChatId,
-          `⏰ <b>Kunlik hisobot vaqtini tanlang:</b>\n\n` +
+        const msgText = `⏰ <b>Kunlik hisobot vaqtini tanlang:</b>\n\n` +
           `Har kuni qaysi vaqtda do'kon balansi va qarzlarni qabul qilmoqchisiz?\n` +
-          `<i>(O'zbekiston vaqti bilan)</i>`,
-          { parse_mode: 'HTML', reply_markup: timeKeyboard }
-        )
+          `<i>(O'zbekiston vaqti bilan)</i>`
+
+        if (cb.message?.message_id) {
+          await telegramService.editMessageText(cbChatId, cb.message.message_id, msgText, {
+            parse_mode: 'HTML',
+            reply_markup: timeKeyboard,
+          })
+        } else {
+          await telegramService.sendMessage(cbChatId, msgText, {
+            parse_mode: 'HTML',
+            reply_markup: timeKeyboard,
+          })
+        }
         return NextResponse.json({ ok: true })
       }
 
@@ -116,16 +133,30 @@ export async function POST(request: NextRequest) {
         })
         await telegramService.answerCallbackQuery(cb.id, `✅ Saqlandi: ${chosenTime}`)
 
-        await telegramService.sendMessage(
-          cbChatId,
-          `✅ <b>Hisobot vaqti muvaffaqiyatli saqlandi!</b>\n\n` +
+        const confirmMsg = `✅ <b>Hisobot vaqti muvaffaqiyatli saqlandi!</b>\n\n` +
           `Endi har kuni soat <b>${chosenTime}</b> da Telegramingizga avtomatik kunlik hisobot yuboriladi. 🚀\n\n` +
-          `<i>Xohlagan vaqtingizda sozlamalardan o'zgartirishingiz mumkin.</i>`,
-          {
+          `<i>Xohlagan vaqtingizda sozlamalardan o'zgartirishingiz mumkin.</i>`
+
+        const confirmKeyboard = {
+          inline_keyboard: [
+            [
+              { text: '⏰ Vaqtni o\'zgartirish', callback_data: 'menu:report_time' },
+              { text: '🔕 Hisobotni o\'chirish', callback_data: 'toggle:report_enabled' },
+            ],
+          ],
+        }
+
+        if (cb.message?.message_id) {
+          await telegramService.editMessageText(cbChatId, cb.message.message_id, confirmMsg, {
             parse_mode: 'HTML',
-            reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
-          }
-        )
+            reply_markup: confirmKeyboard,
+          })
+        } else {
+          await telegramService.sendMessage(cbChatId, confirmMsg, {
+            parse_mode: 'HTML',
+            reply_markup: confirmKeyboard,
+          })
+        }
         return NextResponse.json({ ok: true })
       }
 
@@ -133,6 +164,7 @@ export async function POST(request: NextRequest) {
         const userLocale = (existingUser.locale_settings as any) || {}
         const currentEnabled = userLocale.telegram_daily_report_enabled !== false
         const nextEnabled = !currentEnabled
+        const reportTime = userLocale.telegram_daily_report_time || '09:00'
 
         await telegramService.updateReportSettings(adminSupabase, existingUser.id, {
           enabled: nextEnabled,
@@ -142,21 +174,85 @@ export async function POST(request: NextRequest) {
           nextEnabled ? '🔔 Hisobot yoqildi' : '🔕 Hisobot o\'chirildi'
         )
 
-        await telegramService.sendMessage(
-          cbChatId,
-          nextEnabled
-            ? `🔔 <b>Kunlik avtomatik hisobot yoqildi.</b>`
-            : `🔕 <b>Kunlik avtomatik hisobot o'chirildi.</b>\nIstalgan payt «Bugungi hisobot» tugmasi orqali hisobotni olishingiz mumkin.`,
-          {
+        const replyKeyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: nextEnabled ? '🔕 Hisobotni o\'chirish' : '🔔 Hisobotni yoqish',
+                callback_data: 'toggle:report_enabled',
+              },
+              {
+                text: `⏰ Vaqtni tanlash (${reportTime})`,
+                callback_data: 'menu:report_time',
+              },
+            ],
+          ],
+        }
+
+        const msgText = nextEnabled
+          ? `🔔 <b>Kunlik avtomatik hisobot yoqildi!</b>\n\n` +
+            `⏰ Vaqt: <b>${reportTime}</b> (O'zbekiston vaqti bilan)\n` +
+            `Har kuni belgilangan vaqtda bot sizga do'koningiz hisobotini yuboradi.`
+          : `🔕 <b>Kunlik avtomatik hisobot o'chirildi.</b>\n\n` +
+            `Istalgan payt «Bugungi hisobot» tugmasi orqali hisobot olishingiz yoki quyidagi <b>«Hisobotni yoqish»</b> tugmasi orqali qayta yoqishingiz mumkin:`
+
+        if (cb.message?.message_id) {
+          await telegramService.editMessageText(cbChatId, cb.message.message_id, msgText, {
             parse_mode: 'HTML',
-            reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
-          }
-        )
+            reply_markup: replyKeyboard,
+          })
+        } else {
+          await telegramService.sendMessage(cbChatId, msgText, {
+            parse_mode: 'HTML',
+            reply_markup: replyKeyboard,
+          })
+        }
         return NextResponse.json({ ok: true })
       }
 
       if (data === 'menu:status') {
         await telegramService.answerCallbackQuery(cb.id)
+        const storeTitle = existingUser.store_name || existingUser.full_name || '-'
+        const phone = existingUser.phone || '-'
+        const plan = (existingUser.plan_type || 'FREE').toUpperCase()
+        const userLocale = (existingUser.locale_settings as any) || {}
+        const reportTime = userLocale.telegram_daily_report_time || '09:00'
+        const reportEnabled = userLocale.telegram_daily_report_enabled !== false
+
+        const statusMsg = `⚙️ <b>Qarz Daftari — Ulanish holati</b>\n\n` +
+          `🏪 Do'kon: <b>${storeTitle}</b>\n` +
+          `📞 Telefon: <code>${phone}</code>\n` +
+          `⭐️ Tarif: <b>${plan}</b>\n` +
+          `✅ Telegram: <b>Faol ulangan</b>\n` +
+          `⏰ Kunlik hisobot: <b>${reportTime}</b> ${reportEnabled ? '(Faol ✅)' : '(O\'chirilgan 🔕)'}\n\n` +
+          `<i>Hisobot vaqtini quyidagi tugma orqali o'zgartirishingiz mumkin:</i>`
+
+        const statusKeyboard = {
+          inline_keyboard: [
+            [
+              { text: `⏰ Hisobot vaqtini tanlash (${reportTime})`, callback_data: 'menu:report_time' },
+            ],
+            [
+              {
+                text: reportEnabled ? '🔕 Hisobotni o\'chirish' : '🔔 Hisobotni yoqish',
+                callback_data: 'toggle:report_enabled',
+              },
+            ],
+          ],
+        }
+
+        if (cb.message?.message_id) {
+          await telegramService.editMessageText(cbChatId, cb.message.message_id, statusMsg, {
+            parse_mode: 'HTML',
+            reply_markup: statusKeyboard,
+          })
+        } else {
+          await telegramService.sendMessage(cbChatId, statusMsg, {
+            parse_mode: 'HTML',
+            reply_markup: statusKeyboard,
+          })
+        }
+        return NextResponse.json({ ok: true })
       }
     }
 
@@ -372,6 +468,59 @@ export async function POST(request: NextRequest) {
           `⏰ <b>Kunlik hisobot vaqtini tanlang:</b>\n` +
           `<i>Masalan: /vaqt 20:00 deb yozishingiz yoki quyidagi tugmalardan birini tanlashingiz mumkin:</i>`,
           { parse_mode: 'HTML', reply_markup: timeKeyboard }
+        )
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // 3.6. Handle /yoqish or /on
+    if (text === '/yoqish' || text === '/on' || text.toLowerCase() === 'yoqish') {
+      const existingUser = await telegramService.getUserByChatId(adminSupabase, chatId)
+      if (existingUser) {
+        await telegramService.updateReportSettings(adminSupabase, existingUser.id, { enabled: true })
+        const userLocale = (existingUser.locale_settings as any) || {}
+        const reportTime = userLocale.telegram_daily_report_time || '09:00'
+
+        await telegramService.sendMessage(
+          chatId,
+          `🔔 <b>Kunlik avtomatik hisobot muvaffaqiyatli yoqildi!</b>\n\n` +
+          `⏰ Vaqt: <b>${reportTime}</b> (O'zbekiston vaqti bilan)\n` +
+          `Har kuni belgilangan vaqtda bot sizga hisobotni yuboradi. 🚀`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: `⏰ Vaqtni tanlash (${reportTime})`, callback_data: 'menu:report_time' },
+                  { text: '🔕 O\'chirish', callback_data: 'toggle:report_enabled' },
+                ],
+              ],
+            },
+          }
+        )
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // 3.7. Handle /ochirish or /off
+    if (text === '/ochirish' || text === '/off' || text.toLowerCase() === "o'chirish" || text.toLowerCase() === 'ochirish') {
+      const existingUser = await telegramService.getUserByChatId(adminSupabase, chatId)
+      if (existingUser) {
+        await telegramService.updateReportSettings(adminSupabase, existingUser.id, { enabled: false })
+        await telegramService.sendMessage(
+          chatId,
+          `🔕 <b>Kunlik avtomatik hisobot o'chirildi.</b>\n\n` +
+          `Istalgan vaqtda quyidagi tugma orqali uni qayta yoqishingiz mumkin:`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '🔔 Hisobotni qayta yoqish', callback_data: 'toggle:report_enabled' },
+                ],
+              ],
+            },
+          }
         )
       }
       return NextResponse.json({ ok: true })

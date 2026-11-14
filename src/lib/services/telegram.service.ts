@@ -287,6 +287,35 @@ class TelegramService {
   }
 
   /**
+   * Edit an existing message's text and inline keyboard in-place
+   */
+  async editMessageText(
+    chatId: string | number,
+    messageId: number,
+    text: string,
+    options: { parse_mode?: 'HTML' | 'Markdown'; reply_markup?: any } = { parse_mode: 'HTML' }
+  ): Promise<{ ok: boolean; result?: any; description?: string }> {
+    if (!this.isConfigured()) return { ok: false }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/editMessageText`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          message_id: messageId,
+          text,
+          parse_mode: options.parse_mode ?? 'HTML',
+          reply_markup: options.reply_markup,
+        }),
+      })
+      return await response.json()
+    } catch (err: any) {
+      return { ok: false, description: err.message }
+    }
+  }
+
+  /**
    * Update a user's daily report settings (time and enabled status)
    */
   async updateReportSettings(
