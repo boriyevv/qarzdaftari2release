@@ -142,15 +142,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Handle "📊 Bugungi hisobot" or /hisobot
-    if (text === '📊 Bugungi hisobot' || text === '/hisobot' || text.toLowerCase() === 'hisobot') {
+    if (text.toLowerCase().includes('hisobot') || text === '📊 Bugungi hisobot' || text === '/hisobot') {
       const existingUser = await telegramService.getUserByChatId(adminSupabase, chatId)
       if (!existingUser) {
-        await telegramService.sendMessage(
+        console.warn(`[Telegram Webhook] No user found for chatId: ${chatId}`)
+        const sendRes = await telegramService.sendMessage(
           chatId,
           `⚠️ Hisobingiz hali ulanmagan. Iltimos, avval <a href="${SAFE_APP_URL}/profile">profilingizdan</a> Telegram botni ulang.`,
           { parse_mode: 'HTML' }
         )
-        return NextResponse.json({ ok: true })
+        return NextResponse.json({ ok: true, matched: 'hisobot', userFound: false, sendRes })
       }
 
       const stats = await telegramService.getStoreStats(adminSupabase, existingUser.id)
@@ -165,14 +166,14 @@ export async function POST(request: NextRequest) {
         `📅 <i>${dateFormatted}</i>\n` +
         `━━━━━━━━━━━━━━━━━━━━\n\n` +
         `💰 <b>Jami faol qarzlar:</b>\n` +
-        `└ <b>${formatCurrency(stats.totalDebtAmount)} so'm</b> (${stats.totalDebts} ta qarz)\n\n` +
+        `└ <b>${formatCurrency(stats.totalDebtAmount)}</b> (${stats.totalDebts} ta qarz)\n\n` +
         `⚠️ <b>Muddati o'tgan qarzlar:</b>\n` +
-        `└ <b>${formatCurrency(stats.overdueAmount)} so'm</b> (${stats.overdueCount} ta mijoz)\n\n` +
+        `└ <b>${formatCurrency(stats.overdueAmount)}</b> (${stats.overdueCount} ta mijoz)\n\n` +
         `⏳ <b>Bugun kutilayotgan:</b>\n` +
-        `└ <b>${formatCurrency(stats.dueTodayAmount)} so'm</b> (${stats.dueTodayCount} ta mijoz)\n\n` +
+        `└ <b>${formatCurrency(stats.dueTodayAmount)}</b> (${stats.dueTodayCount} ta mijoz)\n\n` +
         `━━━━━━━━━━━━━━━━━━━━`
 
-      await telegramService.sendMessage(chatId, reportMsg, {
+      const sendRes = await telegramService.sendMessage(chatId, reportMsg, {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
@@ -185,11 +186,12 @@ export async function POST(request: NextRequest) {
           ],
         },
       })
-      return NextResponse.json({ ok: true })
+      console.log('[Telegram Webhook Report Send Result]:', sendRes)
+      return NextResponse.json({ ok: true, matched: 'hisobot', sendRes })
     }
 
     // 3. Handle "⚙️ Sozlamalar va Holat" or /status
-    if (text === '⚙️ Sozlamalar va Holat' || text === '/status') {
+    if (text.includes('Sozlamalar') || text.includes('Holat') || text === '/status') {
       const existingUser = await telegramService.getUserByChatId(adminSupabase, chatId)
       if (existingUser) {
         const storeTitle = existingUser.store_name || existingUser.full_name || '-'
