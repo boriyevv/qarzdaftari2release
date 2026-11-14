@@ -16,22 +16,17 @@ import {
   LogOut,
   ChevronRight,
   Sparkles,
-  Info,
   ExternalLink,
-  Shield,
-  Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { securityStorage } from '@/lib/native/biometrics'
 import { toast } from 'sonner'
 import { nativeHaptics } from '@/lib/native'
-import { DeleteAccountSection } from '@/components/profile/delete-account-section'
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser()
   const [isPinSet, setIsPinSet] = useState(false)
   const [isLockOn, setIsLockOn] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -369,23 +364,6 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="w-4 h-4 text-rose-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
           </button>
-        </div>
-
-        {/* Footnote: Legal Links & App Version (matching bottom of screenshot) */}
-        <div className="pt-4 text-center space-y-3">
-          <div className="flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
-            <Link
-              href="/profile/store"
-              className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors inline-flex items-center gap-1.5"
-            >
-              <Info className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Ommaviy oferta</span>
-            </Link>
-          </div>
-
-          <p className="text-[11px] text-slate-400 dark:text-slate-600 font-mono">
-            Qarz Daftari 2.0 • 2026
-          </p>
         </div>
       </div>
     </AppShell>
