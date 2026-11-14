@@ -544,7 +544,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={handleRequestResetCode}
                 disabled={isSendingCode}
-                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors cursor-pointer py-2 px-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 disabled:opacity-50"
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors cursor-pointer py-1.5 px-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 disabled:opacity-50"
               >
                 {isSendingCode ? (
                   <>
@@ -554,7 +554,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 ) : (
                   <>
                     <Send className="w-3.5 h-3.5" />
-                    <span>PIN kodni unutdingizmi? Telegram orqali tiklash</span>
+                    <span>PIN kodni unutdingizmi?</span>
                   </>
                 )}
               </button>
