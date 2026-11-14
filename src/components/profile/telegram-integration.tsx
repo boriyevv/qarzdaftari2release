@@ -124,11 +124,7 @@ export function TelegramIntegration() {
     }
   }
 
-  const handleUnlink = async () => {
-    if (!confirm("Rostdan ham Telegram bot ulanishini uzmoqchimisiz? Ertalabki avtomatik hisobotlar to'xtatiladi.")) {
-      return
-    }
-
+  const executeUnlink = async () => {
     setUnlinking(true)
     try {
       const res = await fetch('/api/telegram/link', {
@@ -148,6 +144,21 @@ export function TelegramIntegration() {
     } finally {
       setUnlinking(false)
     }
+  }
+
+  const handleUnlink = async () => {
+    toast.warning('Telegram bot ulanishini uzmoqchimisiz?', {
+      description: "Ertalabki avtomatik hisobotlar to'xtatiladi.",
+      action: {
+        label: 'Uzish',
+        onClick: executeUnlink,
+      },
+      cancel: {
+        label: 'Bekor qilish',
+        onClick: () => {},
+      },
+      duration: 6000,
+    })
   }
 
   const handleCopyLink = () => {

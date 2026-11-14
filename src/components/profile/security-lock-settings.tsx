@@ -85,11 +85,22 @@ export function SecurityLockSettings() {
   }
 
   const handleRemoveLock = () => {
-    if (confirm("Rostdan ham ilova PIN kodi va biometrik qulfini o'chirmoqchimisiz?")) {
-      securityStorage.removePin()
-      reloadSettings()
-      toast.success("Xavfsizlik qulfi o'chirildi")
-    }
+    toast.warning("Ilova qulfini o'chirmoqchimisiz?", {
+      description: "PIN kod va biometrik himoya o'chiriladi.",
+      action: {
+        label: "O'chirish",
+        onClick: () => {
+          securityStorage.removePin()
+          reloadSettings()
+          toast.success("Xavfsizlik qulfi o'chirildi")
+        },
+      },
+      cancel: {
+        label: "Bekor qilish",
+        onClick: () => {},
+      },
+      duration: 6000,
+    })
   }
 
   const handleOpenSetup = () => {

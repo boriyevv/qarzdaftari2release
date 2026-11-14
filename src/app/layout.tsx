@@ -8,6 +8,7 @@ import { PwaInstallBanner } from '@/components/pwa/pwa-install-banner'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TelegramWebAppInitializer } from '@/components/telegram/telegram-webapp-initializer'
 import { AppLockProvider } from '@/components/security/app-lock-provider'
+import { Toaster } from '@/components/ui/sonner'
 
 
 
@@ -103,6 +104,7 @@ export default function RootLayout({
               <OfflineIndicator />
               {children}
               <PwaInstallBanner />
+              <Toaster position="top-center" richColors closeButton />
             </AppLockProvider>
           </UserProvider>
         </ThemeProvider>

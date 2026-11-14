@@ -345,14 +345,26 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   }
 
   const handleLogout = async () => {
-    if (confirm("Hisobdan chiqmoqchimisiz? Qayta kirish uchun telefon raqamingiz orqali tasdiqlash lozim bo'ladi.")) {
-      securityStorage.removePin()
-      setIsLocked(false)
-      try {
-        await fetch('/api/auth/logout', { method: 'POST' })
-      } catch {}
-      window.location.href = '/login'
-    }
+    await nativeHaptics.impact('light')
+    toast.warning('Hisobdan chiqmoqchimisiz?', {
+      description: "Qayta kirish uchun telefon raqamingiz orqali tasdiqlash lozim bo'ladi.",
+      action: {
+        label: 'Ha, chiqish',
+        onClick: async () => {
+          securityStorage.removePin()
+          setIsLocked(false)
+          try {
+            await fetch('/api/auth/logout', { method: 'POST' })
+          } catch {}
+          window.location.href = '/login'
+        },
+      },
+      cancel: {
+        label: 'Bekor qilish',
+        onClick: () => {},
+      },
+      duration: 8000,
+    })
   }
 
   return (

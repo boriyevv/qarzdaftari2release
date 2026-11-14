@@ -41,9 +41,7 @@ export default function ProfilePage() {
     }
   }, [])
 
-  const handleLogout = async () => {
-    if (!confirm('Rostdan ham hisobdan chiqmoqchimisiz?')) return
-
+  const executeLogout = async () => {
     try {
       await nativeHaptics.impact('medium')
       if (typeof window !== 'undefined') {
@@ -54,6 +52,22 @@ export default function ProfilePage() {
     } catch (e) {
       console.error(e)
     }
+  }
+
+  const handleLogout = async () => {
+    await nativeHaptics.impact('light')
+    toast.warning('Rostdan ham hisobdan chiqmoqchimisiz?', {
+      description: "Qayta kirish uchun telefon raqamingiz orqali tasdiqlash lozim bo'ladi.",
+      action: {
+        label: 'Ha, chiqish',
+        onClick: executeLogout,
+      },
+      cancel: {
+        label: 'Bekor qilish',
+        onClick: () => {},
+      },
+      duration: 8000,
+    })
   }
 
   const handleShareApp = async () => {
