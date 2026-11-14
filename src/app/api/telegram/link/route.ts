@@ -21,6 +21,8 @@ export async function GET() {
     const telegramUsername = settings.telegram_username || null
     const telegramLinkedAt = settings.telegram_linked_at || null
     const isLinked = Boolean(telegramChatId)
+    const reportTime = settings.telegram_daily_report_time || '09:00'
+    const reportEnabled = settings.telegram_daily_report_enabled !== false
 
     const botUsername = telegramService.botUsername
     const deepLink = `https://t.me/${botUsername}?start=link_${user.id}`
@@ -31,6 +33,8 @@ export async function GET() {
       telegramChatId,
       telegramUsername,
       telegramLinkedAt,
+      reportTime,
+      reportEnabled,
       botUsername,
       deepLink,
       isBotConfigured: telegramService.isConfigured(),
@@ -48,9 +52,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}))
-    const { action } = body
+    const { action, reportTime, reportEnabled } = body
 
     const adminSupabase = createAdminClient()
+
+    if (action === 'update_report_settings') {
+      const updated = await telegramService.updateReportSettings(adminSupabase, user.id, {
+        time: typeof reportTime === 'string' ? reportTime : undefined,
+        enabled: typeof reportEnabled === 'boolean' ? reportEnabled : undefined,
+      })
+
+      if (!updated) {
+        return NextResponse.json({ error: 'Sozlamalarni saqlashda xatolik' }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "Kunlik hisobot sozlamalari muvaffaqiyatli saqlandi",
+        reportTime,
+        reportEnabled,
+      })
+    }
 
     if (action === 'unlink') {
       await telegramService.unlinkUser(adminSupabase, user.id)

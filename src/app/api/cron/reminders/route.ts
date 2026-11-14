@@ -13,6 +13,23 @@ export const runtime = 'nodejs'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://debtbook.uz'
 const SAFE_APP_URL = APP_URL.startsWith('https://') ? APP_URL : 'https://debtbook.uz'
 
+/**
+ * Helper to calculate current wall-clock time in Uzbekistan (UTC+5)
+ */
+function getTashkentTime(date = new Date()) {
+  const utcMs = date.getTime() + date.getTimezoneOffset() * 60000
+  const tashkentDate = new Date(utcMs + 5 * 3600000)
+  const hours = String(tashkentDate.getHours()).padStart(2, '0')
+  const minutes = String(tashkentDate.getMinutes()).padStart(2, '0')
+  const dateStr = tashkentDate.toISOString().split('T')[0]
+  return {
+    hours,
+    minutes,
+    timeStr: `${hours}:${minutes}`,
+    dateStr,
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Basic auth check for CRON
@@ -27,38 +44,63 @@ export async function GET(request: NextRequest) {
     const adminSupabase = createAdminClient()
     const now = new Date()
     now.setHours(0, 0, 0, 0)
-    const dateFormatted = now.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' })
     const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
     let telegramDigestsSent = 0
 
     // =========================================================================
-    // 1. TELEGRAM MORNING DIGESTS (Send to connected store owners at 09:00 AM)
+    // 1. TELEGRAM DAILY DIGESTS (Sent at user-configured convenient time, default 09:00 AM)
     // =========================================================================
     if (telegramService.isConfigured()) {
       try {
+        const tashkentTime = getTashkentTime()
+
         const { data: linkedUsers } = await adminSupabase
           .from('users')
           .select('id, full_name, store_name, locale_settings')
           .not('locale_settings->>telegram_chat_id', 'is', null)
 
         for (const user of linkedUsers || []) {
-          const chatId = (user.locale_settings as any)?.telegram_chat_id
+          const userLocale = (user.locale_settings as any) || {}
+          const chatId = userLocale.telegram_chat_id
           if (!chatId) continue
+
+          // 1. Check if user enabled daily report
+          const isReportEnabled = userLocale.telegram_daily_report_enabled !== false
+          if (!isReportEnabled) continue
+
+          // 2. Check preferred hour (e.g. "09:00" -> "09")
+          const targetTime = userLocale.telegram_daily_report_time || '09:00'
+          const targetHour = targetTime.split(':')[0]
+          const lastReportDate = userLocale.telegram_last_report_date
+
+          // Skip if already received today's report
+          if (lastReportDate === tashkentTime.dateStr) {
+            continue
+          }
+
+          // Skip if current hour does not match user's chosen hour
+          if (tashkentTime.hours !== targetHour) {
+            continue
+          }
 
           const stats = await telegramService.getStoreStats(adminSupabase, user.id)
           const storeTitle = user.store_name || user.full_name || "Do'koningiz"
+          const hourNum = parseInt(targetHour, 10)
+          const isEvening = hourNum >= 17
+          const greeting = isEvening ? 'Xayrli oqshom' : 'Xayrli tong'
+          const icon = isEvening ? '🌙' : '☀️'
 
-          const digestText = `☀️ <b>Assalomu alaykum, ${storeTitle}!</b>\n` +
-            `Xayrli tong! Bugungi Qarz Daftari holati:\n\n` +
+          const digestText = `${icon} <b>Assalomu alaykum, ${storeTitle}!</b>\n` +
+            `${greeting}! Bugungi Qarz Daftari holati:\n\n` +
             `💰 <b>Jami faol qarzlar:</b>\n` +
-            `└ <b>${formatCurrency(stats.totalDebtAmount)} so'm</b> (${stats.totalDebts} ta qarz)\n\n` +
+            `└ <b>${formatCurrency(stats.totalDebtAmount)}</b> (${stats.totalDebts} ta qarz)\n\n` +
             `⚠️ <b>Muddati o'tgan qarzlar:</b>\n` +
-            `└ <b>${formatCurrency(stats.overdueAmount)} so'm</b> (${stats.overdueCount} ta mijoz)\n\n` +
+            `└ <b>${formatCurrency(stats.overdueAmount)}</b> (${stats.overdueCount} ta mijoz)\n\n` +
             `⏳ <b>Bugun kutilayotgan to'lovlar:</b>\n` +
-            `└ <b>${formatCurrency(stats.dueTodayAmount)} so'm</b> (${stats.dueTodayCount} ta mijoz)\n\n` +
-            `Barakali va muvaffaqiyatli kun tilaymiz! ✨`
+            `└ <b>${formatCurrency(stats.dueTodayAmount)}</b> (${stats.dueTodayCount} ta mijoz)\n\n` +
+            `Barakali va muvaffaqiyatli bo'lsin! ✨`
 
           const res = await telegramService.sendMessage(chatId, digestText, {
             parse_mode: 'HTML',
@@ -76,6 +118,16 @@ export async function GET(request: NextRequest) {
 
           if (res.ok) {
             telegramDigestsSent++
+            // Record last report date to guarantee idempotency (once per day)
+            await adminSupabase
+              .from('users')
+              .update({
+                locale_settings: {
+                  ...userLocale,
+                  telegram_last_report_date: tashkentTime.dateStr,
+                },
+              })
+              .eq('id', user.id)
           }
         }
       } catch (tgErr) {

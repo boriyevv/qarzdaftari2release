@@ -261,6 +261,72 @@ class TelegramService {
   }
 
   /**
+   * Answer a callback query from an inline keyboard button
+   */
+  async answerCallbackQuery(
+    callbackQueryId: string,
+    text?: string,
+    showAlert: boolean = false
+  ): Promise<{ ok: boolean; description?: string }> {
+    if (!this.isConfigured()) return { ok: false }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callback_query_id: callbackQueryId,
+          text,
+          show_alert: showAlert,
+        }),
+      })
+      return await response.json()
+    } catch (err: any) {
+      return { ok: false, description: err.message }
+    }
+  }
+
+  /**
+   * Update a user's daily report settings (time and enabled status)
+   */
+  async updateReportSettings(
+    supabase: SupabaseClient,
+    userId: string,
+    settings: { time?: string; enabled?: boolean }
+  ): Promise<boolean> {
+    try {
+      const { data: user } = await supabase
+        .from('users')
+        .select('locale_settings')
+        .eq('id', userId)
+        .single()
+
+      if (!user) return false
+
+      const currentLocale =
+        typeof user.locale_settings === 'object' && user.locale_settings !== null
+          ? { ...user.locale_settings }
+          : {}
+
+      if (settings.time !== undefined) {
+        currentLocale.telegram_daily_report_time = settings.time
+      }
+      if (settings.enabled !== undefined) {
+        currentLocale.telegram_daily_report_enabled = settings.enabled
+      }
+
+      const { error } = await supabase
+        .from('users')
+        .update({ locale_settings: currentLocale, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+
+      return !error
+    } catch {
+      return false
+    }
+  }
+
+  /**
    * Create standard merchant keyboard (Telegram requires HTTPS for all web_app links)
    */
   getMerchantKeyboard(appUrl: string = 'https://debtbook.uz') {

@@ -64,6 +64,102 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true })
     }
 
+    const adminSupabase = createAdminClient()
+
+    // Handle Callback Query (e.g. from inline keyboard time buttons)
+    if (update.callback_query) {
+      const cb = update.callback_query
+      const cbChatId = cb.message?.chat?.id || cb.from?.id
+      const data = cb.data || ''
+
+      const existingUser = await telegramService.getUserByChatId(adminSupabase, cbChatId)
+      if (!existingUser) {
+        await telegramService.answerCallbackQuery(cb.id, "Hisob topilmadi", true)
+        return NextResponse.json({ ok: true })
+      }
+
+      if (data === 'menu:report_time') {
+        await telegramService.answerCallbackQuery(cb.id)
+        const timeKeyboard = {
+          inline_keyboard: [
+            [
+              { text: '🌅 08:00', callback_data: 'set_time:08:00' },
+              { text: '☀️ 09:00', callback_data: 'set_time:09:00' },
+              { text: '🕙 10:00', callback_data: 'set_time:10:00' },
+            ],
+            [
+              { text: '🌇 18:00', callback_data: 'set_time:18:00' },
+              { text: '🌙 20:00', callback_data: 'set_time:20:00' },
+              { text: '🌃 21:00', callback_data: 'set_time:21:00' },
+            ],
+            [
+              { text: '◀️ Orqaga', callback_data: 'menu:status' },
+            ],
+          ],
+        }
+
+        await telegramService.sendMessage(
+          cbChatId,
+          `⏰ <b>Kunlik hisobot vaqtini tanlang:</b>\n\n` +
+          `Har kuni qaysi vaqtda do'kon balansi va qarzlarni qabul qilmoqchisiz?\n` +
+          `<i>(O'zbekiston vaqti bilan)</i>`,
+          { parse_mode: 'HTML', reply_markup: timeKeyboard }
+        )
+        return NextResponse.json({ ok: true })
+      }
+
+      if (data.startsWith('set_time:')) {
+        const chosenTime = data.replace('set_time:', '')
+        await telegramService.updateReportSettings(adminSupabase, existingUser.id, {
+          time: chosenTime,
+          enabled: true,
+        })
+        await telegramService.answerCallbackQuery(cb.id, `✅ Saqlandi: ${chosenTime}`)
+
+        await telegramService.sendMessage(
+          cbChatId,
+          `✅ <b>Hisobot vaqti muvaffaqiyatli saqlandi!</b>\n\n` +
+          `Endi har kuni soat <b>${chosenTime}</b> da Telegramingizga avtomatik kunlik hisobot yuboriladi. 🚀\n\n` +
+          `<i>Xohlagan vaqtingizda sozlamalardan o'zgartirishingiz mumkin.</i>`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
+          }
+        )
+        return NextResponse.json({ ok: true })
+      }
+
+      if (data === 'toggle:report_enabled') {
+        const userLocale = (existingUser.locale_settings as any) || {}
+        const currentEnabled = userLocale.telegram_daily_report_enabled !== false
+        const nextEnabled = !currentEnabled
+
+        await telegramService.updateReportSettings(adminSupabase, existingUser.id, {
+          enabled: nextEnabled,
+        })
+        await telegramService.answerCallbackQuery(
+          cb.id,
+          nextEnabled ? '🔔 Hisobot yoqildi' : '🔕 Hisobot o\'chirildi'
+        )
+
+        await telegramService.sendMessage(
+          cbChatId,
+          nextEnabled
+            ? `🔔 <b>Kunlik avtomatik hisobot yoqildi.</b>`
+            : `🔕 <b>Kunlik avtomatik hisobot o'chirildi.</b>\nIstalgan payt «Bugungi hisobot» tugmasi orqali hisobotni olishingiz mumkin.`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL),
+          }
+        )
+        return NextResponse.json({ ok: true })
+      }
+
+      if (data === 'menu:status') {
+        await telegramService.answerCallbackQuery(cb.id)
+      }
+    }
+
     const message = update.message
     if (!message || !message.chat) {
       return NextResponse.json({ ok: true })
@@ -72,8 +168,6 @@ export async function POST(request: NextRequest) {
     const chatId = message.chat.id
     const username = message.from?.username || message.chat?.username || ''
     const text = (message.text || '').trim()
-
-    const adminSupabase = createAdminClient()
 
     // 1. Handle /start command
     if (text.startsWith('/start')) {
@@ -197,20 +291,87 @@ export async function POST(request: NextRequest) {
         const storeTitle = existingUser.store_name || existingUser.full_name || '-'
         const phone = existingUser.phone || '-'
         const plan = (existingUser.plan_type || 'FREE').toUpperCase()
+        const userLocale = (existingUser.locale_settings as any) || {}
+        const reportTime = userLocale.telegram_daily_report_time || '09:00'
+        const reportEnabled = userLocale.telegram_daily_report_enabled !== false
 
         const statusMsg = `⚙️ <b>Qarz Daftari — Ulanish holati</b>\n\n` +
           `🏪 Do'kon: <b>${storeTitle}</b>\n` +
           `📞 Telefon: <code>${phone}</code>\n` +
           `⭐️ Tarif: <b>${plan}</b>\n` +
-          `✅ Telegram: <b>Faol ulangan</b>\n\n` +
-          `<i>Agar hisobni ushbu botdan uzmoqchi bo'lsangiz, /unlink buyrug'ini yuboring.</i>`
+          `✅ Telegram: <b>Faol ulangan</b>\n` +
+          `⏰ Kunlik hisobot: <b>${reportTime}</b> ${reportEnabled ? '(Faol ✅)' : '(O\'chirilgan 🔕)'}\n\n` +
+          `<i>Hisobot vaqtini quyidagi tugma orqali o'zgartirishingiz mumkin:</i>`
 
-        await telegramService.sendMessage(chatId, statusMsg, { parse_mode: 'HTML' })
+        await telegramService.sendMessage(chatId, statusMsg, {
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: `⏰ Hisobot vaqtini tanlash (${reportTime})`, callback_data: 'menu:report_time' },
+              ],
+              [
+                {
+                  text: reportEnabled ? '🔕 Hisobotni o\'chirish' : '🔔 Hisobotni yoqish',
+                  callback_data: 'toggle:report_enabled',
+                },
+              ],
+            ],
+          },
+        })
       } else {
         await telegramService.sendMessage(
           chatId,
           `Ushbu Telegram hisobi hali hech qaysi Qarz Daftari profiliga ulanmagan.`,
           { parse_mode: 'HTML' }
+        )
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // 3.5. Handle /vaqt or /vaqt <HH:mm>
+    if (text.startsWith('/vaqt') || text.startsWith('/time')) {
+      const existingUser = await telegramService.getUserByChatId(adminSupabase, chatId)
+      if (!existingUser) {
+        await telegramService.sendMessage(chatId, `Avval hisobingizni ulang.`, { parse_mode: 'HTML' })
+        return NextResponse.json({ ok: true })
+      }
+
+      const parts = text.split(' ')
+      const inputTime = parts[1]?.trim()
+
+      if (inputTime && /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(inputTime)) {
+        const formattedTime = inputTime.length === 4 ? `0${inputTime}` : inputTime
+        await telegramService.updateReportSettings(adminSupabase, existingUser.id, {
+          time: formattedTime,
+          enabled: true,
+        })
+        await telegramService.sendMessage(
+          chatId,
+          `✅ <b>Hisobot vaqti saqlandi!</b>\n\nEndi har kuni soat <b>${formattedTime}</b> da Telegramingizga kunlik hisobot yuboriladi. 🚀`,
+          { parse_mode: 'HTML', reply_markup: telegramService.getMerchantKeyboard(SAFE_APP_URL) }
+        )
+      } else {
+        const timeKeyboard = {
+          inline_keyboard: [
+            [
+              { text: '🌅 08:00', callback_data: 'set_time:08:00' },
+              { text: '☀️ 09:00', callback_data: 'set_time:09:00' },
+              { text: '🕙 10:00', callback_data: 'set_time:10:00' },
+            ],
+            [
+              { text: '🌇 18:00', callback_data: 'set_time:18:00' },
+              { text: '🌙 20:00', callback_data: 'set_time:20:00' },
+              { text: '🌃 21:00', callback_data: 'set_time:21:00' },
+            ],
+          ],
+        }
+
+        await telegramService.sendMessage(
+          chatId,
+          `⏰ <b>Kunlik hisobot vaqtini tanlang:</b>\n` +
+          `<i>Masalan: /vaqt 20:00 deb yozishingiz yoki quyidagi tugmalardan birini tanlashingiz mumkin:</i>`,
+          { parse_mode: 'HTML', reply_markup: timeKeyboard }
         )
       }
       return NextResponse.json({ ok: true })

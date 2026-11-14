@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import {
   Send,
@@ -19,12 +20,23 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+const REPORT_TIME_PRESETS = [
+  { time: '08:00', label: '08:00', sub: 'erta tong' },
+  { time: '09:00', label: '09:00', sub: 'standart' },
+  { time: '10:00', label: '10:00', sub: 'ertalab' },
+  { time: '18:00', label: '18:00', sub: 'kechki' },
+  { time: '20:00', label: '20:00', sub: 'yopilishda' },
+  { time: '21:00', label: '21:00', sub: 'tungi' },
+]
+
 export function TelegramIntegration() {
   const [data, setData] = useState<{
     isLinked: boolean
     telegramChatId?: string | null
     telegramUsername?: string | null
     telegramLinkedAt?: string | null
+    reportTime?: string
+    reportEnabled?: boolean
     botUsername: string
     deepLink: string
     isBotConfigured: boolean
@@ -33,6 +45,9 @@ export function TelegramIntegration() {
   const [loading, setLoading] = useState(true)
   const [testingMsg, setTestingMsg] = useState(false)
   const [unlinking, setUnlinking] = useState(false)
+  const [reportTime, setReportTime] = useState('09:00')
+  const [reportEnabled, setReportEnabled] = useState(true)
+  const [savingSettings, setSavingSettings] = useState(false)
 
   const loadStatus = async () => {
     try {
@@ -40,11 +55,47 @@ export function TelegramIntegration() {
       const json = await res.json()
       if (res.ok) {
         setData(json)
+        if (json.reportTime) setReportTime(json.reportTime)
+        if (json.reportEnabled !== undefined) setReportEnabled(json.reportEnabled)
       }
     } catch (e) {
       console.error('Failed to load telegram connection status:', e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpdateReportSettings = async (newTime?: string, newEnabled?: boolean) => {
+    const timeToSave = newTime !== undefined ? newTime : reportTime
+    const enabledToSave = newEnabled !== undefined ? newEnabled : reportEnabled
+
+    setSavingSettings(true)
+    try {
+      const res = await fetch('/api/telegram/link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_report_settings',
+          reportTime: timeToSave,
+          reportEnabled: enabledToSave,
+        }),
+      })
+      const json = await res.json()
+      if (res.ok && json.success) {
+        if (newTime !== undefined) setReportTime(newTime)
+        if (newEnabled !== undefined) setReportEnabled(newEnabled)
+        toast.success(
+          enabledToSave === false
+            ? "Kunlik avtomatik hisobot o'chirildi"
+            : `Kunlik hisobot vaqti ${timeToSave} ga belgilandi!`
+        )
+      } else {
+        toast.error(json.error || 'Sozlamalarni saqlab bo\'lmadi')
+      }
+    } catch {
+      toast.error('Tarmoq xatosi yuz berdi')
+    } finally {
+      setSavingSettings(false)
     }
   }
 
@@ -219,6 +270,70 @@ export function TelegramIntegration() {
                   <Unlink className="w-3.5 h-3.5" />
                 </Button>
               </div>
+            </div>
+
+            {/* Daily Report Schedule Settings */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800 space-y-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      Avtomatik kunlik hisobot
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Belgilangan vaqtda bot orqali do&apos;kon balansi va qarzlarni Telegramga yuborish
+                  </p>
+                </div>
+
+                <Switch
+                  checked={reportEnabled}
+                  onCheckedChange={(checked) => handleUpdateReportSettings(undefined, checked)}
+                  disabled={savingSettings}
+                />
+              </div>
+
+              {reportEnabled && (
+                <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                      Yuborish vaqti (O&apos;zbekiston vaqti):
+                    </span>
+                    <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-lg border border-blue-200/70 dark:border-blue-900/50">
+                      {reportTime}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {REPORT_TIME_PRESETS.map((p) => {
+                      const isActive = reportTime === p.time
+                      return (
+                        <button
+                          key={p.time}
+                          type="button"
+                          onClick={() => handleUpdateReportSettings(p.time, true)}
+                          disabled={savingSettings}
+                          className={`py-1.5 px-2 rounded-xl text-center border transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs scale-[1.02]'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500'
+                          }`}
+                        >
+                          <span className="block text-xs font-extrabold">{p.label}</span>
+                          <span
+                            className={`block text-[9px] font-normal leading-tight ${
+                              isActive ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
+                            }`}
+                          >
+                            {p.sub}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
