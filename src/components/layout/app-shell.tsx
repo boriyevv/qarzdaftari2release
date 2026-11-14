@@ -531,7 +531,7 @@ export function AppShell({
             ========================================================= */}
         <div
           className={`
-            flex-1 flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out pb-[calc(5.75rem+env(safe-area-inset-bottom))] lg:pb-8
+            flex-1 flex flex-col min-h-screen transition-[padding] duration-300 ease-in-out pb-[calc(4.75rem+env(safe-area-inset-bottom))] lg:pb-8
             ${isCollapsed ? 'lg:pl-20' : 'lg:pl-64'}
           `}
         >
@@ -675,13 +675,13 @@ export function AppShell({
         {/* =========================================================
             MOBILE BOTTOM NAVIGATION DOCK (WITH ELEVATED CENTER ACTION)
             ========================================================= */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800 z-40 shadow-xl pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-1.5">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800 z-40 shadow-xl pb-[max(0.5rem,calc(env(safe-area-inset-bottom)*0.55))] pt-1">
           <div className="grid grid-cols-5 items-center px-2 max-w-md mx-auto relative">
             {/* Slot 1: Bosh sahifa */}
             <Link
               id="tour-nav-dashboard-mobile"
               href="/dashboard"
-              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+              className={`flex flex-col items-center justify-center pt-1 pb-0.5 rounded-xl text-[10px] font-semibold transition-all ${
                 pathname === '/dashboard'
                   ? 'text-blue-600 dark:text-blue-400 font-extrabold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -701,7 +701,7 @@ export function AppShell({
             <Link
               id="tour-nav-analytics-mobile"
               href="/analytics"
-              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+              className={`flex flex-col items-center justify-center pt-1 pb-0.5 rounded-xl text-[10px] font-semibold transition-all ${
                 pathname === '/analytics'
                   ? 'text-blue-600 dark:text-blue-400 font-extrabold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -721,7 +721,7 @@ export function AppShell({
             </Link>
 
             {/* Slot 3: Elevated Center Action Button (+ Qarz) */}
-            <div className="flex items-center justify-center -mt-5">
+            <div className="flex items-center justify-center -mt-4">
               <button
                 type="button"
                 id="tour-add-debt-mobile"
@@ -740,7 +740,7 @@ export function AppShell({
             <Link
               id="tour-nav-sms-mobile"
               href="/sms-credits"
-              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+              className={`flex flex-col items-center justify-center pt-1 pb-0.5 rounded-xl text-[10px] font-semibold transition-all ${
                 pathname === '/sms-credits'
                   ? 'text-blue-600 dark:text-blue-400 font-extrabold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -760,7 +760,7 @@ export function AppShell({
             <Link
               id="tour-nav-profile-mobile"
               href="/profile"
-              className={`flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition-all ${
+              className={`flex flex-col items-center justify-center pt-1 pb-0.5 rounded-xl text-[10px] font-semibold transition-all ${
                 pathname === '/profile'
                   ? 'text-blue-600 dark:text-blue-400 font-extrabold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
