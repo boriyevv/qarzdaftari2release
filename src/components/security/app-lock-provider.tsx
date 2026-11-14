@@ -12,7 +12,20 @@ import {
 } from '@/lib/native/biometrics'
 import { nativeHaptics } from '@/lib/native'
 import { playSuccessSound } from '@/lib/sounds'
-import { Fingerprint, Delete, Shield, Lock, LogOut } from 'lucide-react'
+import {
+  Fingerprint,
+  Delete,
+  Shield,
+  Lock,
+  LogOut,
+  Send,
+  KeyRound,
+  CheckCircle2,
+  ArrowLeft,
+  RefreshCw,
+  Loader2,
+} from 'lucide-react'
+import { toast } from 'sonner'
 
 interface AppLockContextType {
   isLocked: boolean
@@ -35,6 +48,14 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [biometricName, setBiometricName] = useState('Biometrika')
   const [canUseBiometrics, setCanUseBiometrics] = useState(false)
+
+  // Reset Flow States (Option 2: Telegram reset -> self-selected new PIN)
+  const [lockMode, setLockMode] = useState<
+    'enter_pin' | 'enter_reset_code' | 'enter_new_pin' | 'confirm_new_pin'
+  >('enter_pin')
+  const [tempNewPin, setTempNewPin] = useState('')
+  const [isSendingCode, setIsSendingCode] = useState(false)
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false)
 
   // 1. Check biometrics capability on mount
   useEffect(() => {
@@ -145,9 +166,9 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLocked, triggerBiometrics])
 
-  // 5. Handle PIN input
+  // 5. Handle PIN input & Reset State Machine
   const handleDigit = async (digit: string) => {
-    if (pin.length >= 4) return
+    if (pin.length >= 4 || isVerifyingCode) return
     await nativeHaptics.impact('light')
 
     const newPin = pin + digit
@@ -155,21 +176,115 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     setErrorMessage(null)
 
     if (newPin.length === 4) {
-      const isValid = await securityStorage.verifyPin(newPin)
-      if (isValid) {
-        await nativeHaptics.notification('success')
-        playSuccessSound()
-        setIsLocked(false)
-        setPin('')
-        securityStorage.recordActiveTime()
-      } else {
-        await nativeHaptics.notification('error')
-        setIsShaking(true)
-        setErrorMessage("Noto'g'ri PIN kod")
-        setTimeout(() => {
-          setIsShaking(false)
+      // 1. Normal Lock Mode: Verify Current PIN
+      if (lockMode === 'enter_pin') {
+        const isValid = await securityStorage.verifyPin(newPin)
+        if (isValid) {
+          await nativeHaptics.notification('success')
+          playSuccessSound()
+          setIsLocked(false)
           setPin('')
-        }, 500)
+          securityStorage.recordActiveTime()
+        } else {
+          await nativeHaptics.notification('error')
+          setIsShaking(true)
+          setErrorMessage("Noto'g'ri PIN kod")
+          setTimeout(() => {
+            setIsShaking(false)
+            setPin('')
+          }, 500)
+        }
+        return
+      }
+
+      // 2. Reset Step 1: Verify 4-digit code from Telegram
+      if (lockMode === 'enter_reset_code') {
+        setIsVerifyingCode(true)
+        try {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+          if (typeof window !== 'undefined') {
+            const phoneSession = localStorage.getItem('phone_user_session')
+            if (phoneSession) headers['x-phone-session'] = phoneSession
+          }
+
+          const res = await fetch('/api/security/pin-reset', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ action: 'verify_code', code: newPin }),
+          })
+          const data = await res.json()
+
+          if (res.ok && data.success) {
+            await nativeHaptics.notification('success')
+            playSuccessSound()
+            setLockMode('enter_new_pin')
+            setPin('')
+            setErrorMessage(null)
+          } else {
+            await nativeHaptics.notification('error')
+            setIsShaking(true)
+            setErrorMessage(data.message || "Noto'g'ri tasdiq kodi")
+            setTimeout(() => {
+              setIsShaking(false)
+              setPin('')
+            }, 500)
+          }
+        } catch {
+          setErrorMessage("Tarmoq xatosi. Qaytadan urinib ko'ring")
+          setTimeout(() => setPin(''), 500)
+        } finally {
+          setIsVerifyingCode(false)
+        }
+        return
+      }
+
+      // 3. Reset Step 2: Enter desired new PIN
+      if (lockMode === 'enter_new_pin') {
+        await nativeHaptics.impact('medium')
+        setTempNewPin(newPin)
+        setLockMode('confirm_new_pin')
+        setPin('')
+        setErrorMessage(null)
+        return
+      }
+
+      // 4. Reset Step 3: Confirm desired new PIN
+      if (lockMode === 'confirm_new_pin') {
+        if (newPin === tempNewPin) {
+          await securityStorage.savePin(newPin)
+
+          try {
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+            if (typeof window !== 'undefined') {
+              const phoneSession = localStorage.getItem('phone_user_session')
+              if (phoneSession) headers['x-phone-session'] = phoneSession
+            }
+            fetch('/api/security/pin-reset', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ action: 'save_new_pin' }),
+            }).catch(() => {})
+          } catch {}
+
+          await nativeHaptics.notification('success')
+          playSuccessSound()
+          toast.success("Yangi PIN kod muvaffaqiyatli o'rnatildi! 🎉")
+          setIsLocked(false)
+          setLockMode('enter_pin')
+          setPin('')
+          setTempNewPin('')
+          securityStorage.recordActiveTime()
+        } else {
+          await nativeHaptics.notification('error')
+          setIsShaking(true)
+          setErrorMessage("PIN kodlar mos kelmadi. Qaytadan kiriting")
+          setTimeout(() => {
+            setIsShaking(false)
+            setPin('')
+            setLockMode('enter_new_pin')
+          }, 700)
+        }
+        return
       }
     }
   }
@@ -177,6 +292,55 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   const handleDelete = async () => {
     await nativeHaptics.impact('light')
     setPin((prev) => prev.slice(0, -1))
+    setErrorMessage(null)
+  }
+
+  const handleRequestResetCode = async () => {
+    setIsSendingCode(true)
+    setErrorMessage(null)
+    try {
+      await nativeHaptics.impact('medium')
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (typeof window !== 'undefined') {
+        const phoneSession = localStorage.getItem('phone_user_session')
+        if (phoneSession) headers['x-phone-session'] = phoneSession
+      }
+
+      const res = await fetch('/api/security/pin-reset', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action: 'send_code' }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (data.error === 'NO_TELEGRAM') {
+          toast.error("Telegram botingiz ulanmagan. Iltimos, hisobdan chiqib, telefon raqamingiz orqali kiring.")
+          setErrorMessage("Telegram bot ulanmagan")
+        } else {
+          toast.error(data.message || "Kod yuborishda xatolik yuz berdi")
+          setErrorMessage(data.message || "Xatolik yuz berdi")
+        }
+        return
+      }
+
+      toast.success("Telegram botingizga 4 xonali tasdiq kodi yuborildi! ✈️")
+      playSuccessSound()
+      setLockMode('enter_reset_code')
+      setPin('')
+      setErrorMessage(null)
+    } catch {
+      toast.error("Tarmoq xatosi. Qaytadan urinib ko'ring.")
+      setErrorMessage("Tarmoq xatosi")
+    } finally {
+      setIsSendingCode(false)
+    }
+  }
+
+  const handleCancelReset = () => {
+    setLockMode('enter_pin')
+    setPin('')
+    setTempNewPin('')
     setErrorMessage(null)
   }
 
@@ -197,11 +361,17 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         isLocked,
         lockApp: () => {
           setIsLocked(true)
+          setLockMode('enter_pin')
           setPin('')
+          setTempNewPin('')
+          setErrorMessage(null)
         },
         unlockApp: () => {
           setIsLocked(false)
+          setLockMode('enter_pin')
           setPin('')
+          setTempNewPin('')
+          setErrorMessage(null)
         },
       }}
     >
@@ -223,18 +393,61 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               />
             </div>
 
-            <div className="space-y-1">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
-                <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                Qarz Daftari
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Ilovani ochish uchun 4 xonali PIN kodni kiriting
-              </p>
-            </div>
+            {/* Title & Subtitle based on lockMode */}
+            {lockMode === 'enter_pin' && (
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
+                  <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  Qarz Daftari
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Ilovani ochish uchun 4 xonali PIN kodni kiriting
+                </p>
+              </div>
+            )}
 
-            {/* 4 PIN Dots */}
-            <div className={`flex items-center justify-center gap-4 py-4 ${isShaking ? 'animate-bounce text-rose-500' : ''}`}>
+            {lockMode === 'enter_reset_code' && (
+              <div className="space-y-1 animate-in fade-in">
+                <h2 className="text-xl font-bold tracking-tight text-sky-600 dark:text-sky-400 flex items-center justify-center gap-1.5">
+                  <Send className="w-4 h-4" />
+                  Telegram tasdiq kodi
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                  Telegram botingizga yuborilgan 4 xonali tasdiq kodini kiriting
+                </p>
+              </div>
+            )}
+
+            {lockMode === 'enter_new_pin' && (
+              <div className="space-y-1 animate-in fade-in">
+                <h2 className="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
+                  <KeyRound className="w-4 h-4" />
+                  Yangi PIN kod
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                  O&apos;zingiz xohlagan 4 xonali yangi PIN kodni kiriting
+                </p>
+              </div>
+            )}
+
+            {lockMode === 'confirm_new_pin' && (
+              <div className="space-y-1 animate-in fade-in">
+                <h2 className="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  PIN kodni tasdiqlang
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                  Xatolik yo&apos;qligini tekshirish uchun kodni qayta kiriting
+                </p>
+              </div>
+            )}
+
+            {/* 4 PIN / Code Dots */}
+            <div
+              className={`flex items-center justify-center gap-4 py-4 ${
+                isShaking ? 'animate-bounce text-rose-500' : ''
+              }`}
+            >
               {[0, 1, 2, 3].map((index) => {
                 const filled = pin.length > index
                 return (
@@ -244,7 +457,11 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                       errorMessage
                         ? 'bg-rose-500 ring-4 ring-rose-500/30'
                         : filled
-                        ? 'bg-blue-600 dark:bg-blue-500 scale-110 shadow-md shadow-blue-500/50'
+                        ? lockMode === 'enter_reset_code'
+                          ? 'bg-sky-500 scale-110 shadow-md shadow-sky-500/50'
+                          : lockMode === 'enter_new_pin' || lockMode === 'confirm_new_pin'
+                          ? 'bg-emerald-500 scale-110 shadow-md shadow-emerald-500/50'
+                          : 'bg-blue-600 dark:bg-blue-500 scale-110 shadow-md shadow-blue-500/50'
                         : 'border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/60'
                     }`}
                   />
@@ -266,31 +483,45 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 key={num}
                 type="button"
                 onClick={() => handleDigit(num.toString())}
-                className="h-16 rounded-2xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-blue-600 active:text-white dark:active:bg-blue-600 dark:active:text-white border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95"
+                disabled={isVerifyingCode}
+                className="h-16 rounded-2xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-blue-600 active:text-white dark:active:bg-blue-600 dark:active:text-white border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 {num}
               </button>
             ))}
 
-            {/* Bottom Row: Biometrics or Empty */}
-            <button
-              type="button"
-              onClick={triggerBiometrics}
-              disabled={!canUseBiometrics && !securityStorage.isBiometricsEnabled()}
-              className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-blue-600 dark:text-blue-400 flex flex-col items-center justify-center transition-colors cursor-pointer active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
-              title={biometricName}
-            >
-              <Fingerprint className="w-6 h-6" />
-              <span className="text-[9px] font-semibold mt-0.5 text-slate-500 dark:text-slate-400 truncate max-w-[70px]">
-                {biometricName}
-              </span>
-            </button>
+            {/* Bottom Row Left: Biometrics in lock mode or Cancel in reset mode */}
+            {lockMode === 'enter_pin' ? (
+              <button
+                type="button"
+                onClick={triggerBiometrics}
+                disabled={!canUseBiometrics && !securityStorage.isBiometricsEnabled()}
+                className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-blue-600 dark:text-blue-400 flex flex-col items-center justify-center transition-colors cursor-pointer active:scale-95 disabled:opacity-0 disabled:pointer-events-none"
+                title={biometricName}
+              >
+                <Fingerprint className="w-6 h-6" />
+                <span className="text-[9px] font-semibold mt-0.5 text-slate-500 dark:text-slate-400 truncate max-w-[70px]">
+                  {biometricName}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCancelReset}
+                className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-600 dark:text-slate-300 flex flex-col items-center justify-center transition-colors cursor-pointer active:scale-95"
+                title="Bekor qilish"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="text-[9px] font-semibold mt-0.5">Bekor qilish</span>
+              </button>
+            )}
 
             {/* 0 */}
             <button
               type="button"
               onClick={() => handleDigit('0')}
-              className="h-16 rounded-2xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-blue-600 active:text-white dark:active:bg-blue-600 dark:active:text-white border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95"
+              disabled={isVerifyingCode}
+              className="h-16 rounded-2xl bg-white dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-blue-600 active:text-white dark:active:bg-blue-600 dark:active:text-white border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-2xl flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-95 disabled:opacity-50"
             >
               0
             </button>
@@ -299,23 +530,68 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={handleDelete}
-              className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              disabled={isVerifyingCode}
+              className="h-16 rounded-2xl bg-slate-100/70 dark:bg-slate-900/50 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <Delete className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Footer: Forgot PIN / Logout */}
-          <div className="pb-4">
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1.5 transition-colors cursor-pointer py-2 px-3 rounded-xl"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>PIN kodni unutdingizmi? Hisobdan chiqish</span>
-            </button>
-          </div>
+          {/* Footer: Reset Actions / Logout */}
+          {lockMode === 'enter_pin' ? (
+            <div className="pb-4 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={handleRequestResetCode}
+                disabled={isSendingCode}
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors cursor-pointer py-2 px-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 disabled:opacity-50"
+              >
+                {isSendingCode ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Kod yuborilmoqda...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>PIN kodni unutdingizmi? Telegram orqali tiklash</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-[11px] text-slate-400 hover:text-rose-500 flex items-center gap-1 transition-colors cursor-pointer py-1 px-2.5 rounded-lg"
+              >
+                <LogOut className="w-3 h-3" />
+                <span>Hisobdan chiqish</span>
+              </button>
+            </div>
+          ) : (
+            <div className="pb-4 flex items-center justify-center gap-4">
+              {lockMode === 'enter_reset_code' && (
+                <button
+                  type="button"
+                  onClick={handleRequestResetCode}
+                  disabled={isSendingCode}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isSendingCode ? 'animate-spin' : ''}`} />
+                  <span>Kodni qayta yuborish</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleCancelReset}
+                className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                <span>Bekor qilish</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </AppLockContext.Provider>
