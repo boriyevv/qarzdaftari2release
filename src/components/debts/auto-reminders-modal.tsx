@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -109,15 +110,16 @@ export function AutoRemindersModal({ open, onOpenChange, onSuccess }: AutoRemind
         playSuccessSound()
         setResultMessage(data.message || `${data.sentCount} ta eslatma muvaffaqiyatli yuborildi!`)
         onSuccess?.()
+        toast.success(data.message || `${data.sentCount} ta eslatma muvaffaqiyatli yuborildi!`)
         setTimeout(() => {
           fetchEligibleDebts()
         }, 1500)
       } else {
-        alert(data.error || 'Eslatmalarni yuborishda xato yuz berdi')
+        toast.error(data.error || 'Eslatmalarni yuborishda xato yuz berdi')
       }
     } catch (err) {
       console.error(err)
-      alert('Tarmoq xatosi')
+      toast.error('Tarmoq xatosi')
     } finally {
       setSending(false)
     }

@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,7 +82,7 @@ export function DebtActionsMenu({ debt, onEdit, onDelete, onView }: DebtActionsM
       const message = smsType === 'custom' ? customMessage : generateDefaultMessage()
 
       if (!message.trim()) {
-        alert('SMS matnini kiriting')
+        toast.error('SMS matnini kiriting')
         return
       }
 
@@ -99,15 +100,15 @@ export function DebtActionsMenu({ debt, onEdit, onDelete, onView }: DebtActionsM
       const data = await response.json()
 
       if (response.ok) {
-        alert('SMS muvaffaqiyatli yuborildi!')
+        toast.success('SMS muvaffaqiyatli yuborildi!')
         setShowSMSDialog(false)
         setCustomMessage('')
       } else {
-        alert(data.error || 'SMS yuborishda xato')
+        toast.error(data.error || 'SMS yuborishda xato')
       }
     } catch (error) {
       console.error('SMS send error:', error)
-      alert('Xato yuz berdi')
+      toast.error('Xato yuz berdi')
     } finally {
       setLoading(false)
     }

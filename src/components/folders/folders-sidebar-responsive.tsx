@@ -1,6 +1,7 @@
 // src/components/folders/folders-sidebar-responsive.tsx
 'use client'
 
+import { toast } from 'sonner'
 import { Badge } from '@//components/ui/badge'
 import { Button } from '@//components/ui/button'
 import {
@@ -290,29 +291,36 @@ export function FoldersSidebarResponsive({
 		}
 	}
 
-	const handleDeleteFolder = async (folderId: string) => {
-		if (
-			!confirm(
-				"Folderni o'chirmoqchimisiz? Ichidagi qarzlar default folderga ko'chiriladi.",
-			)
-		) {
-			return
-		}
+	const handleDeleteFolder = (folderId: string) => {
+		toast.warning("Folderni o'chirmoqchimisiz? Ichidagi qarzlar asosiy ro'yxatga ko'chiriladi.", {
+			action: {
+				label: "O'chirish",
+				onClick: async () => {
+					try {
+						const response = await fetch(`/api/folders/${folderId}`, {
+							method: 'DELETE',
+						})
 
-		try {
-			const response = await fetch(`/api/folders/${folderId}`, {
-				method: 'DELETE',
-			})
-
-			if (response.ok) {
-				if (activeFolder === folderId) {
-					onFolderChange('all')
-				}
-				fetchFolders()
-			}
-		} catch (error) {
-			console.error('Delete folder error:', error)
-		}
+						if (response.ok) {
+							if (activeFolder === folderId) {
+								onFolderChange('all')
+							}
+							toast.success("Folder muvaffaqiyatli o'chirildi")
+							fetchFolders()
+						} else {
+							toast.error("Folderni o'chirishda xatolik yuz berdi")
+						}
+					} catch (error) {
+						console.error('Delete folder error:', error)
+						toast.error("Xatolik yuz berdi")
+					}
+				},
+			},
+			cancel: {
+				label: 'Bekor qilish',
+				onClick: () => {},
+			},
+		})
 	}
 
 	const openEditModal = (folder: Folder) => {

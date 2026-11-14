@@ -1,6 +1,7 @@
 // src/app/sms-credits/page.tsx
 'use client'
 
+import { toast } from 'sonner'
 import { AppShell } from '@/components/layout/app-shell'
 import { ClickOnSiteModal } from '@/components/payments/click-on-site-modal'
 import { PaymeOnSiteModal } from '@/components/payments/payme-on-site-modal'
@@ -151,11 +152,11 @@ export default function SMSCreditsPage() {
 				}
 				window.location.href = data.paymentUrl
 			} else {
-				alert(data.error || 'Xato yuz berdi')
+				toast.error(data.error || 'Xato yuz berdi')
 			}
 		} catch (error) {
 			console.error('Purchase error:', error)
-			alert('Xato yuz berdi')
+			toast.error('Xato yuz berdi')
 		} finally {
 			setPurchaseLoading(false)
 			setShowProviderModal(false)

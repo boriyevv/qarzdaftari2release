@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import Link from 'next/link'
 import {
   Check,
@@ -154,11 +155,11 @@ export default function PricingPage() {
         }
         window.location.href = data.paymentUrl
       } else {
-        alert(data.error || 'Xato yuz berdi')
+        toast.error(data.error || 'Xato yuz berdi')
       }
     } catch (error) {
       console.error('Payment error:', error)
-      alert('Xato yuz berdi')
+      toast.error('Xato yuz berdi')
     } finally {
       setLoading(null)
       setShowProviderModal(false)

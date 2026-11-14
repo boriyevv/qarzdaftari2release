@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import {
   Users,
   UserPlus,
@@ -119,12 +120,13 @@ export function CashiersManagement() {
         setCashiers((prev) =>
           prev.map((c) => (c.id === cashier.id ? { ...c, is_active: nextStatus } : c))
         )
+        toast.success(nextStatus ? 'Kassir faollashtirildi' : "Kassir faoliyati to'xtatildi")
       } else {
         const data = await res.json()
-        alert(data.error || 'Holatni o\'zgartirishda xatolik')
+        toast.error(data.error || 'Holatni o\'zgartirishda xatolik')
       }
     } catch (err) {
-      alert('Tarmoq xatosi')
+      toast.error('Tarmoq xatosi')
     }
   }
 
@@ -139,12 +141,13 @@ export function CashiersManagement() {
       if (res.ok) {
         setCashiers((prev) => prev.filter((c) => c.id !== cashierToDelete.id))
         setCashierToDelete(null)
+        toast.success("Kassir muvaffaqiyatli o'chirildi")
       } else {
         const data = await res.json()
-        alert(data.error || 'O\'chirishda xatolik')
+        toast.error(data.error || 'O\'chirishda xatolik')
       }
     } catch (err) {
-      alert('Tarmoq xatosi')
+      toast.error('Tarmoq xatosi')
     } finally {
       setDeleting(false)
     }

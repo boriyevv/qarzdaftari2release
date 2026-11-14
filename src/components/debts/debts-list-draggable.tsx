@@ -1484,22 +1484,33 @@ export function DebtsListDraggable({
         break
       case 'delete':
         if (user?.role === 'cashier') {
-          alert("Kassir qarzni o'chirish huquqiga ega emas. Faqat do'kon egasi o'chira oladi.")
+          toast.error("Kassir qarzni o'chirish huquqiga ega emas. Faqat do'kon egasi o'chira oladi.")
           return
         }
-        if (confirm(`${debt.debtor_name} ning qarz yozuvini o'chirmoqchimisiz?`)) {
-          try {
-            const response = await fetch(`/api/debts/${debt.id}`, { method: 'DELETE' })
-            if (response.ok) {
-              onUpdate()
-            } else {
-              const data = await response.json()
-              alert(data.error || "O'chirishda xatolik yuz berdi")
+        toast.warning(`${debt.debtor_name} ning qarz yozuvini o'chirmoqchimisiz?`, {
+          action: {
+            label: "O'chirish",
+            onClick: async () => {
+              try {
+                const response = await fetch(`/api/debts/${debt.id}`, { method: 'DELETE' })
+                if (response.ok) {
+                  toast.success("Qarz yozuvi muvaffaqiyatli o'chirildi")
+                  onUpdate()
+                } else {
+                  const data = await response.json()
+                  toast.error(data.error || "O'chirishda xatolik yuz berdi")
+                }
+              } catch (error) {
+                console.error('Delete error:', error)
+                toast.error("Xatolik yuz berdi")
+              }
             }
-          } catch (error) {
-            console.error('Delete error:', error)
+          },
+          cancel: {
+            label: 'Bekor qilish',
+            onClick: () => {},
           }
-        }
+        })
         break
     }
   }

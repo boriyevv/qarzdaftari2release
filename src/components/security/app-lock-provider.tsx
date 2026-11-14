@@ -512,8 +512,8 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
                 title={biometricName}
               >
                 <Fingerprint className="w-6 h-6" />
-                <span className="text-[9px] font-semibold mt-0.5 text-slate-500 dark:text-slate-400 truncate max-w-[70px]">
-                  {biometricName}
+                <span className="text-[10px] font-semibold mt-0.5 text-slate-500 dark:text-slate-400">
+                  {biometricName.toLowerCase().includes('face') ? 'Face ID' : 'Biometrika'}
                 </span>
               </button>
             ) : (
