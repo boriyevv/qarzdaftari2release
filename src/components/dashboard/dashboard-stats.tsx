@@ -102,6 +102,20 @@ export function DashboardStats({
     },
   ]
 
+  const handleCardClick = (title: string) => {
+    if (typeof window === 'undefined') return
+    const el = document.getElementById('tour-debts-list')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (title.includes('Muddati')) {
+        setTimeout(() => {
+          const overdueBtn = document.querySelector('[data-filter="overdue"]') as HTMLButtonElement
+          if (overdueBtn) overdueBtn.click()
+        }, 250)
+      }
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, index) => {
@@ -109,10 +123,11 @@ export function DashboardStats({
         return (
           <div
             key={index}
+            onClick={() => handleCardClick(stat.title)}
             className={`
               group relative overflow-hidden bg-gradient-to-br ${stat.cardBg}
               border ${stat.borderColor} rounded-3xl p-4 sm:p-5
-              transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs
+              transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg shadow-2xs cursor-pointer active:scale-[0.99]
             `}
           >
             {/* 1. Ambient Backlight Glow */}

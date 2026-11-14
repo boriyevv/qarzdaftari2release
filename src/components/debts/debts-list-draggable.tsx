@@ -1666,6 +1666,7 @@ export function DebtsListDraggable({
             {/* 3. Overdue */}
             <button
               type="button"
+              data-filter="overdue"
               onClick={() => setStatusFilter('overdue')}
               className={`h-8 px-2.5 sm:px-3 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === 'overdue'

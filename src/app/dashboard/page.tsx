@@ -103,11 +103,27 @@ function DashboardContent() {
     )
   }
 
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
   const totalDebts = debts.length
-  const totalAmount = debts.reduce((sum, debt) => sum + debt.amount, 0)
-  const totalPaid = debts.reduce((sum, debt) => sum + debt.paid_amount, 0)
-  const totalRemaining = totalAmount - totalPaid
-  const overdueCount = debts.filter((d) => d.status === 'overdue').length
+  const totalAmount = debts.reduce((sum, debt) => sum + (Number(debt.amount) || 0), 0)
+  const totalPaid = debts.reduce((sum, debt) => sum + (Number(debt.paid_amount) || 0), 0)
+  const totalRemaining = Math.max(0, totalAmount - totalPaid)
+
+  // Calculate true overdue count by comparing due_date with current date
+  const overdueCount = debts.filter((d) => {
+    const remaining = (Number(d.amount) || 0) - (Number(d.paid_amount) || 0)
+    const isPaid = d.status === 'paid' || remaining <= 0
+    if (isPaid) return false
+    if (d.status === 'overdue') return true
+    if (d.due_date) {
+      const dueDate = new Date(d.due_date)
+      dueDate.setHours(0, 0, 0, 0)
+      return dueDate.getTime() < today.getTime()
+    }
+    return false
+  }).length
 
   return (
     <AppShell
