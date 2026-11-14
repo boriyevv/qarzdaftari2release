@@ -1,9 +1,9 @@
 // src/app/dashboard/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useUser } from '@/lib/contexts/user-context'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderFilterBar } from '@/components/folders/folder-filter-bar'
 import { AddDebtModal } from '@/components/debts/add-debt-modal'
 import { DebtsListDraggable } from '@/components/debts/debts-list-draggable'
@@ -30,13 +30,28 @@ interface Debt {
   } | null
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user, loading: userLoading } = useUser()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const action = searchParams.get('action')
+
   const [debts, setDebts] = useState<Debt[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFolder, setActiveFolder] = useState('all')
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false)
+
+  // Automatically open Add Debt Modal if requested via ?action=new-debt (e.g. from Telegram Mini App)
+  useEffect(() => {
+    if (action === 'new-debt' && user) {
+      setIsAddDebtOpen(true)
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('action')
+        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''))
+      }
+    }
+  }, [action, user])
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -179,5 +194,22 @@ export default function DashboardPage() {
         }}
       />
     </AppShell>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-slate-600 dark:text-slate-400 text-sm">Yuklanmoqda...</p>
+          </div>
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   )
 }
