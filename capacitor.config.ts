@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     // In production, the native shell seamlessly loads the live production app
     // enabling instant over-the-air updates, server actions, and API webhooks.
     // For local emulator/device testing, set CAPACITOR_LIVE_URL to your local IP (e.g. http://192.168.100.3:3000)
-    url: process.env.CAPACITOR_LIVE_URL || 'https://debtbook.uz',
+    url: process.env.CAPACITOR_LIVE_URL || 'https://debtbook.uz/dashboard',
     cleartext: true,
     errorPath: 'offline.html',
     allowNavigation: [

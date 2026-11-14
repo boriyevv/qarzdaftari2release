@@ -29,15 +29,59 @@ import {
 	X,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@/lib/contexts/user-context'
+import { isNativePlatform } from '@/lib/native'
 
 export default function Home() {
+	const { user, loading: userLoading } = useUser()
+	const router = useRouter()
+
+	// If already authenticated or opened inside installed mobile app / PWA, go straight to dashboard
+	useEffect(() => {
+		if (typeof window === 'undefined') return
+
+		const hasPhoneSession = Boolean(localStorage.getItem('phone_user_session'))
+		const isStandalone =
+			window.matchMedia('(display-mode: standalone)').matches ||
+			(window.navigator as any).standalone === true ||
+			document.referrer.includes('android-app://')
+
+		// 1. If logged in, jump straight to dashboard
+		if (user || hasPhoneSession) {
+			router.replace('/dashboard')
+			return
+		}
+
+		// 2. If opened from installed mobile app or PWA and not logged in, go to login
+		if (!userLoading && (isNativePlatform() || isStandalone)) {
+			router.replace('/login')
+		}
+	}, [user, userLoading, router])
+
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 	const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
 		'monthly',
 	)
 	const [openFaq, setOpenFaq] = useState<number | null>(0)
 	const [smsSent, setSmsSent] = useState(false)
+
+	// Prevent landing page flicker if user already has an active session
+	const hasActiveSession =
+		Boolean(user) ||
+		(typeof window !== 'undefined' && Boolean(localStorage.getItem('phone_user_session')))
+
+	if (hasActiveSession) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+				<div className="text-center space-y-3">
+					<div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+					<p className="text-xs text-slate-400 font-medium">Boshqaruv paneli yuklanmoqda...</p>
+				</div>
+			</div>
+		)
+	}
 
 	const handleTestSms = () => {
 		setSmsSent(true)

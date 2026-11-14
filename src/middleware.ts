@@ -56,6 +56,15 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isAuthRoute = pathname === '/login' || pathname === '/register'
 
+  // If user is already authenticated and visits '/', redirect straight to /dashboard
+  if (isAuthenticated && pathname === '/') {
+    const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url))
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
+  }
+
   // If user is already authenticated and attempts to visit /login or /register, redirect to /dashboard
   if (isAuthenticated && isAuthRoute) {
     const redirectParam = request.nextUrl.searchParams.get('redirect') || request.nextUrl.searchParams.get('from')
