@@ -80,8 +80,10 @@ export async function GET(request: NextRequest) {
             continue
           }
 
-          // Skip if current hour does not match user's chosen hour
-          if (tashkentTime.hours !== targetHour) {
+          // Send report if the scheduled time has arrived or passed today, and hasn't been sent yet
+          const targetHourNum = parseInt(targetHour, 10)
+          const currentHourNum = parseInt(tashkentTime.hours, 10)
+          if (currentHourNum < targetHourNum) {
             continue
           }
 

@@ -18,6 +18,8 @@ import {
   RotateCcw,
   CheckCircle2,
   Clock,
+  Calendar,
+  CalendarDays,
 } from 'lucide-react'
 import { playPingSound } from '@/lib/sounds'
 import { useUser } from '@/lib/contexts/user-context'
@@ -60,9 +62,60 @@ const QUICK_AMOUNT_CHIPS = [
   { label: '+10 000', value: 10000 },
   { label: '+50 000', value: 50000 },
   { label: '+100 000', value: 100000 },
-  { label: '+500 000', value: 50000 },
+  { label: '+500 000', value: 500000 },
   { label: '+1 000 000', value: 1000000 },
 ]
+
+const DATE_PRESETS = [
+  { label: '+3 kun', days: 3 },
+  { label: '1 hafta', days: 7 },
+  { label: '2 hafta', days: 14 },
+  { label: '1 oy', days: 30 },
+]
+
+const getLocalDateString = (daysToAdd = 0) => {
+  const d = new Date()
+  d.setDate(d.getDate() + daysToAdd)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatHumanDueDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  try {
+    const parts = dateStr.split('-')
+    if (parts.length !== 3) return dateStr
+    const year = parseInt(parts[0], 10)
+    const month = parseInt(parts[1], 10) - 1
+    const day = parseInt(parts[2], 10)
+
+    const targetDate = new Date(year, month, day)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    targetDate.setHours(0, 0, 0, 0)
+
+    const diffMs = targetDate.getTime() - today.getTime()
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
+
+    const monthsUz = [
+      'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+      'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'
+    ]
+
+    const baseText = `${day}-${monthsUz[month]}, ${year}`
+
+    if (diffDays === 0) return `${baseText} (Bugun)`
+    if (diffDays === 1) return `${baseText} (Ertaga)`
+    if (diffDays > 1) return `${baseText} (${diffDays} kundan keyin)`
+    if (diffDays < 0) return `${baseText} (${Math.abs(diffDays)} kun kechikkan)`
+
+    return baseText
+  } catch {
+    return dateStr
+  }
+}
 
 export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDebtModalProps) {
   const { user } = useUser()
@@ -221,15 +274,25 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     amountInputRef.current?.focus()
   }
 
+  const handleSetPresetDate = (days: number) => {
+    const dateStr = getLocalDateString(days)
+    setFormData((prev) => ({ ...prev, due_date: dateStr }))
+    nativeHaptics.impact('light').catch(() => {})
+  }
+
   const generateDefaultMessage = () => {
     const { debtor_name, amount, due_date, shop_name } = formData
     const numAmount = parseAmountInput(amount)
     if (!debtor_name || numAmount <= 0) return "Ma'lumotlarni to'ldiring..."
     const formattedAmount = formatCurrency(numAmount)
     const shopText = shop_name ? ` "${shop_name}"` : ''
-    const dueDateText = due_date
-      ? ` To'lov muddati: ${new Date(due_date).toLocaleDateString('uz-UZ')}.`
-      : ''
+    let dueDateText = ''
+    if (due_date) {
+      const parts = due_date.split('-').map(Number)
+      if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+        dueDateText = ` To'lov muddati: ${new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('uz-UZ')}.`
+      }
+    }
     return `Hurmatli ${debtor_name}, Siz${shopText}dan ${formattedAmount} qarz oldingiz.${dueDateText} Qarz Daftari.`
   }
 
@@ -240,6 +303,7 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
   const canSubmit = () => {
     if (!formData.debtor_name.trim() || formData.debtor_name.trim().length < 2) return false
     if (numAmount <= 0) return false
+    if (!formData.due_date) return false
     // If phone is provided, it must be complete (9 digits)
     if (rawPhone.length > 0 && rawPhone.length < 9) return false
     // If SMS is requested, phone and credits are required
@@ -352,6 +416,8 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
     ? "Qarzdor ismini kiriting (kamida 2 ta harf)"
     : !formData.amount || numAmount <= 0
     ? "Qarz summasini kiriting"
+    : !formData.due_date
+    ? "To'lov muddatini belgilang"
     : rawPhone.length > 0 && rawPhone.length < 9
     ? "Telefon raqamini to'liq 9 ta raqam qilib kiriting yoki bo'sh qoldiring"
     : sendSMS && !hasPhone
@@ -608,18 +674,93 @@ export function AddDebtModal({ open, onOpenChange, onSuccess, folderId }: AddDeb
             </div>
 
             {/* To'lov muddati */}
-            <div className="space-y-1.5">
-              <Label htmlFor="due_date" className="text-sm font-medium">
-                To&apos;lov muddati{' '}
-                <span className="text-slate-400 text-xs font-normal">(ixtiyoriy)</span>
-              </Label>
-              <Input
-                id="due_date"
-                type="date"
-                value={formData.due_date}
-                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                className="h-11 rounded-xl"
-              />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="due_date" className="text-sm font-semibold flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                  <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span>To&apos;lov muddati</span>
+                  <span className="text-rose-500 font-bold">*</span>
+                </Label>
+                {formData.due_date && (
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                    Tanlandi
+                  </span>
+                )}
+              </div>
+
+              {/* Styled date picker container */}
+              <div className="relative group">
+                <input
+                  id="due_date"
+                  type="date"
+                  min={getLocalDateString(0)}
+                  value={formData.due_date}
+                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  required
+                />
+                <div
+                  className={`
+                    w-full h-12 px-3.5 flex items-center justify-between rounded-xl border transition-all text-sm
+                    ${
+                      formData.due_date
+                        ? 'border-blue-500/50 bg-blue-50/40 dark:bg-blue-950/30 text-slate-900 dark:text-slate-100 font-medium ring-1 ring-blue-500/20'
+                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 group-hover:border-slate-300 dark:group-hover:border-slate-700'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-2.5 truncate mr-2">
+                    <div
+                      className={`
+                        p-1.5 rounded-lg shrink-0 transition-colors
+                        ${
+                          formData.due_date
+                            ? 'bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                        }
+                      `}
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                    </div>
+                    <span className="truncate">
+                      {formData.due_date ? (
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">
+                          {formatHumanDueDate(formData.due_date)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">To&apos;lov sanasini tanlang (kalendarni ochish)</span>
+                      )}
+                    </span>
+                  </div>
+                  <span className="text-xs shrink-0 font-medium px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
+                    {formData.due_date ? "O'zgartirish" : "Tanlash"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Tezkor sana chiplari */}
+              <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+                {DATE_PRESETS.map((chip) => {
+                  const isActive = formData.due_date === getLocalDateString(chip.days)
+                  return (
+                    <button
+                      key={chip.days}
+                      type="button"
+                      onClick={() => handleSetPresetDate(chip.days)}
+                      className={`
+                        px-2.5 py-1 text-xs font-semibold rounded-lg border active:scale-95 transition-all cursor-pointer
+                        ${
+                          isActive
+                            ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/30'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 border-slate-200/80 dark:border-slate-700'
+                        }
+                      `}
+                    >
+                      {chip.label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Izoh */}

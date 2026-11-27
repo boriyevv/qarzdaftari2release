@@ -57,6 +57,7 @@ interface FolderFilterBarProps {
   activeFolder: string
   onFolderChange: (folderId: string) => void
   onFoldersLoaded?: (folders: FolderItem[]) => void
+  totalDebtsCount?: number
 }
 
 const COLORS = [
@@ -150,8 +151,10 @@ export function FolderFilterBar({
   activeFolder,
   onFolderChange,
   onFoldersLoaded,
+  totalDebtsCount,
 }: FolderFilterBarProps) {
   const [folders, setFolders] = useState<FolderItem[]>([])
+  const [apiTotalDebts, setApiTotalDebts] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [isManageOpen, setIsManageOpen] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
@@ -190,6 +193,9 @@ export function FolderFilterBar({
           debt_count: typeof f.debt_count === 'number' ? f.debt_count : 0,
         }))
         setFolders(loadedFolders)
+        if (typeof data.total_debts === 'number') {
+          setApiTotalDebts(data.total_debts)
+        }
         onFoldersLoaded?.(loadedFolders)
       }
     } catch (error) {
@@ -309,27 +315,28 @@ export function FolderFilterBar({
     setIsEditOpen(true)
   }
 
-  const totalDebts = folders.reduce((sum, f) => sum + f.debt_count, 0)
+  const totalDebts =
+    totalDebtsCount ?? apiTotalDebts ?? folders.reduce((sum, f) => sum + f.debt_count, 0)
 
   return (
     <div className="w-full">
       {/* Horizontal Scrollable Filter Chips Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none no-scrollbar">
-        {/* All Debts Chip */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none no-scrollbar -mx-0.5 px-0.5">
+        {/* All Folders Chip */}
         <button
           onClick={() => onFolderChange('all')}
           className={cn(
-            'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex-shrink-0 shadow-2xs cursor-pointer',
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex-shrink-0 cursor-pointer',
             activeFolder === 'all'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700',
           )}
         >
-          <Layers className="w-3.5 h-3.5" />
-          <span>Barcha qarzlar</span>
+          <Folder className="w-3.5 h-3.5" />
+          <span>Barcha papkalar</span>
           <span
             className={cn(
-              'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
+              'px-1.5 py-0.2 rounded-md text-[10px] font-bold font-mono',
               activeFolder === 'all'
                 ? 'bg-blue-700 text-white'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
@@ -347,20 +354,20 @@ export function FolderFilterBar({
               key={folder.id}
               onClick={() => onFolderChange(folder.id)}
               className={cn(
-                'flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex-shrink-0 shadow-2xs cursor-pointer',
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex-shrink-0 cursor-pointer',
                 isActive
-                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md'
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xs'
                   : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700',
               )}
             >
               <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ backgroundColor: folder.color }}
               />
-              <span className="truncate max-w-[130px]">{folder.name}</span>
+              <span className="truncate max-w-[120px]">{folder.name}</span>
               <span
                 className={cn(
-                  'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
+                  'px-1.5 py-0.2 rounded-md text-[10px] font-bold font-mono',
                   isActive
                     ? 'bg-slate-800 dark:bg-slate-200 text-slate-200 dark:text-slate-800'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
@@ -375,22 +382,21 @@ export function FolderFilterBar({
         {/* Add Folder Quick Chip */}
         <button
           onClick={() => setIsAddOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200/80 dark:border-blue-900/60 hover:border-blue-300 dark:hover:border-blue-700 flex-shrink-0 transition-all cursor-pointer"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200/80 dark:border-blue-900/60 hover:border-blue-300 dark:hover:border-blue-700 flex-shrink-0 transition-all cursor-pointer"
           title="Yangi papka qo'shish"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Yangi papka</span>
+          <span>Papka</span>
         </button>
 
         {/* Manage Folders Chip */}
         {folders.length > 0 && (
           <button
             onClick={() => setIsManageOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 flex-shrink-0 transition-colors cursor-pointer"
+            className="flex items-center justify-center w-7 h-7 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 flex-shrink-0 transition-colors cursor-pointer"
             title="Papkalarni tartibga solish va boshqarish"
           >
             <Settings2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Boshqarish</span>
           </button>
         )}
       </div>

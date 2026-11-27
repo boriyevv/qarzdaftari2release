@@ -16,7 +16,7 @@ export interface TelegramSendMessageOptions {
 
 class TelegramService {
   private get token(): string | undefined {
-    return process.env.TELEGRAM_BOT_TOKEN || '9064121371:AAEf9-454FMs_f1O5s7KTTVLPvdN81lcVSA'
+    return process.env.TELEGRAM_BOT_TOKEN
   }
 
   private get baseUrl(): string {
@@ -365,12 +365,14 @@ class TelegramService {
     return {
       keyboard: [
         [
-          { text: '📊 Bugungi hisobot' },
           { text: '🚀 Qarz Daftari', web_app: { url: `${safeUrl}/dashboard` } },
         ],
         [
+          { text: '📊 Bugungi hisobot' },
           { text: '➕ Yangi qarz', web_app: { url: `${safeUrl}/dashboard?action=new-debt` } },
-          { text: '⚙️ Sozlamalar va Holat' },
+        ],
+        [
+          { text: '⚙️ Sozlamalar' },
         ],
       ],
       resize_keyboard: true,

@@ -150,10 +150,11 @@ function DashboardContent() {
         </div>
 
         {/* Horizontal Folder Filter Bar */}
-        <div id="tour-folders" className="pt-2 sm:pt-3">
+        <div id="tour-folders" className="pt-1 sm:pt-2">
           <FolderFilterBar
             activeFolder={activeFolder}
             onFolderChange={handleFolderChange}
+            totalDebtsCount={totalDebts}
           />
         </div>
 

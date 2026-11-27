@@ -24,6 +24,51 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { formatFullPhoneInput } from '@/lib/utils/phone'
 import { formatAmountInput, parseAmountInput, numberToUzbekWords } from '@/lib/utils/currency'
+import { Calendar, CalendarDays } from 'lucide-react'
+
+const getLocalDateString = (daysToAdd = 0) => {
+  const d = new Date()
+  d.setDate(d.getDate() + daysToAdd)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatHumanDueDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  try {
+    const parts = dateStr.split('-')
+    if (parts.length !== 3) return dateStr
+    const year = parseInt(parts[0], 10)
+    const month = parseInt(parts[1], 10) - 1
+    const day = parseInt(parts[2], 10)
+
+    const targetDate = new Date(year, month, day)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    targetDate.setHours(0, 0, 0, 0)
+
+    const diffMs = targetDate.getTime() - today.getTime()
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
+
+    const monthsUz = [
+      'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+      'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'
+    ]
+
+    const baseText = `${day}-${monthsUz[month]}, ${year}`
+
+    if (diffDays === 0) return `${baseText} (Bugun)`
+    if (diffDays === 1) return `${baseText} (Ertaga)`
+    if (diffDays > 1) return `${baseText} (${diffDays} kundan keyin)`
+    if (diffDays < 0) return `${baseText} (${Math.abs(diffDays)} kun kechikkan)`
+
+    return baseText
+  } catch {
+    return dateStr
+  }
+}
 
 interface Debt {
   id: string
@@ -101,9 +146,7 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
   }
 
   const addDays = (days: number) => {
-    const d = new Date()
-    d.setDate(d.getDate() + days)
-    setFormData({ ...formData, due_date: d.toISOString().split('T')[0] })
+    setFormData((prev) => ({ ...prev, due_date: getLocalDateString(days) }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -264,8 +307,9 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <Label htmlFor="edit_due_date" className="font-semibold text-slate-700 dark:text-slate-300">
-                Qaytarish muddati
+              <Label htmlFor="edit_due_date" className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>Qaytarish muddati</span>
               </Label>
               {formData.due_date && (
                 <button
@@ -277,31 +321,84 @@ export function EditDebtModal({ debt, open, onOpenChange, onSuccess }: EditDebtM
                 </button>
               )}
             </div>
-            <Input
-              id="edit_due_date"
-              type="date"
-              value={formData.due_date}
-              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-              disabled={loading}
-              className="rounded-xl h-10 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
-            />
+
+            {/* Styled date picker container */}
+            <div className="relative group">
+              <input
+                id="edit_due_date"
+                type="date"
+                min={getLocalDateString(0)}
+                value={formData.due_date}
+                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                disabled={loading}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+              />
+              <div
+                className={`
+                  w-full h-11 px-3 flex items-center justify-between rounded-xl border transition-all text-sm
+                  ${
+                    formData.due_date
+                      ? 'border-blue-500/50 bg-blue-50/40 dark:bg-blue-950/30 text-slate-900 dark:text-slate-100 font-medium'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2 truncate mr-2">
+                  <div
+                    className={`
+                      p-1 rounded-lg shrink-0 transition-colors
+                      ${
+                        formData.due_date
+                          ? 'bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                      }
+                    `}
+                  >
+                    <CalendarDays className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="truncate text-xs">
+                    {formData.due_date ? (
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
+                        {formatHumanDueDate(formData.due_date)}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">To&apos;lov sanasini tanlang</span>
+                    )}
+                  </span>
+                </div>
+                <span className="text-[11px] shrink-0 font-medium px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
+                  {formData.due_date ? "O'zgartirish" : "Tanlash"}
+                </span>
+              </div>
+            </div>
+
             {/* Tezkor sana chiplari */}
-            <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+            <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
               {[
                 { label: '+3 kun', days: 3 },
                 { label: '1 hafta', days: 7 },
                 { label: '2 hafta', days: 14 },
                 { label: '1 oy', days: 30 },
-              ].map((chip) => (
-                <button
-                  key={chip.days}
-                  type="button"
-                  onClick={() => addDays(chip.days)}
-                  className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 dark:hover:text-blue-400 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer active:scale-95"
-                >
-                  {chip.label}
-                </button>
-              ))}
+              ].map((chip) => {
+                const isActive = formData.due_date === getLocalDateString(chip.days)
+                return (
+                  <button
+                    key={chip.days}
+                    type="button"
+                    onClick={() => addDays(chip.days)}
+                    className={`
+                      text-[11px] font-semibold px-2 py-0.5 rounded-lg border transition-all cursor-pointer active:scale-95
+                      ${
+                        isActive
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 dark:hover:text-blue-400 border-slate-200/80 dark:border-slate-700'
+                      }
+                    `}
+                  >
+                    {chip.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 

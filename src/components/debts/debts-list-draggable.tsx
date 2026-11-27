@@ -1527,105 +1527,102 @@ export function DebtsListDraggable({
   return (
     <div className="space-y-4">
       {/* ─── CRM TOOLBAR: Search, Status Chips & Sort ─────────────────── */}
-      <div className="flex flex-col gap-2.5">
-        {/* Top line: Search input + Controls */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <div className="flex flex-col gap-2">
+        {/* Compact unified line: Search input + Sort + Actions Menu */}
+        <div className="flex items-center gap-2">
           {/* Search bar */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <div className="relative flex-1 min-w-0">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <Input
               type="text"
               placeholder={dict.dashboard.search_placeholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-9 h-10 rounded-2xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors w-full"
+              className="pl-9 pr-8 h-10 rounded-xl border-slate-200/90 dark:border-slate-800 text-xs shadow-2xs focus-visible:ring-blue-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 hover:border-slate-300 dark:hover:border-slate-700 transition-colors w-full"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Controls: Sort + Auto Reminders + Export */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none shrink-0">
-            {/* Sort Select */}
-            <div className="flex-1 sm:flex-none min-w-[130px]">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="h-10 w-full px-3 pr-7 rounded-2xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-colors"
-              >
-                <option value="date-desc">Eng yangilar</option>
-                <option value="remaining-desc">Qoldiq: Ko&apos;p</option>
-                <option value="remaining-asc">Qoldiq: Kam</option>
-                <option value="due-asc">Muddati yaqin</option>
-                <option value="name-asc">Ism (A-Z)</option>
-              </select>
-            </div>
-
-            {/* Auto Reminders Button */}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsAutoRemindersOpen(true)}
-              className="h-10 px-3 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all shrink-0"
-              title="Yaqinlashgan qarzlar uchun avtomatik eslatmalar"
+          {/* Sort Select */}
+          <div className="shrink-0">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="h-10 px-2.5 pr-6 rounded-xl border border-slate-200/90 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 shadow-2xs focus:outline-none focus:ring-1 focus:ring-blue-500 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer transition-colors max-w-[125px] sm:max-w-none"
             >
-              <Bell className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="whitespace-nowrap">Avto Eslatma</span>
-            </Button>
-
-            {/* Export Dropdown Button */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-10 px-3 rounded-2xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all shrink-0"
-                  title="Qarzlar ro'yxatini yuklab olish"
-                >
-                  <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <span className="whitespace-nowrap">Eksport</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 p-1.5 rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl z-50 animate-in fade-in-50 zoom-in-95"
-              >
-                <DropdownMenuItem
-                  onClick={() => handleExport('excel')}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 dark:hover:text-emerald-300 focus:bg-emerald-50 dark:focus:bg-emerald-950/50 focus:text-emerald-700 dark:focus:text-emerald-300 cursor-pointer transition-colors"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-bold">Excel (.xlsx)</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Jadval va hisob-kitoblar</p>
-                  </div>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => handleExport('pdf')}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-700 dark:hover:text-rose-300 focus:bg-rose-50 dark:focus:bg-rose-950/50 focus:text-rose-700 dark:focus:text-rose-300 cursor-pointer mt-0.5 transition-colors"
-                >
-                  <FileText className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-bold">PDF Hisobot (A4)</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Chop etish va hisobot uchun</p>
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <option value="date-desc">Eng yangilar</option>
+              <option value="remaining-desc">Qoldiq: Ko&apos;p</option>
+              <option value="remaining-asc">Qoldiq: Kam</option>
+              <option value="due-asc">Muddati yaqin</option>
+              <option value="name-asc">Ism (A-Z)</option>
+            </select>
           </div>
+
+          {/* More actions: Avto Eslatma & Export */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 w-10 p-0 rounded-xl border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shrink-0"
+                title="Boshqa amallar (Eslatmalar va Eksport)"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-56 p-1.5 rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl z-50 animate-in fade-in-50 zoom-in-95"
+            >
+              <DropdownMenuItem
+                onClick={() => setIsAutoRemindersOpen(true)}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-amber-950/50 hover:text-amber-700 dark:hover:text-amber-300 cursor-pointer transition-colors"
+              >
+                <Bell className="w-4 h-4 text-amber-500 shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-bold">Avto Eslatma</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">SMS eslatma sozlamalari</p>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="my-1 border-slate-100 dark:border-slate-800" />
+
+              <DropdownMenuItem
+                onClick={() => handleExport('excel')}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-700 dark:hover:text-emerald-300 cursor-pointer transition-colors"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-bold">Excel (.xlsx)</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Jadval va hisob-kitoblar</p>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => handleExport('pdf')}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-700 dark:hover:text-rose-300 cursor-pointer mt-0.5 transition-colors"
+              >
+                <FileText className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-bold">PDF Hisobot (A4)</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">Chop etish va hisobot uchun</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Bottom line: Filter Chips & Active Summary */}
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pr-4 pb-1 sm:pb-0 scrollbar-none">
+        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pr-2 pb-0.5 scrollbar-none no-scrollbar">
             {/* 1. All */}
             <button
               type="button"

@@ -58,7 +58,21 @@ export async function GET() {
       })
     )
 
-    return NextResponse.json({ folders: foldersWithCounts })
+    // Get total debts count across all folders (including debts without folder)
+    const { count: totalDebtsCount, error: totalCountError } = await adminSupabase
+      .from('debts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', storeOwnerId)
+      .is('deleted_at', null)
+
+    if (totalCountError) {
+      console.error('Total debts count error:', totalCountError)
+    }
+
+    return NextResponse.json({
+      folders: foldersWithCounts,
+      total_debts: totalDebtsCount || 0,
+    })
   } catch (error) {
     console.error('❌ Folders API error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
