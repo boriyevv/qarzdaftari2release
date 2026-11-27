@@ -40,3 +40,8 @@ next-env.d.ts
 # next-pwa
 public/sw.js
 public/workbox-*.js
+
+# mobile builds
+/build-output
+*.ipa
+*.xcarchive
